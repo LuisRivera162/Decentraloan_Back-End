@@ -55,9 +55,7 @@ class UsersHandler:
         dao = UsersDAO()
 
         if password == confirm_password:
-            print(password)
             password = generate_password_hash(password)
-            print(password)
             try:
                 uid = dao.insert_user(username, first_name, last_name, email, password, age)
             except:

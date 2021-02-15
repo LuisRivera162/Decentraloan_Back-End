@@ -1,13 +1,16 @@
+from Handler.loans_h import LoansHandler
 from flask import (Flask, g, jsonify, session, url_for, request)
 from flask_cors import CORS, cross_origin
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
 from Handler.users_h import UsersHandler
+from Handler.loans_h import LoansHandler
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
 CORS(app)
 
 UsersHandler = UsersHandler()
+LoansHandler = LoansHandler()
 
 @app.before_request
 def before_request():
@@ -73,6 +76,33 @@ def login():
 def logout():
     if request.method == 'POST':
         return jsonify({'status': 'success'})
+
+
+# Loan Routes
+@app.route('/api/create-loan', methods=['POST'])
+def create_loan():
+    if request.method == 'POST':
+        data = request.json
+        print(data)
+        loan_amount = data['loan_amount']
+        interest = data['interest']
+        time_frame = data['time_frame']
+        platform = data['platform']
+        user_id = data['user_id']
+        
+        loan_id = LoansHandler.insert_loan(loan_amount, user_id, interest, time_frame)
+        if loan_id: 
+            return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
+        else:
+            return jsonify(Error="Invalid credentials."), 404
+
+    else:
+        return jsonify(Error="Method not allowed."), 405
+
+
+@app.route('/loans', methods=['GET'])
+def get_all_loans():
+    return LoansHandler.get_all_loans()
 
 
 if __name__ == '__main__':
