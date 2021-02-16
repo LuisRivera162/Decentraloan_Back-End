@@ -1,4 +1,5 @@
 from DAO.loans import LoansDAO
+from DAO.users import UsersDAO
 from flask import jsonify
 
 class LoansHandler:
@@ -22,7 +23,7 @@ class LoansHandler:
         except:
             return jsonify("Error processing, query."), 400
 
-        return loan_id
+        return loan_id, 200
 
     # GET
     def get_all_loans(self):
@@ -31,5 +32,18 @@ class LoansHandler:
         result_list = []
         for row in loans:
             result = self.build_loan_dict(row)
+            result_list.append(result)
+        return jsonify(Loans=result_list)
+
+    def get_all_user_loans(self, uid):
+        dao = LoansDAO()
+        user_dao = UsersDAO()
+        username = user_dao.get_username(uid)
+        loans = dao.get_all_user_loans(uid)
+        result_list = []
+        for row in loans:
+            result = self.build_loan_dict(row)
+            result['username'] = username
+            print(result)
             result_list.append(result)
         return jsonify(Loans=result_list)

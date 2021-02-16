@@ -27,3 +27,12 @@ class LoansDAO:
         for row in cursor:
             result.append(row)
         return result
+
+    def get_all_user_loans(self, uid):
+        cursor = self.conn.cursor()
+        query = f'select * from loans where user_id = {uid};'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
