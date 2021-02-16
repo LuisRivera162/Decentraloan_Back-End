@@ -83,7 +83,6 @@ def logout():
 def create_loan():
     if request.method == 'POST':
         data = request.json
-        print(data)
         loan_amount = data['loan_amount']
         interest = data['interest']
         time_frame = data['time_frame']
@@ -100,9 +99,19 @@ def create_loan():
         return jsonify(Error="Method not allowed."), 405
 
 
-@app.route('/loans', methods=['GET'])
+@app.route('/api/loans', methods=['GET'])
 def get_all_loans():
     return LoansHandler.get_all_loans()
+
+
+@app.route('/api/user-loans', methods=['GET'])
+def get_all_user_loans():
+    
+    user_id = request.args.get('user_id')
+    if user_id:
+        return LoansHandler.get_all_user_loans(user_id), 200
+    else: 
+        return jsonify(Error="User not found."), 404
 
 
 if __name__ == '__main__':
