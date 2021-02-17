@@ -113,6 +113,15 @@ def get_all_user_loans():
     else: 
         return jsonify(Error="User not found."), 404
 
+@app.route('/api/user-loan', methods=['GET'])
+def get_single_user_loans():
+    loan_id = request.args.get('loan_id')
+    user_id = request.args.get('user_id')
+    if loan_id:
+        return LoansHandler.get_loan(user_id, loan_id), 200
+    else: 
+        return jsonify(Error="User not found."), 404
+
 
 if __name__ == '__main__':
     app.run(debug=True)

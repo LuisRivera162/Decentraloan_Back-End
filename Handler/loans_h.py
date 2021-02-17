@@ -44,6 +44,17 @@ class LoansHandler:
         for row in loans:
             result = self.build_loan_dict(row)
             result['username'] = username
-            print(result)
             result_list.append(result)
         return jsonify(Loans=result_list)
+
+    def get_loan(self, uid, loan_id):
+        dao = LoansDAO()
+        user_dao = UsersDAO()
+        username = user_dao.get_username(uid)
+        row = dao.get_single_user_loan(loan_id)
+        if not row:
+            return jsonify(Error="Loan Not Found"), 404
+        else:
+            result = self.build_loan_dict(row)
+            result['username'] = username
+            return jsonify(Loan=result)

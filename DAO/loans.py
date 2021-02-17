@@ -36,3 +36,13 @@ class LoansDAO:
         for row in cursor:
             result.append(row)
         return result
+
+    def get_single_user_loan(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f'select * from loans where loan_id = {loan_id};'
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            return result
+        else:
+            return -1
