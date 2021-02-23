@@ -12,6 +12,8 @@ class UsersHandler:
         result['last_name'] = row[3]
         result['email'] = row[5]
         result['age'] = row[8]
+        result['phone'] = row[10]
+        result['wallet'] = row[11]
         return result
 
     def get_user(self, uid):
@@ -50,14 +52,14 @@ class UsersHandler:
             result_list.append(result)
         return jsonify(Users=result_list)
 
-    def insert_user(self, username, first_name, last_name, email, password, confirm_password, age):
+    def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone):
         # NEED TO HANDLE IF USER EXISTS
         dao = UsersDAO()
 
         if password == confirm_password:
             password = generate_password_hash(password)
             try:
-                uid = dao.insert_user(username, first_name, last_name, email, password, age)
+                uid = dao.insert_user(username, first_name, last_name, email, password, age, phone)
             except:
                 return jsonify("Email or Username already exists.")
         else:

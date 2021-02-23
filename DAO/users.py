@@ -61,11 +61,11 @@ class UsersDAO:
             return -1
 
     # INSERT 
-    def insert_user(self, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PASSKEY, AGE):
+    def insert_user(self, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PASSKEY, AGE, PHONE):
         cursor = self.conn.cursor()
-        query = "insert into Users(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, EMAIL, created_on, user_age) values (%s, %s, %s, %s, %s," \
-                " now(), %s) returning user_id;"
-        cursor.execute(query, (USERNAME, FIRSTNAME, LASTNAME, PASSKEY, EMAIL, AGE))
+        query = "insert into Users(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, EMAIL, created_on, user_age, phone) values (%s, %s, %s, %s, %s," \
+                " now(), %s, %s) returning user_id;"
+        cursor.execute(query, (USERNAME, FIRSTNAME, LASTNAME, PASSKEY, EMAIL, AGE, PHONE))
         uid = cursor.fetchone()[0]
         self.conn.commit()
         return uid
