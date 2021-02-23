@@ -22,7 +22,7 @@ def before_request():
 
 @app.route('/')
 def profile():
-    return 'Welcome to _______'
+    return 'go to /users'
 
 @app.route('/users', methods=['GET'])
 def get_all_users():
@@ -45,9 +45,10 @@ def register():
         password = data['password']
         conf_password = data['conf_password']
         age = data['age']
+        phone = data['phone']
         
         try:
-            uid = UsersHandler.insert_user(username, first_name, last_name, email, password, conf_password, age)
+            uid = UsersHandler.insert_user(username, first_name, last_name, email, password, conf_password, age, phone)
             return jsonify({"email": email, "localId": uid, "status": 'success'}), 200
     
         except:
@@ -113,15 +114,43 @@ def get_all_user_loans():
     else: 
         return jsonify(Error="User not found."), 404
 
-@app.route('/api/user-loan', methods=['GET'])
+@app.route('/api/user-loan', methods=['GET', 'PUT'])
 def get_single_user_loans():
-    loan_id = request.args.get('loan_id')
-    user_id = request.args.get('user_id')
-    if loan_id:
-        return LoansHandler.get_loan(user_id, loan_id), 200
-    else: 
-        return jsonify(Error="User not found."), 404
 
+    if request.method == 'GET':
+        loan_id = request.args.get('loan_id')
+        if loan_id:
+            return LoansHandler.get_loan(loan_id), 200
+        else: 
+            return jsonify(Error="User not found."), 404
+
+    elif request.method == 'PUT':
+        data = request.json
+        loan_id = data['loan_id']
+        loan_amount = data['loan_amount']
+        interest = data['interest']
+        time_frame = data['time_frame']
+        platform = data['platform']
+        
+        result = LoansHandler.edit_loan(loan_id, loan_amount, interest, time_frame, platform)
+        
+        if result:
+            return jsonify(Response="Success"), 200
+        else: 
+            return jsonify(Error="User not found."), 404
+
+    else: 
+        return jsonify(Error="Method not allowed."), 405
+
+
+@app.route('/api/user', methods=['GET'])
+def get_user():
+    user_id = request.args.get('user_id')
+    if user_id:
+        return UsersHandler.get_user(user_id)
+    else:
+        return jsonify(Error="User not found.")
+        
 
 if __name__ == '__main__':
     app.run(debug=True)
