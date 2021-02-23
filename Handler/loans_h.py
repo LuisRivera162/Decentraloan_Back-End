@@ -47,14 +47,22 @@ class LoansHandler:
             result_list.append(result)
         return jsonify(Loans=result_list)
 
-    def get_loan(self, uid, loan_id):
+    def get_loan(self, loan_id):
         dao = LoansDAO()
         user_dao = UsersDAO()
-        username = user_dao.get_username(uid)
         row = dao.get_single_user_loan(loan_id)
         if not row:
             return jsonify(Error="Loan Not Found"), 404
         else:
             result = self.build_loan_dict(row)
+            username = user_dao.get_username(result['user_id'])
             result['username'] = username
             return jsonify(Loan=result)
+
+    def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
+        dao = LoansDAO()
+        loan_id = dao.edit_loan(loan_id, loan_amount, interest, time_frame, platform)
+        if loan_id: 
+            return loan_id, 200
+        else: 
+            return None

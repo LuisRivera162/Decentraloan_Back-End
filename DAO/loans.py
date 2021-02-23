@@ -46,3 +46,11 @@ class LoansDAO:
             return result
         else:
             return -1
+
+    def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
+        cursor = self.conn.cursor()
+        query = f"update loans set loan_amount = {loan_amount}, interest = {int(interest) / 100}, time_frame = '{time_frame}' where loan_id = {loan_id};"
+        print(query)
+        cursor.execute(query)
+        self.conn.commit()
+        return loan_id
