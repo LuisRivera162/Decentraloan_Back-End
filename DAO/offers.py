@@ -1,0 +1,71 @@
+from config.dbconfig import pg_config
+import psycopg2
+
+class OffersDAO:
+
+    def __init__(self):
+
+        connection_url = "dbname=%s user=%s password=%s" % (pg_config['dbname'],
+                                                            pg_config['user'],
+                                                            pg_config['passwd'])
+        self.conn = psycopg2._connect(connection_url)
+
+    # GET
+    def get_all_offers(self): 
+        cursor = self.conn.cursor()
+        query = 'select * from offer;'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
+
+    def get_all_loan_offers(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f'select * from offer where loan_id = {loan_id};'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
+
+    def get_offer(self, offer_id):
+        cursor = self.conn.cursor()
+        query = f'select * from offer where offer_id = {offer_id};'
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            return result
+        else:
+            return -1
+        
+    def get_borrower_loan_offer(self, user_id, loan_id):
+        cursor = self.conn.cursor()
+        query = f'select * from offer where loan_id = {loan_id} and borrower_id = {user_id};'
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            return result
+        else:
+            return -1
+
+    # POST
+    # expiration date not used, not sure how to use. 
+    def create_offer(self, loan_id, borrower_id, loan_amount, time_frame, interest, expiration_date):
+        cursor = self.conn.cursor()
+        query = "insert into LOANS(LOAN_ID, BORROWER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST, CREATED_ON, EXPIRATION_DATE) \
+                values (%s, %s, %s, %s, %s, now(), now()) returning offer_id;"
+        cursor.execute(query, (loan_id, borrower_id, loan_amount, time_frame, interest))
+        offer_id = cursor.fetchone()[0]
+        self.conn.commit()
+        return offer_id
+
+    
+    # PUT
+    # expiration date not used, not sure how to use. 
+    def edit_offer(self, offer_id, loan_amount, time_frame, interest, expiration_date):
+        cursor = self.conn.cursor()
+        query = f"update offer set loan_amount = {loan_amount}, interest = {int(interest) / 100}, time_frame = '{time_frame}' where offer_id = {offer_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return offer_id
