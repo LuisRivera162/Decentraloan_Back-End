@@ -16,7 +16,7 @@ LoansHandler = LoansHandler()
 def before_request():
     g.user = None
 
-    if 'user_id' in session: 
+    if 'user_id' in session:
         user = UsersHandler.get_user(session['user_id'])
         g.user = user
 
@@ -27,6 +27,14 @@ def profile():
 @app.route('/users', methods=['GET'])
 def get_all_users():
     return UsersHandler.get_all_users()
+
+@app.route('/api/user', methods=['GET'])
+def get_user():
+    user_id = request.args.get('user_id')
+    if user_id:
+        return UsersHandler.get_user(user_id)
+    else:
+        return jsonify(Error="User not found.")
 
 # -----------------------
 #  Log | Register Routes
@@ -46,14 +54,15 @@ def register():
         conf_password = data['conf_password']
         age = data['age']
         phone = data['phone']
-        
+        lender = data['lender']
+
         try:
-            uid = UsersHandler.insert_user(username, first_name, last_name, email, password, conf_password, age, phone)
-            return jsonify({"email": email, "localId": uid, "status": 'success'}), 200
-    
+            uid = UsersHandler.insert_user(username, first_name, last_name, email, password, conf_password, age, phone, lender)
+            return jsonify({"email": email, "localId": uid, "status": 'success', 'lender': lender}), 200
+
         except:
-            return jsonify({'email': 'null', 'localId': 'null', 'status': 'failure'})
-    
+            return jsonify({'email': 'null', 'localId': 'null', 'status': 'failure', 'lender': 'null'})
+
     else:
         return jsonify(Error="Method not allowed."), 405
 
@@ -65,13 +74,32 @@ def login():
         email = data['email']
         password = data['password']
         uid = UsersHandler.validate_user_login(email, password)
-        if uid: 
-            return jsonify({'email': email, 'localId': uid, 'status': 'success'})
+        lender = UsersHandler.get_user(uid).get("lender")
+        print(UsersHandler.get_user(uid))
+        print(lender)
+        if uid:
+            return jsonify({'email': email, 'localId': uid, 'status': 'success', 'lender': lender })
         else:
             return jsonify(Error="Invalid credentials."), 404
 
     else:
         return jsonify(Error="Method not allowed."), 405
+
+@app.route('/api/edituser', methods=['PUT'])
+def edit_user():
+    # need to handle case if user already exists.
+    data = request.json
+    uid = data['user_id']
+    username = data['username']
+    first_name = data['first_name']
+    last_name = data['last_name']
+    email = data['email']
+    phone = data['phone']
+    try:
+        uid = UsersHandler.edit_user(uid, username, first_name, last_name, email, phone)
+        return jsonify({"email": email, "localId": uid, "status": 'success'}), 200
+    except:
+        return jsonify({'email': 'null', 'localId': 'null', 'status': 'failure'}), 404
 
 @app.route('/api/logout')
 def logout():
@@ -89,9 +117,9 @@ def create_loan():
         time_frame = data['time_frame']
         platform = data['platform']
         user_id = data['user_id']
-        
+
         loan_id = LoansHandler.insert_loan(loan_amount, user_id, interest, time_frame)
-        if loan_id: 
+        if loan_id:
             return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
         else:
             return jsonify(Error="Invalid credentials."), 404
@@ -107,11 +135,11 @@ def get_all_loans():
 
 @app.route('/api/user-loans', methods=['GET'])
 def get_all_user_loans():
-    
+
     user_id = request.args.get('user_id')
     if user_id:
         return LoansHandler.get_all_user_loans(user_id), 200
-    else: 
+    else:
         return jsonify(Error="User not found."), 404
 
 @app.route('/api/user-loan', methods=['GET', 'PUT'])
@@ -121,7 +149,7 @@ def get_single_user_loans():
         loan_id = request.args.get('loan_id')
         if loan_id:
             return LoansHandler.get_loan(loan_id), 200
-        else: 
+        else:
             return jsonify(Error="User not found."), 404
 
     elif request.method == 'PUT':
@@ -131,26 +159,20 @@ def get_single_user_loans():
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
-        
+
         result = LoansHandler.edit_loan(loan_id, loan_amount, interest, time_frame, platform)
-        
+
         if result:
             return jsonify(Response="Success"), 200
-        else: 
+        else:
             return jsonify(Error="User not found."), 404
 
-    else: 
+    else:
         return jsonify(Error="Method not allowed."), 405
 
 
-@app.route('/api/user', methods=['GET'])
-def get_user():
-    user_id = request.args.get('user_id')
-    if user_id:
-        return UsersHandler.get_user(user_id)
-    else:
-        return jsonify(Error="User not found.")
-        
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
