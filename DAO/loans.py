@@ -10,7 +10,7 @@ class LoansDAO:
                                                             pg_config['passwd'])
         self.conn = psycopg2._connect(connection_url)
 
-    # INSERT 
+    # POST 
     def insert_loan(self, USER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST):
         cursor = self.conn.cursor()
         query = "insert into LOANS(USER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST, created_on) values (%s, %s, %s, %s, now()) returning loan_id;"
@@ -19,6 +19,8 @@ class LoansDAO:
         self.conn.commit()
         return loan_id
 
+
+    # GET
     def get_all_loans(self):
         cursor = self.conn.cursor()
         query = 'select * from loans;'
@@ -47,10 +49,11 @@ class LoansDAO:
         else:
             return -1
 
+
+    # PUT
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
         cursor = self.conn.cursor()
         query = f"update loans set loan_amount = {loan_amount}, interest = {int(interest) / 100}, time_frame = '{time_frame}' where loan_id = {loan_id};"
-        print(query)
         cursor.execute(query)
         self.conn.commit()
         return loan_id

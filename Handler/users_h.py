@@ -14,6 +14,7 @@ class UsersHandler:
         result['age'] = row[8]
         result['phone'] = row[10]
         result['wallet'] = row[11]
+        result['lender'] = row[12]
         return result
 
     def get_user(self, uid):
@@ -22,8 +23,7 @@ class UsersHandler:
         if not row:
             return jsonify(Error="User Not Found"), 404
         else:
-            user = self.build_user_dict(row)
-            return jsonify(User=user)
+            return self.build_user_dict(row)
 
     def get_user_by_username(self, username):
         dao = UsersDAO()
@@ -52,19 +52,24 @@ class UsersHandler:
             result_list.append(result)
         return jsonify(Users=result_list)
 
-    def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone):
+    def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone, lender):
         # NEED TO HANDLE IF USER EXISTS
         dao = UsersDAO()
 
         if password == confirm_password:
             password = generate_password_hash(password)
             try:
-                uid = dao.insert_user(username, first_name, last_name, email, password, age, phone)
+                uid = dao.insert_user(username, first_name, last_name, email, password, age, phone, lender)
             except:
                 return jsonify("Email or Username already exists.")
         else:
             return jsonify("Passwords do not match."), 405
         return uid
+
+    def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
+        dao = UsersDAO()
+        dao.edit_user(uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE)
+        return uid, 200
 
     # -------------------------
     #     Login Validation

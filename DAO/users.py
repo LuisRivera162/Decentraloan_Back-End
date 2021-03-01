@@ -61,14 +61,24 @@ class UsersDAO:
             return -1
 
     # INSERT 
-    def insert_user(self, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PASSKEY, AGE, PHONE):
+    def insert_user(self, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PASSKEY, AGE, PHONE, LENDER):
         cursor = self.conn.cursor()
-        query = "insert into Users(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, EMAIL, created_on, user_age, phone) values (%s, %s, %s, %s, %s," \
-                " now(), %s, %s) returning user_id;"
-        cursor.execute(query, (USERNAME, FIRSTNAME, LASTNAME, PASSKEY, EMAIL, AGE, PHONE))
+        query = "insert into Users(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, EMAIL, created_on, user_age, phone, LENDER) values (%s, %s, %s, %s, %s," \
+                " now(), %s, %s, %s) returning user_id;"
+        cursor.execute(query, (USERNAME, FIRSTNAME, LASTNAME, PASSKEY, EMAIL, AGE, PHONE, LENDER))
         uid = cursor.fetchone()[0]
         self.conn.commit()
         return uid
+
+    def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
+        cursor = self.conn.cursor()
+
+        query = f"update users set username = '{USERNAME}', firstname = '{FIRSTNAME}', lastname = '{LASTNAME}'" \
+                f", email = '{EMAIL}', phone = '{PHONE}' where user_id = {uid};"
+        cursor.execute(query)
+        self.conn.commit()
+        print(query)
+        return query
 
     # ----------------------
     #   Login Validations
