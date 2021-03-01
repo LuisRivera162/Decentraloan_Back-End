@@ -6,11 +6,11 @@ CREATE TABLE USERS (
 	password VARCHAR ( 200 ) NOT NULL,
 	email VARCHAR ( 255 ) UNIQUE NOT NULL,
 	created_on TIMESTAMP NOT NULL,
-last_login TIMESTAMP,
-user_age INTEGER,
-phone VARCHAR ( 11 ),
-wallet VARCHAR ( 200 ),
-logged_in BOOLEAN DEFAULT FALSE
+	last_login TIMESTAMP,
+	user_age INTEGER,
+	phone VARCHAR ( 11 ),
+	eth_address VARCHAR ( 200 ) UNIQUE NOT NULL,
+	logged_in BOOLEAN DEFAULT FALSE
 );
 
 

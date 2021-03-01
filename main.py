@@ -1,21 +1,21 @@
-# Automatically import kovan-testnet infura provider
+# Automatically imports kovan-testnet infura provider
 # Needs DEV_KETH_PRIVATE_KEY, WEB3_INFURA_PROJECT_ID and WEB3_INFURA_API_SECRET set as env variables
 # project WILL NOT be able to connect the the blockchain if not set!
 # run env.bat to populate this data
-import json, os
-DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY') 
-from web3.auto.infura.kovan import w3
-from eth_account import Account
-
-# Flask Imports
-from flask import (Flask, g, jsonify, session, url_for, request)
-from flask_cors import CORS, cross_origin
-from wtforms import Form, BooleanField, TextField, PasswordField, validators
-
-# DB Handler Imports
-from Handler.loans_h import LoansHandler
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
+
+from wtforms import Form, BooleanField, TextField, PasswordField, validators
+
+from flask_cors import CORS, cross_origin
+from flask import (Flask, g, jsonify, session, url_for, request)
+
+from eth_account import Account
+from web3.auto.infura.kovan import w3
+import json
+import os
+
+DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
 decentraloanfactory_compiled_path = 'build/contracts/DecentraLoanFactory.json'
@@ -65,7 +65,7 @@ LoansHandler = LoansHandler()
 
 # Initialize Web3 Account object from private key
 # This account is internal and will pay for TX fees
-_backend_account = Account.from_key(DEV_KETH_PRIVATE_KEY)
+_backend_eth_account = Account.from_key(DEV_KETH_PRIVATE_KEY)
 
 @app.before_request
 def before_request():
@@ -79,6 +79,16 @@ def before_request():
 @app.route('/')
 def profile():
     return 'go to /users'
+
+
+# verify if connected to Infura
+# return _backend_account address
+@app.route('/checkonline')
+def check_online():
+    return jsonify({
+        'web3_online': w3.isConnected(),
+        'backend_eth_account': _backend_eth_account.address
+    })
 
 
 @app.route('/users', methods=['GET'])
@@ -118,6 +128,7 @@ def register():
         try:
             uid = UsersHandler.insert_user(
                 username, first_name, last_name, email, password, conf_password, age, phone, lender)
+            
             return jsonify({"email": email, "localId": uid, "status": 'success', 'lender': lender}), 200
 
         except:
