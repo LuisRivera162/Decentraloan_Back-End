@@ -108,7 +108,6 @@ def get_user():
 #  Log | Register Routes
 # -----------------------
 
-
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
 def register():
