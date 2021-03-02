@@ -6,13 +6,13 @@ CREATE TABLE USERS (
 	password VARCHAR ( 200 ) NOT NULL,
 	email VARCHAR ( 255 ) UNIQUE NOT NULL,
 	created_on TIMESTAMP NOT NULL,
-	last_login TIMESTAMP,
-	user_age INTEGER,
-	phone VARCHAR ( 11 ),
-	eth_address VARCHAR ( 200 ) UNIQUE NOT NULL,
-	logged_in BOOLEAN DEFAULT FALSE
+    last_login TIMESTAMP,
+    user_age INTEGER,
+    phone VARCHAR ( 11 ),
+    wallet VARCHAR ( 200 ),
+    logged_in BOOLEAN DEFAULT FALSE
+    lender BOOLEAN DEFAULT FALSE
 );
-
 
 CREATE TABLE BORROWERS (
 	borrower_id serial PRIMARY KEY,
@@ -31,8 +31,8 @@ CREATE TABLE LOANERS (
 CREATE TABLE LOANS (
 	loan_id serial PRIMARY KEY,
 	user_id INTEGER,
-	loan_amount MONEY,
-	time_frame DATE,
+	loan_amount FLOAT,
+	time_frame INTEGER,
 	interest FLOAT,
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
@@ -54,12 +54,12 @@ CREATE TABLE OFFER (
 	offer_id serial PRIMARY KEY,
 	loan_id INTEGER,
 	borrower_id INTEGER,
-	desired_amount MONEY,
-	time_frame DATE,
-	interest DECIMAL(5,2),
+	loan_amount FLOAT,
+	time_frame INTEGER,
+	interest FLOAT,
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
-	espiration_date DATE,
+	expiration_date DATE,
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
 );
