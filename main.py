@@ -85,10 +85,11 @@ def profile():
 # return _backend_account address
 @app.route('/checkonline')
 def check_online():
-    return jsonify({
-        'web3_online': w3.isConnected(),
-        'backend_eth_account': _backend_eth_account.address
-    })
+    return jsonify(
+        web3_online= w3.isConnected(),
+        backend_eth_account= _backend_eth_account.address,
+        backend_eth_balance= float(w3.fromWei(w3.eth.get_balance(_backend_eth_account.address), 'ether'))
+    )
 
 
 @app.route('/users', methods=['GET'])
