@@ -13,7 +13,7 @@ class LoansDAO:
     # POST 
     def insert_loan(self, USER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST):
         cursor = self.conn.cursor()
-        query = "insert into LOANS(USER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST, created_on) values (%s, %s, %s, %s, now()) returning loan_id;"
+        query = "insert into LOANS(USER_ID, AMOUNT, MONTHS, INTEREST, created_on) values (%s, %s, %s, %s, now()) returning loan_id;"
         cursor.execute(query, (USER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST))
         loan_id = cursor.fetchone()[0]
         self.conn.commit()
@@ -53,7 +53,7 @@ class LoansDAO:
     # PUT
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
         cursor = self.conn.cursor()
-        query = f"update loans set loan_amount = {loan_amount}, interest = {int(interest) / 100}, time_frame = '{time_frame}' where loan_id = {loan_id};"
+        query = f"update loans set amount = {loan_amount}, interest = {int(interest) / 100}, months = {time_frame} where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
         return loan_id

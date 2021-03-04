@@ -8,10 +8,14 @@ class LoansHandler:
         result = {}
         result['loan_id'] = row[0]
         result['user_id'] = row[1]
-        result['loan_amount'] = row[2]
-        result['time_frame'] = row[3]
+        result['amount'] = row[2]
+        result['months'] = row[3]
         result['interest'] = row[4]
         result['accepted'] = row[6]
+        result['eth_address'] = row[7]
+        result['monthly_repayment'] = row[8]
+        result['balance'] = row[9]
+        result['est_total_interest'] = row[10]
         return result
 
     def insert_loan(self, loan_amount, user_id, interest, time_frame):
@@ -28,10 +32,12 @@ class LoansHandler:
     # GET
     def get_all_loans(self):
         dao = LoansDAO()
+        user_dao = UsersDAO()
         loans = dao.get_all_loans()
         result_list = []
         for row in loans:
             result = self.build_loan_dict(row)
+            result['username'] = user_dao.get_username(row[1])
             result_list.append(result)
         return jsonify(Loans=result_list)
 
@@ -47,6 +53,11 @@ class LoansHandler:
             result_list.append(result)
         return jsonify(Loans=result_list)
 
+    def get_all_user_loan_count(self, uid):
+        dao = LoansDAO()
+        loans = dao.get_all_user_loans(uid)
+        return jsonify(len(loans))
+
     def get_loan(self, loan_id):
         dao = LoansDAO()
         user_dao = UsersDAO()
@@ -57,6 +68,7 @@ class LoansHandler:
             result = self.build_loan_dict(row)
             username = user_dao.get_username(result['user_id'])
             result['username'] = username
+            print(jsonify(Loan=result))
             return jsonify(Loan=result)
 
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):

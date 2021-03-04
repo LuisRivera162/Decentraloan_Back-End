@@ -5,7 +5,7 @@
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
 
-from wtforms import Form, BooleanField, TextField, PasswordField, validators
+# from wtforms import Form, BooleanField, TextField, PasswordField, validators
 
 from flask_cors import CORS, cross_origin
 from flask import (Flask, g, jsonify, session, url_for, request)
@@ -191,9 +191,8 @@ def create_loan():
         time_frame = data['time_frame']
         platform = data['platform']
         user_id = data['user_id']
-
-        loan_id = LoansHandler.insert_loan(
-            loan_amount, user_id, interest, time_frame)
+        
+        loan_id = LoansHandler.insert_loan(loan_amount, user_id, interest, time_frame)
         if loan_id:
             return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
         else:
@@ -217,6 +216,14 @@ def get_all_user_loans():
     else:
         return jsonify(Error="User not found."), 404
 
+@app.route('/api/user-loan-count', methods=['GET'])
+def get_all_user_loan_count():
+
+    user_id = request.args.get('user_id')
+    if user_id:
+        return LoansHandler.get_all_user_loan_count(user_id), 200
+    else:
+        return jsonify(Error="User not found."), 404
 
 @app.route('/api/user-loan', methods=['GET', 'PUT'])
 def get_single_user_loans():

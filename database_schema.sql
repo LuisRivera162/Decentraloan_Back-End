@@ -31,11 +31,15 @@ CREATE TABLE LOANERS (
 CREATE TABLE LOANS (
 	loan_id serial PRIMARY KEY,
 	user_id INTEGER,
-	loan_amount FLOAT,
-	time_frame INTEGER,
+	amount INTEGER,
+	months INTEGER,
 	interest FLOAT,
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
+	eth_address VARCHAR,
+	monthly_repayment FLOAT,
+	balance FLOAT,
+	est_total_interest FLOAT,
 	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
