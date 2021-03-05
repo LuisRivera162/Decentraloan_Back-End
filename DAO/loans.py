@@ -26,7 +26,7 @@ class LoansDAO:
         # if user_id: 
         #     query = f'select * from loans where user_id != {user_id};'
         # else:
-            query = f'select * from loans;'
+        query = f'select * from loans;'
         cursor.execute(query)
         result = []
         for row in cursor:
