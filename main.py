@@ -194,7 +194,7 @@ def create_loan():
         time_frame = data['time_frame']
         platform = data['platform']
         lender = data['lender']
-        
+
         loan_id = LoansHandler.insert_loan(loan_amount, lender, None, interest, time_frame)
         if loan_id:
             return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})

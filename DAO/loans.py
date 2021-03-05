@@ -5,9 +5,10 @@ class LoansDAO:
 
     def __init__(self):
 
-        connection_url = "dbname=%s user=%s password=%s" % (pg_config['dbname'],
+        connection_url = "dbname=%s user=%s password=%s port=%s" % (pg_config['dbname'],
                                                             pg_config['user'],
-                                                            pg_config['passwd'])
+                                                            pg_config['passwd'],
+                                                            pg_config['port'])
         self.conn = psycopg2._connect(connection_url)
 
     # POST 
@@ -26,7 +27,7 @@ class LoansDAO:
         # if user_id: 
         #     query = f'select * from loans where user_id != {user_id};'
         # else:
-            query = f'select * from loans;'
+        query = f'select * from loans;'
         cursor.execute(query)
         result = []
         for row in cursor:
