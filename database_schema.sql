@@ -10,7 +10,7 @@ CREATE TABLE USERS (
     user_age INTEGER,
     phone VARCHAR ( 11 ),
     wallet VARCHAR ( 200 ),
-    logged_in BOOLEAN DEFAULT FALSE
+    logged_in BOOLEAN DEFAULT FALSE,
     lender BOOLEAN DEFAULT FALSE
 );
 
