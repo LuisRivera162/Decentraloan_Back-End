@@ -7,23 +7,25 @@ class LoansHandler:
     def build_loan_dict(self, row):
         result = {}
         result['loan_id'] = row[0]
-        result['user_id'] = row[1]
-        result['amount'] = row[2]
-        result['months'] = row[3]
-        result['interest'] = row[4]
-        result['accepted'] = row[6]
-        result['eth_address'] = row[7]
-        result['monthly_repayment'] = row[8]
-        result['balance'] = row[9]
-        result['est_total_interest'] = row[10]
+        result['lender'] = row[1]
+        result['borrower'] = row[2]
+        result['amount'] = row[3]
+        result['months'] = row[4]
+        result['interest'] = row[5]
+        result['created_on'] = row[6]
+        result['accepted'] = row[7]
+        result['eth_address'] = row[8]
+        result['monthly_repayment'] = row[9]
+        result['balance'] = row[10]
+        result['est_total_interest'] = row[11]
         return result
 
-    def insert_loan(self, loan_amount, user_id, interest, time_frame):
+    def insert_loan(self, loan_amount, lender, borrower, interest, time_frame):
         # NEED TO HANDLE IF USER EXISTS
         dao = LoansDAO()
         
         try:
-            loan_id = dao.insert_loan(user_id, loan_amount, time_frame, interest/100)
+            loan_id = dao.insert_loan(lender, borrower, loan_amount, time_frame, interest/100)
         except:
             return jsonify("Error processing, query."), 400
 
@@ -51,6 +53,8 @@ class LoansHandler:
             result = self.build_loan_dict(row)
             result['username'] = username
             result_list.append(result)
+
+        print (result_list)
         return jsonify(Loans=result_list)
 
     def get_all_user_loan_count(self, uid):

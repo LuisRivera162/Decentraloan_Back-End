@@ -193,9 +193,9 @@ def create_loan():
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
-        user_id = data['user_id']
+        lender = data['lender']
         
-        loan_id = LoansHandler.insert_loan(loan_amount, user_id, interest, time_frame)
+        loan_id = LoansHandler.insert_loan(loan_amount, lender, None, interest, time_frame)
         if loan_id:
             return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
         else:
@@ -295,6 +295,14 @@ def create_offer():
 
     else:
         return jsonify(Error="Method not allowed."), 405
+
+@app.route('/api/validate-payment', methods=['POST'])
+def validate_payment():
+    pass
+
+@app.route('/api/send-payment', methods=['POST'])
+def send_payment():
+    pass
 
 
 if __name__ == '__main__':

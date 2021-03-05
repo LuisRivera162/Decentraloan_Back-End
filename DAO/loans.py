@@ -11,10 +11,10 @@ class LoansDAO:
         self.conn = psycopg2._connect(connection_url)
 
     # POST 
-    def insert_loan(self, USER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST):
+    def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST):
         cursor = self.conn.cursor()
-        query = "insert into LOANS(USER_ID, AMOUNT, MONTHS, INTEREST, created_on) values (%s, %s, %s, %s, now()) returning loan_id;"
-        cursor.execute(query, (USER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST))
+        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, created_on) values (%s, %s, %s, %s, %s, now()) returning loan_id;"
+        cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST))
         loan_id = cursor.fetchone()[0]
         self.conn.commit()
         return loan_id
@@ -23,9 +23,9 @@ class LoansDAO:
     # GET
     def get_all_loans(self, user_id):
         cursor = self.conn.cursor()
-        if user_id: 
-            query = f'select * from loans where user_id != {user_id};'
-        else:
+        # if user_id: 
+        #     query = f'select * from loans where user_id != {user_id};'
+        # else:
             query = f'select * from loans;'
         cursor.execute(query)
         result = []
@@ -35,7 +35,7 @@ class LoansDAO:
 
     def get_all_user_loans(self, uid):
         cursor = self.conn.cursor()
-        query = f'select * from loans where user_id = {uid};'
+        query = f'select * from loans where lender = {uid} or borrower = {uid};'
         cursor.execute(query)
         result = []
         for row in cursor:
