@@ -30,10 +30,10 @@ class LoansHandler:
         return loan_id, 200
 
     # GET
-    def get_all_loans(self):
+    def get_all_loans(self, user_id):
         dao = LoansDAO()
         user_dao = UsersDAO()
-        loans = dao.get_all_loans()
+        loans = dao.get_all_loans(user_id)
         result_list = []
         for row in loans:
             result = self.build_loan_dict(row)

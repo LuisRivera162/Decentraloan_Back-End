@@ -21,9 +21,12 @@ class LoansDAO:
 
 
     # GET
-    def get_all_loans(self):
+    def get_all_loans(self, user_id):
         cursor = self.conn.cursor()
-        query = 'select * from loans;'
+        if user_id: 
+            query = f'select * from loans where user_id != {user_id};'
+        else:
+            query = f'select * from loans;'
         cursor.execute(query)
         result = []
         for row in cursor:
