@@ -58,8 +58,8 @@ CREATE TABLE OFFER (
 	offer_id serial PRIMARY KEY,
 	loan_id INTEGER,
 	borrower_id INTEGER,
-	loan_amount FLOAT,
-	time_frame INTEGER,
+	amount FLOAT,
+	months INTEGER,
 	interest FLOAT,
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
@@ -67,6 +67,7 @@ CREATE TABLE OFFER (
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
 );
+
 
 CREATE TABLE MESSAGE (
 	message_id serial PRIMARY KEY,
