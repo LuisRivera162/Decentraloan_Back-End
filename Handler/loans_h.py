@@ -53,8 +53,6 @@ class LoansHandler:
             result = self.build_loan_dict(row)
             result['username'] = username
             result_list.append(result)
-
-        print (result_list)
         return jsonify(Loans=result_list)
 
     def get_all_user_loan_count(self, uid):
