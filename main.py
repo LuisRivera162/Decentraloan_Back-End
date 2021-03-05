@@ -149,8 +149,6 @@ def login():
         password = data['password']
         uid = UsersHandler.validate_user_login(email, password)
         lender = UsersHandler.get_user(uid).get("lender")
-        print(UsersHandler.get_user(uid))
-        print(lender)
         if uid:
             return jsonify({'email': email, 'localId': uid, 'status': 'success', 'lender': lender})
         else:
