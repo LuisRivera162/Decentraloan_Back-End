@@ -4,6 +4,7 @@
 # run env.bat to populate this data
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
+from Handler.offers_h import OffersHandler
 
 # from wtforms import Form, BooleanField, TextField, PasswordField, validators
 
@@ -15,6 +16,7 @@ from web3.auto.infura.kovan import w3
 import json
 import os
 
+os.system('env.bat')
 DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
@@ -62,6 +64,7 @@ CORS(app)
 # Initialize DB Handlers
 UsersHandler = UsersHandler()
 LoansHandler = LoansHandler()
+OffersHandler = OffersHandler()
 
 # Initialize Web3 Account object from private key
 # This account is internal and will pay for TX fees
@@ -85,10 +88,11 @@ def profile():
 # return _backend_account address
 @app.route('/checkonline')
 def check_online():
-    return jsonify({
-        'web3_online': w3.isConnected(),
-        'backend_eth_account': _backend_eth_account.address
-    })
+    return jsonify(
+        web3_online= w3.isConnected(),
+        backend_eth_account= _backend_eth_account.address,
+        backend_eth_balance= float(w3.fromWei(w3.eth.get_balance(_backend_eth_account.address), 'ether'))
+    )
 
 
 @app.route('/users', methods=['GET'])
@@ -107,7 +111,6 @@ def get_user():
 # -----------------------
 #  Log | Register Routes
 # -----------------------
-
 
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
@@ -204,7 +207,8 @@ def create_loan():
 
 @app.route('/api/loans', methods=['GET'])
 def get_all_loans():
-    return LoansHandler.get_all_loans()
+    user_id = request.args.get('user_id')
+    return LoansHandler.get_all_loans(user_id)
 
 
 @app.route('/api/user-loans', methods=['GET'])
@@ -234,6 +238,44 @@ def get_single_user_loans():
             return LoansHandler.get_loan(loan_id), 200
         else:
             return jsonify(Error="User not found."), 404
+
+    elif request.method == 'PUT':
+        data = request.json
+        loan_id = data['loan_id']
+        loan_amount = data['loan_amount']
+        interest = data['interest']
+        time_frame = data['time_frame']
+        platform = data['platform']
+
+        result = LoansHandler.edit_loan(
+            loan_id, loan_amount, interest, time_frame, platform)
+
+        if result:
+            return jsonify(Response="Success"), 200
+        else:
+            return jsonify(Error="User not found."), 404
+
+    else:
+        return jsonify(Error="Method not allowed."), 405
+
+@app.route('/api/create-offer', methods=['POST', 'PUT'])
+def create_offer():
+    if request.method == 'POST':
+        data = request.json
+        print(data)
+        loan_id = data['loan_id']
+        borrower_id = data['borrower_id']
+        loan_amount = data['loan_amount']
+        interest = data['interest']
+        time_frame = data['time_frame']
+        platform = data['platform']
+        
+        result = OffersHandler.create_offer(loan_id, borrower_id, loan_amount, time_frame, interest, None)
+
+        if result:
+            return jsonify(Status="Success."), 200
+        else: 
+            return jsonify(Error="Offer not created."), 404
 
     elif request.method == 'PUT':
         data = request.json

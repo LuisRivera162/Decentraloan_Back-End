@@ -53,7 +53,7 @@ class OffersDAO:
     # expiration date not used, not sure how to use. 
     def create_offer(self, loan_id, borrower_id, loan_amount, time_frame, interest, expiration_date):
         cursor = self.conn.cursor()
-        query = "insert into LOANS(LOAN_ID, BORROWER_ID, LOAN_AMOUNT, TIME_FRAME, INTEREST, CREATED_ON, EXPIRATION_DATE) \
+        query = "insert into OFFER(LOAN_ID, BORROWER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE) \
                 values (%s, %s, %s, %s, %s, now(), now()) returning offer_id;"
         cursor.execute(query, (loan_id, borrower_id, loan_amount, time_frame, interest))
         offer_id = cursor.fetchone()[0]
