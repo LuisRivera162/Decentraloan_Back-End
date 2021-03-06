@@ -298,6 +298,12 @@ def create_offer():
 
 @app.route('/api/validate-payment', methods=['POST'])
 def validate_payment():
+    # PARAMS: contract_id, paymentNumber, senderId, evidenceHash
+    # check the blockchain for evidence data of a payment
+    # the evidence hash is encrypted using the system's private key
+    # if evidence[paymentNumber] found in the blockchain, decrypt and verify against submited evidence hash
+    # if equal, return True to sender, set payment as valid a update contract accordingly
+    # if not equal return False, manage callback in frontend
     pass
 
 @app.route('/api/send-payment', methods=['POST'])
