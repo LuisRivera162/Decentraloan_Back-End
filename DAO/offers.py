@@ -29,6 +29,15 @@ class OffersDAO:
             result.append(row)
         return result
 
+    def get_all_user_pending_offers(self, borrower_id):
+        cursor = self.conn.cursor()
+        query = f'select * from offer where borrower_id = {borrower_id};'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
+
     def get_offer(self, offer_id):
         cursor = self.conn.cursor()
         query = f'select * from offer where offer_id = {offer_id};'

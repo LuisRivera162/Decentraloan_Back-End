@@ -294,6 +294,15 @@ def create_offer():
     else:
         return jsonify(Error="Method not allowed."), 405
 
+@app.route('/api/pending-offers', methods=['GET'])
+def get_all_user_pending_offers():
+
+    user_id = request.args.get('user_id')
+    if user_id:
+        return OffersHandler.get_all_user_pending_offers(user_id), 200
+    else:
+        return jsonify(Error="User not found."), 404
+
 @app.route('/api/validate-payment', methods=['POST'])
 def validate_payment():
     pass

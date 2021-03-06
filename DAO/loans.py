@@ -52,6 +52,25 @@ class LoansDAO:
         else:
             return -1
 
+    def get_loan_lender_id(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f'select lender from loans where loan_id = {loan_id};'
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            return result
+        else:
+            return -1
+
+    def get_loan_eth_address(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f'select eth_address from loans where loan_id = {loan_id};'
+        cursor.execute(query)
+        result = cursor.fetchone()[0]
+        if result:
+            return result
+        else:
+            return -1
 
     # PUT
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
