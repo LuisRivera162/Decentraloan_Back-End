@@ -12,8 +12,8 @@ class UsersHandler:
         result['last_name'] = row[3]
         result['email'] = row[5]
         result['age'] = row[8]
-        result['phone'] = row[10]
-        result['wallet'] = row[11]
+        result['phone'] = row[9]
+        result['wallet'] = row[10]
         result['lender'] = row[12]
         return result
 
