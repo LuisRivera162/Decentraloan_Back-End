@@ -31,7 +31,7 @@ CREATE TABLE LOANERS (
 CREATE TABLE LOANS (
 	loan_id serial PRIMARY KEY,
 	lender INTEGER,
-	borrower INTEGER
+	borrower INTEGER,
 	amount INTEGER,
 	months INTEGER,
 	interest FLOAT,
@@ -41,7 +41,7 @@ CREATE TABLE LOANS (
 	monthly_repayment FLOAT,
 	balance FLOAT,
 	est_total_interest FLOAT,
-	FOREIGN KEY (lender) REFERENCES USERS(user_id)
+	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
 
@@ -62,7 +62,7 @@ CREATE TABLE OFFER (
 	borrower_id INTEGER,
 	amount FLOAT,
 	months INTEGER,
-	interest FLOAT,
+	interest FLOAT,s
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
 	expiration_date DATE,

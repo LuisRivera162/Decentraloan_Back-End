@@ -70,7 +70,6 @@ class LoansHandler:
             result = self.build_loan_dict(row)
             username = user_dao.get_username(result['user_id'])
             result['username'] = username
-            print(jsonify(Loan=result))
             return jsonify(Loan=result)
 
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):

@@ -10,8 +10,8 @@ class OffersHandler:
         result['offer_id'] = row[0]
         result['loan_id'] = row[1]
         result['borrower_id'] = row[2]
-        result['loan_amount'] = row[3]
-        result['time_frame'] = row[4]
+        result['amount'] = row[3]
+        result['months'] = row[4]
         result['interest'] = row[5]
         result['accepted'] = row[7]
         result['expiration_date'] = row[8]
@@ -36,6 +36,20 @@ class OffersHandler:
         result_list = []
         for row in offers:
             result = self.build_offer_dict(row)
+            result_list.append(result)
+        return jsonify(Offers=result_list)
+
+    def get_all_user_pending_offers(self, borrower_id):
+        dao = OffersDAO()
+        loan_dao = LoansDAO()
+        user_dao = UsersDAO()
+        offers = dao.get_all_user_pending_offers(borrower_id)
+        result_list = []
+        for row in offers:
+            result = self.build_offer_dict(row)
+            lender_id = loan_dao.get_loan_lender_id(row[1])
+            result['username'] = user_dao.get_username(lender_id)
+            result['eth_address'] = loan_dao.get_loan_eth_address(row[1])
             result_list.append(result)
         return jsonify(Offers=result_list)
 
