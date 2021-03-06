@@ -40,6 +40,7 @@ contract DecentraLoan {
     StateType public State;
     Evidence[] public Evidences;
     uint256 public Balance;
+    uint256 public PaymentNumber;
 
     // contract constructor [factory]
     constructor(
@@ -59,6 +60,8 @@ contract DecentraLoan {
         _owner = owner; // set owner to custom address
 
         State = StateType.Available;
+
+        PaymentNumber = 0;
     }
 
     // make offer with different terms [lender|borrower]
@@ -148,8 +151,8 @@ contract DecentraLoan {
         emit OfferRejected(user);
     }
 
-    // emits payment with required evidence attached [lender|borrower]
-    function EmitPayment(
+    // sends payment with required evidence attached [lender|borrower]
+    function SendPayment(
         address user,
         address receiver,
         uint256 paymentNumber,
@@ -175,13 +178,19 @@ contract DecentraLoan {
 
         State = StateType.AwaitingValidation; // set state to awaiting validation
 
-        emit PaymentEmitted(
+        emit PaymentSent(
             user,
             receiver,
             amount,
             paymentNumber,
             Evidences[paymentNumber]
         );
+    }
+
+    function GetEvidence(uint256 paymentNumber) public view returns (Evidence memory) {
+        require(paymentNumber <= PaymentNumber);
+
+        return Evidences[paymentNumber];
     }
 
     function ValidateEvidence(address user, uint256 paymentNumber)
@@ -222,7 +231,7 @@ contract DecentraLoan {
         uint256 offerInterestRate,
         uint256 offerRepaymentPeriod
     );
-    event PaymentEmitted(
+    event PaymentSent(
         address sender,
         address receiver,
         uint256 amount,

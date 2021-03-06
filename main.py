@@ -70,6 +70,7 @@ OffersHandler = OffersHandler()
 # This account is internal and will pay for TX fees
 _backend_eth_account = Account.from_key(DEV_KETH_PRIVATE_KEY)
 
+
 @app.before_request
 def before_request():
     g.user = None
@@ -89,9 +90,10 @@ def profile():
 @app.route('/checkonline')
 def check_online():
     return jsonify(
-        web3_online= w3.isConnected(),
-        backend_eth_account= _backend_eth_account.address,
-        backend_eth_balance= float(w3.fromWei(w3.eth.get_balance(_backend_eth_account.address), 'ether'))
+        web3_online=w3.isConnected(),
+        backend_eth_account=_backend_eth_account.address,
+        backend_eth_balance=float(w3.fromWei(
+            w3.eth.get_balance(_backend_eth_account.address), 'ether'))
     )
 
 
@@ -112,6 +114,7 @@ def get_user():
 #  Log | Register Routes
 # -----------------------
 
+
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
 def register():
@@ -131,7 +134,7 @@ def register():
         try:
             uid = UsersHandler.insert_user(
                 username, first_name, last_name, email, password, conf_password, age, phone, lender)
-            
+
             return jsonify({"email": email, "localId": uid, "status": 'success', 'lender': lender}), 200
 
         except:
@@ -193,7 +196,8 @@ def create_loan():
         platform = data['platform']
         lender = data['lender']
 
-        loan_id = LoansHandler.insert_loan(loan_amount, lender, None, interest, time_frame)
+        loan_id = LoansHandler.insert_loan(
+            loan_amount, lender, None, interest, time_frame)
         if loan_id:
             return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
         else:
@@ -218,6 +222,7 @@ def get_all_user_loans():
     else:
         return jsonify(Error="User not found."), 404
 
+
 @app.route('/api/user-loan-count', methods=['GET'])
 def get_all_user_loan_count():
 
@@ -226,6 +231,7 @@ def get_all_user_loan_count():
         return LoansHandler.get_all_user_loan_count(user_id), 200
     else:
         return jsonify(Error="User not found."), 404
+
 
 @app.route('/api/user-loan', methods=['GET', 'PUT'])
 def get_single_user_loans():
@@ -256,6 +262,7 @@ def get_single_user_loans():
     else:
         return jsonify(Error="Method not allowed."), 405
 
+
 @app.route('/api/create-offer', methods=['POST', 'PUT'])
 def create_offer():
     if request.method == 'POST':
@@ -267,12 +274,13 @@ def create_offer():
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
-        
-        result = OffersHandler.create_offer(loan_id, borrower_id, loan_amount, time_frame, interest, None)
+
+        result = OffersHandler.create_offer(
+            loan_id, borrower_id, loan_amount, time_frame, interest, None)
 
         if result:
             return jsonify(Status="Success."), 200
-        else: 
+        else:
             return jsonify(Error="Offer not created."), 404
 
     elif request.method == 'PUT':
@@ -294,6 +302,7 @@ def create_offer():
     else:
         return jsonify(Error="Method not allowed."), 405
 
+
 @app.route('/api/pending-offers', methods=['GET'])
 def get_all_user_pending_offers():
 
@@ -303,19 +312,89 @@ def get_all_user_pending_offers():
     else:
         return jsonify(Error="User not found."), 404
 
-@app.route('/api/validate-payment', methods=['POST'])
+
+@app.route('/api/payment/send', methods=['POST'])
+def send_payment():
+    data = request.json
+
+    sender = w3.toChecksumAddress(data['sender'])
+    receiver = w3.toChecksumAddress(data['receiver'])
+    amount = data['amount']
+    paymentNumber = data['paymentNumber']
+    contractHash = data['contractHash']
+    evidenceHash = data['evidenceHash']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    # build transaction
+    unsigned_txn = decentraloan_contract.functions.\
+        SendPayment(
+            sender,
+            receiver,
+            paymentNumber,
+            amount,
+            evidenceHash
+        ).buildTransaction({
+            'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+        })
+
+    # sign transaction
+    signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+    # loan contract address after deployment
+    txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+    return jsonify(
+        status=0, 
+        receipt=txn_address
+    )
+
+
+@app.route('/api/payment/validate', methods=['POST'])
 def validate_payment():
-    # PARAMS: contract_id, paymentNumber, senderId, evidenceHash
+    # PARAMS: contractHash, paymentNumber, sender, evidenceHash
+    data = request.json
+
+    sender = w3.toChecksumAddress(data['sender'])
+    paymentNumber = data['paymentNumber']
+    
+    contractHash = data['contractHash']
+    evidenceHash = data['evidenceHash']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
     # check the blockchain for evidence data of a payment
     # the evidence hash is encrypted using the system's private key
+    evidence = decentraloan_contract.functions.GetEvidence(paymentNumber).call()
+
     # if evidence[paymentNumber] found in the blockchain, decrypt and verify against submited evidence hash
     # if equal, return True to sender, set payment as valid a update contract accordingly
-    # if not equal return False, manage callback in frontend
-    pass
+    if decrypted(evidence['transactionHash']) == evidenceHash:
+        # build transaction
+        unsigned_txn = decentraloan_contract.functions.\
+            ValidateEvidence(
+                sender,
+                paymentNumber
+            ).buildTransaction({
+                'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+            })
 
-@app.route('/api/send-payment', methods=['POST'])
-def send_payment():
-    pass
+        # sign transaction
+        signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+        # loan contract address after deployment
+        txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+        return jsonify(isvalid=True)
+    
+    return jsonify(isvalid=False)
+    
 
 
 if __name__ == '__main__':
