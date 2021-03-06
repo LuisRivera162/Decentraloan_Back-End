@@ -62,7 +62,7 @@ CREATE TABLE OFFER (
 	borrower_id INTEGER,
 	amount FLOAT,
 	months INTEGER,
-	interest FLOAT,s
+	interest FLOAT,
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
 	expiration_date DATE,
