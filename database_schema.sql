@@ -82,3 +82,16 @@ CREATE TABLE MESSAGE (
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (chat_id) REFERENCES CHATS(chat_id)
 );
+
+CREATE TABLE PAYMENTS (
+	payment_id serial PRIMARY KEY,
+	eth_address VARCHAR,
+	receiver_id INTEGER,
+	sender_id INTEGER,
+	amount INTEGER,
+	payment_date TIMESTAMP NOT null,
+	validated BOOLEAN default false, 
+	validation_hash VARCHAR (300),
+	FOREIGN KEY (receiver_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (sender_id) REFERENCES USERS(user_id)
+);

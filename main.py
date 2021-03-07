@@ -5,6 +5,7 @@
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
 from Handler.offers_h import OffersHandler
+from Handler.payments_h import PaymentsHandler
 
 # from wtforms import Form, BooleanField, TextField, PasswordField, validators
 
@@ -65,6 +66,7 @@ CORS(app)
 UsersHandler = UsersHandler()
 LoansHandler = LoansHandler()
 OffersHandler = OffersHandler()
+PaymentsHandler = PaymentsHandler()
 
 # Initialize Web3 Account object from private key
 # This account is internal and will pay for TX fees
@@ -395,7 +397,18 @@ def validate_payment():
     
     return jsonify(isvalid=False)
     
+@app.route('/api/user-payments', methods=['GET'])
+def get_all_user_payments():
 
+    user_id = request.args.get('user_id')
+    if user_id:
+        return PaymentsHandler.get_all_user_payments(user_id), 200
+    else:
+        return jsonify(Error="User not found."), 404
+
+@app.route('/payments', methods=['GET'])
+def get_all_payments():
+    return PaymentsHandler.get_all_payments()
 
 if __name__ == '__main__':
     app.run(debug=True)
