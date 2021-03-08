@@ -1,4 +1,5 @@
 from DAO.payments import PaymentsDAO
+from DAO.users import UsersDAO
 from flask import jsonify
 
 class PaymentsHandler:
@@ -26,9 +27,11 @@ class PaymentsHandler:
 
     def get_all_user_payments(self, borrower_id):
         dao = PaymentsDAO()
+        users_dao = UsersDAO()
         offers = dao.get_all_user_payments(borrower_id)
         result_list = []
         for row in offers:
             result = self.build_payment_dict(row)
+            result['receiver_username'] = users_dao.get_username(row[2])
             result_list.append(result)
         return jsonify(Payments=result_list)
