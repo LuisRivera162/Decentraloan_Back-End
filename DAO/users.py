@@ -71,7 +71,7 @@ class UsersDAO:
 
         query = "insert into Users(USERNAME, FIRSTNAME, LASTNAME, PASSWORD, EMAIL, created_on, user_age, phone, wallet, LENDER) values (%s, %s, %s, %s, %s," \
                 " now(), %s, %s, %s, %s) returning user_id;"
-        cursor.execute(query, (USERNAME, FIRSTNAME, LASTNAME, PASSKEY, EMAIL, AGE, PHONE, w3.Web3.toHex(_ETH_ACCOUNT.address), LENDER))
+        cursor.execute(query, (USERNAME, FIRSTNAME, LASTNAME, PASSKEY, EMAIL, AGE, PHONE, _ETH_ACCOUNT.address, LENDER))
         uid = cursor.fetchone()[0]
         self.conn.commit()
         return uid
