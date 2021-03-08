@@ -38,7 +38,7 @@ contract DecentraLoan {
 
     // loan contract specific variables
     StateType public State;
-    Evidence[] public Evidences;
+    mapping(uint256 => Evidence) public Evidences;
     uint256 public Balance;
     uint256 public PaymentNumber;
 
@@ -54,8 +54,6 @@ contract DecentraLoan {
         LoanAmount = amount;
         InterestRate = interest;
         RepaymentPeriod = repaymentPeriod;
-
-        Evidences = new Evidence[](repaymentPeriod + 1);
 
         _owner = owner; // set owner to custom address
 
@@ -275,7 +273,7 @@ contract DecentraLoan {
             uint256,
             uint256,
             uint256,
-            Evidence[] memory,
+            // Evidence[] memory,
             StateType
         )
     {
@@ -286,7 +284,7 @@ contract DecentraLoan {
             Balance,
             InterestRate,
             RepaymentPeriod,
-            Evidences,
+            // Evidences,
             State
         );
     }
