@@ -18,16 +18,16 @@ class OffersHandler:
         return result
 
     # POST
-    def create_offer(self, loan_id, borrower_id, loan_amount, time_frame, interest, expiration_date):
-        # NEED TO HANDLE IF USER EXISTS
+    def create_offer(self, loan_id, borrower_id, amount, months, interest, expiration_date):
+        # NEED TO HANDLE IF OFFER EXISTS
         dao = OffersDAO()
-        
+        offer = dao.get_borrower_loan_offer(borrower_id, loan_id)
+        if offer: 
+            return dao.edit_offer(offer, amount, months, interest, expiration_date), 200
         try:
-            offer_id = dao.create_offer(loan_id, borrower_id, loan_amount, time_frame, interest, expiration_date)
+            return dao.create_offer(loan_id, borrower_id, amount, months, interest, expiration_date), 200
         except:
             return jsonify("Error processing, query."), 400
-
-        return offer_id, 200
 
     # GET
     def get_all_offers(self):
@@ -70,6 +70,15 @@ class OffersHandler:
         else:
             result = self.build_offer_dict(row)
             return jsonify(Offer=result)
+
+    def exists_offer(self, borrower_id, loan_id):
+        dao = OffersDAO()
+        row = dao.get_borrower_loan_offer(borrower_id, loan_id)
+        if not row:
+            return False
+        else:
+            return True
+
 
     # PUT
     def edit_offer(self, offer_id, loan_amount, time_frame, interest, expiration_date):

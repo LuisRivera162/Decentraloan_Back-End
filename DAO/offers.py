@@ -32,7 +32,7 @@ class OffersDAO:
 
     def get_all_user_pending_offers(self, borrower_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where borrower_id = {borrower_id};'
+        query = f'select * from offer where borrower_id = {borrower_id} order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -51,13 +51,13 @@ class OffersDAO:
         
     def get_borrower_loan_offer(self, user_id, loan_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where loan_id = {loan_id} and borrower_id = {user_id};'
+        query = f'select offer_id from offer where loan_id = {loan_id} and borrower_id = {user_id};'
         cursor.execute(query)
         result = cursor.fetchone()
-        if result:
-            return result
+        if result: 
+            return result[0]
         else:
-            return -1
+            return None
 
     # POST
     # expiration date not used, not sure how to use. 
@@ -73,9 +73,9 @@ class OffersDAO:
     
     # PUT
     # expiration date not used, not sure how to use. 
-    def edit_offer(self, offer_id, loan_amount, time_frame, interest, expiration_date):
+    def edit_offer(self, offer_id, amount, months, interest, expiration_date):
         cursor = self.conn.cursor()
-        query = f"update offer set loan_amount = {loan_amount}, interest = {int(interest) / 100}, time_frame = '{time_frame}' where offer_id = {offer_id};"
+        query = f"update offer set amount = {amount}, interest = {int(interest) / 100}, months = {months} where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id

@@ -269,7 +269,6 @@ def get_single_user_loans():
 def create_offer():
     if request.method == 'POST':
         data = request.json
-        print(data)
         loan_id = data['loan_id']
         borrower_id = data['borrower_id']
         loan_amount = data['loan_amount']
@@ -281,23 +280,24 @@ def create_offer():
             loan_id, borrower_id, loan_amount, time_frame, interest, None)
 
         if result:
-            return jsonify(Status="Success."), 200
+            return jsonify(Status="CREATE OFFER Success."), 200
         else:
             return jsonify(Error="Offer not created."), 404
 
     elif request.method == 'PUT':
         data = request.json
-        loan_id = data['loan_id']
+        offer_id = data['offer_id']
         loan_amount = data['loan_amount']
         interest = data['interest']
         time_frame = data['time_frame']
+        # expiration_date = data['expiration_date']
         platform = data['platform']
 
-        result = LoansHandler.edit_loan(
-            loan_id, loan_amount, interest, time_frame, platform)
+        result = OffersHandler.edit_offer(
+            offer_id, loan_amount, interest, time_frame, None)
 
         if result:
-            return jsonify(Response="Success"), 200
+            return jsonify(Response="EDIT OFFER Success"), 200
         else:
             return jsonify(Error="User not found."), 404
 
