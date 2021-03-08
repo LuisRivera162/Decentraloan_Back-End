@@ -62,6 +62,8 @@ contract DecentraLoan {
         State = StateType.Available;
 
         PaymentNumber = 0;
+
+        emit Created(lender, amount, interest, repaymentPeriod);
     }
 
     // make offer with different terms [lender|borrower]
@@ -125,7 +127,7 @@ contract DecentraLoan {
         InterestRate = interest;
         RepaymentPeriod = repaymentPeriod;
 
-        emit ContractModified(Lender, amount, interest, repaymentPeriod);
+        emit Modified(Lender, amount, interest, repaymentPeriod);
     }
 
     // accept borrower offer [lender]
@@ -187,7 +189,11 @@ contract DecentraLoan {
         );
     }
 
-    function GetEvidence(uint256 paymentNumber) public view returns (Evidence memory) {
+    function GetEvidence(uint256 paymentNumber)
+        public
+        view
+        returns (Evidence memory)
+    {
         require(paymentNumber <= PaymentNumber);
 
         return Evidences[paymentNumber];
@@ -219,7 +225,13 @@ contract DecentraLoan {
      **/
     event Received(address sender, uint256 amount);
 
-    event ContractModified(
+    event Created(
+        address lender,
+        uint256 amount,
+        uint256 interest,
+        uint256 repaymentPeriod
+    );
+    event Modified(
         address sender,
         uint256 amount,
         uint256 interest,
@@ -246,7 +258,6 @@ contract DecentraLoan {
     event BorrowerConfirmed(address sender);
     event OfferAccepted(address sender);
     event OfferRejected(address sender);
-    
 
     // Receive any ethereum randomly sent to the contract from outside
     receive() external payable {

@@ -21,41 +21,32 @@ os.system('env.bat')
 DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
-decentraloanfactory_compiled_path = 'build/contracts/DecentraLoanFactory.json'
-decentraloanfactory_deployed_address = '0xA1ECB51222202b7CD05175703F440d8181c421aD'
+# decentraloanfactory_compiled_path = 'build/contracts/DecentraLoanFactory.json'
+# decentraloanfactory_deployed_address = '0xA1ECB51222202b7CD05175703F440d8181c421aD'
 
 decentraloantoken_compiled_path = 'build/contracts/DecentraLoanToken.json'
 decentraloantoken_deployed_address = '0xAE8c01a235f00251C0c579ae442ee460bdCAD030'
 
 decentraloan_compiled_path = 'build/contracts/DecentraLoan.json'
-decentraloan_contract_json = ''
 decentraloan_contract_abi = ''
+decentraloan_contract_bin = ''
 
 # DecentraLoan.json
 with open(decentraloan_compiled_path) as file:
     decentraloan_contract_json = json.load(file)  # load contract info as JSON
     # fetch contract's abi - necessary to call its functions
     decentraloan_contract_abi = decentraloan_contract_json['abi']
-
-# DecentraLoanFactory.json
-with open(decentraloanfactory_compiled_path) as file:
-    contract_json = json.load(file)  # load contract info as JSON
-    # fetch contract's abi - necessary to call its functions
-    contract_abi = contract_json['abi']
-
-# Fetch deployed contract reference
-decentraloanfactory_contract = w3.eth.contract(
-    address=decentraloanfactory_deployed_address, abi=contract_abi)
+    decentraloan_contract_bytecode = decentraloan_contract_json['bytecode']
 
 # DecentraLoanToken.json
-with open(decentraloantoken_compiled_path) as file:
-    contract_json = json.load(file)  # load contract info as JSON
-    # fetch contract's abi - necessary to call its functions
-    contract_abi = contract_json['abi']
+# with open(decentraloantoken_compiled_path) as file:
+#     contract_json = json.load(file)  # load contract info as JSON
+#     # fetch contract's abi - necessary to call its functions
+#     contract_abi = contract_json['abi']
 
-# Fetch deployed contract reference
-decentraloantoken_contract = w3.eth.contract(
-    address=decentraloantoken_deployed_address, abi=contract_abi)
+# # Fetch deployed contract reference
+# decentraloantoken_contract = w3.eth.contract(
+#     address=decentraloantoken_deployed_address, abi=contract_abi)
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -154,8 +145,9 @@ def login():
         password = data['password']
         uid = UsersHandler.validate_user_login(email, password)
         lender = UsersHandler.get_user(uid).get("lender")
+        wallet = UsersHandler.get_user(uid).get("wallet")
         if uid:
-            return jsonify({'email': email, 'localId': uid, 'status': 'success', 'lender': lender})
+            return jsonify(email=email, localId=uid, status='success', wallet=wallet, lender=lender)
         else:
             return jsonify(Error="Invalid credentials."), 404
 
@@ -197,13 +189,49 @@ def create_loan():
         time_frame = data['time_frame']
         platform = data['platform']
         lender = data['lender']
+        lender_eth = data['lender_eth']
 
-        loan_id = LoansHandler.insert_loan(
-            loan_amount, lender, None, interest, time_frame)
+        print(_backend_eth_account.address,
+                lender_eth,
+                loan_amount,
+                int(interest*100),
+                time_frame)
+
+        # build transaction
+        unsigned_txn = w3.eth.contract(
+            abi=decentraloan_contract_abi,
+            bytecode=decentraloan_contract_bytecode)\
+            .constructor(
+                _backend_eth_account.address,
+                lender_eth,
+                loan_amount,
+                int(interest*100),
+                time_frame
+            ).buildTransaction({
+                'gas': 4000000,
+                'gasPrice': w3.eth.gas_price,
+                'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+            })
+
+        # sign transaction
+        signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+        # Save loan to DB
+        loan_id = LoansHandler.insert_loan(loan_amount, lender, None, interest, time_frame)
+        
         if loan_id:
-            return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
+            # send eth transaction and wait for response
+            txn_receipt = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            contractReceipt = w3.eth.waitForTransactionReceipt(txn_receipt)
+
+            LoansHandler.edit_loan(loan_id[0], loan_amount, interest, time_frame, None, contractReceipt['contractAddress'])
+            
+            return jsonify(contractAddress=contractReceipt['contractAddress'])
+
+            # return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
         else:
             return jsonify(Error="Invalid credentials."), 404
+        
 
     else:
         return jsonify(Error="Method not allowed."), 405
@@ -324,7 +352,7 @@ def send_payment():
     amount = data['amount']
     paymentNumber = data['paymentNumber']
     contractHash = data['contractHash']
-    evidenceHash = data['evidenceHash']
+    evidenceHash = encrypt(data['evidenceHash'])
 
     # initialize loan contract object from address and abi
     decentraloan_contract = w3.eth.contract(
@@ -350,7 +378,7 @@ def send_payment():
     txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     return jsonify(
-        status=0, 
+        status=0,
         receipt=txn_address
     )
 
@@ -362,7 +390,7 @@ def validate_payment():
 
     sender = w3.toChecksumAddress(data['sender'])
     paymentNumber = data['paymentNumber']
-    
+
     contractHash = data['contractHash']
     evidenceHash = data['evidenceHash']
 
@@ -373,7 +401,8 @@ def validate_payment():
 
     # check the blockchain for evidence data of a payment
     # the evidence hash is encrypted using the system's private key
-    evidence = decentraloan_contract.functions.GetEvidence(paymentNumber).call()
+    evidence = decentraloan_contract.functions.GetEvidence(
+        paymentNumber).call()
 
     # if evidence[paymentNumber] found in the blockchain, decrypt and verify against submited evidence hash
     # if equal, return True to sender, set payment as valid a update contract accordingly
@@ -394,9 +423,10 @@ def validate_payment():
         txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
         return jsonify(isvalid=True)
-    
+
     return jsonify(isvalid=False)
-    
+
+
 @app.route('/api/user-payments', methods=['GET'])
 def get_all_user_payments():
 
@@ -406,9 +436,11 @@ def get_all_user_payments():
     else:
         return jsonify(Error="User not found."), 404
 
+
 @app.route('/payments', methods=['GET'])
 def get_all_payments():
     return PaymentsHandler.get_all_payments()
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -72,9 +72,9 @@ class LoansHandler:
             result['username'] = username
             return jsonify(Loan=result)
 
-    def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
+    def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform, eth_address):
         dao = LoansDAO()
-        loan_id = dao.edit_loan(loan_id, loan_amount, interest, time_frame, platform)
+        loan_id = dao.edit_loan(loan_id, loan_amount, interest, time_frame, platform, eth_address)
         if loan_id: 
             return loan_id, 200
         else: 
