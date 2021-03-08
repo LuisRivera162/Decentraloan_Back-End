@@ -191,12 +191,6 @@ def create_loan():
         lender = data['lender']
         lender_eth = data['lender_eth']
 
-        print(_backend_eth_account.address,
-                lender_eth,
-                loan_amount,
-                int(interest*100),
-                time_frame)
-
         # build transaction
         unsigned_txn = w3.eth.contract(
             abi=decentraloan_contract_abi,
