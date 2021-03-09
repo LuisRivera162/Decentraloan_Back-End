@@ -85,7 +85,7 @@ CREATE TABLE MESSAGE (
 
 CREATE TABLE PAYMENTS (
 	payment_id serial PRIMARY KEY,
-	eth_address VARCHAR,
+	loan_eth_address VARCHAR,
 	receiver_id INTEGER,
 	sender_id INTEGER,
 	amount INTEGER,

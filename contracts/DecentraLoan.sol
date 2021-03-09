@@ -64,13 +64,40 @@ contract DecentraLoan {
         emit Created(lender, amount, interest, repaymentPeriod);
     }
 
+    // Request Loan Directly (accept default terms and wait for lender confirmation) [borrower]
+    function RequestLoan( 
+        address user
+    ) public payable {
+        require(msg.sender == _owner);
+        require(State == StateType.Available);
+
+        Borrower = user;
+        State = StateType.Confirmed;
+
+        emit Requested(user);
+    }
+
+    // Accept Loan Directly (accept default terms and wait for lender confirmation)
+    function AcceptRequest(
+        address user
+    ) public payable {
+        require(msg.sender == _owner);
+        require(user == Lender);
+        require(State == StateType.Confirmed);
+
+        State = StateType.Active;
+        Balance = LoanAmount;
+
+        emit Accepted(user);
+    }
+
     // make offer with different terms [lender|borrower]
     function MakeOffer(
         address user,
         uint256 offerAmount,
         uint256 offerInterestRate,
         uint256 offerRepaymentPeriod
-    ) public {
+    ) public payable {
         require(msg.sender == _owner);
         require(user == Lender || user == Borrower);
         require(
@@ -99,7 +126,7 @@ contract DecentraLoan {
     }
 
     // confirm lender offer [borrower]
-    function ConfirmLenderOffer(address user) public {
+    function ConfirmLenderOffer(address user) public payable {
         require(msg.sender == _owner);
         require(user == Borrower);
         require(State == StateType.LenderAccepted);
@@ -116,7 +143,7 @@ contract DecentraLoan {
         uint256 amount,
         uint256 interest,
         uint256 repaymentPeriod
-    ) public {
+    ) public payable {
         require(msg.sender == _owner);
         require(user == Lender);
         require(State == StateType.Available);
@@ -129,7 +156,7 @@ contract DecentraLoan {
     }
 
     // accept borrower offer [lender]
-    function AcceptOffer(address user) public {
+    function AcceptOffer(address user) public payable {
         require(msg.sender == _owner);
         require(user == Lender);
         require(State == StateType.OfferPlaced);
@@ -140,7 +167,7 @@ contract DecentraLoan {
     }
 
     // reject offer [lender|borrower]
-    function RejectOffer(address user) public {
+    function RejectOffer(address user) public payable {
         require(msg.sender == _owner);
         require(user == Lender || user == Borrower);
         require(State == StateType.OfferPlaced);
@@ -158,7 +185,7 @@ contract DecentraLoan {
         uint256 paymentNumber,
         uint256 amount,
         string memory evidence
-    ) public {
+    ) public payable {
         require(msg.sender == _owner);
         require(
             (user == Lender && receiver == Borrower) ||
@@ -222,6 +249,9 @@ contract DecentraLoan {
      * EVENTS
      **/
     event Received(address sender, uint256 amount);
+
+    event Requested(address borrower);
+    event Accepted(address lender);
 
     event Created(
         address lender,

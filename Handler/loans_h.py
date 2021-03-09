@@ -68,8 +68,9 @@ class LoansHandler:
             return jsonify(Error="Loan Not Found"), 404
         else:
             result = self.build_loan_dict(row)
-            username = user_dao.get_username(result['user_id'])
-            result['username'] = username
+            result['username'] = user_dao.get_username(result['user_id'])
+            result['lender_eth'] = user_dao.get_user_wallet_address(result['user_id'])
+            result['borrower_eth'] = user_dao.get_user_wallet_address(result['user_id'])
             return jsonify(Loan=result)
 
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform, eth_address):

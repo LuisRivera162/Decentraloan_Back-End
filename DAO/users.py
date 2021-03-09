@@ -43,6 +43,16 @@ class UsersDAO:
         else:
             return -1
 
+    def get_user_wallet_address(self, uid):
+        cursor = self.conn.cursor()
+        query = "select wallet from Users where user_id = %s;"
+        cursor.execute(query, (uid,))
+        result = cursor.fetchone()[0]
+        if result:
+            return result
+        else:
+            return -1
+
     def get_user_by_email(self, email):
         cursor = self.conn.cursor()
         query = "select * from Users where email = %s;"

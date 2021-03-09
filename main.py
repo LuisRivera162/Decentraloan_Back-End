@@ -344,12 +344,14 @@ def get_all_user_pending_offers():
 def send_payment():
     data = request.json
 
+    print(request.json)
+
     sender = w3.toChecksumAddress(data['sender'])
-    receiver = w3.toChecksumAddress(data['receiver'])
+    receiver = data['receiver']
     amount = data['amount']
     paymentNumber = data['paymentNumber']
     contractHash = data['contractHash']
-    evidenceHash = encrypt(data['evidenceHash'])
+    evidenceHash = data['evidenceHash']
 
     # initialize loan contract object from address and abi
     decentraloan_contract = w3.eth.contract(
@@ -365,22 +367,132 @@ def send_payment():
             amount,
             evidenceHash
         ).buildTransaction({
+            'gas': 4000000,
+            'gasPrice': w3.eth.gas_price,
             'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
         })
 
     # sign transaction
     signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
 
-    # loan contract address after deployment
+    # return transaction hash after being sent and mined
     txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
 
     return jsonify(
         status=0,
-        receipt=txn_address
+        receipt=w3.toHex(txn_address)
+    )
+
+@app.route('/api/eth/make-offer', methods=['POST'])
+def make_offer():
+    data = request.json
+
+    contractHash = data['contractHash']
+
+    sender = data['sender']
+    amount = data['amount']
+    interest = data['interest']
+    repaymentPeriod = data['repaymentPeriod']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    # build transaction
+    unsigned_txn = decentraloan_contract.functions.\
+        MakeOffer(
+            sender,
+            amount,
+            interest,
+            repaymentPeriod
+        ).buildTransaction({
+            'gas': 4000000,
+            'gasPrice': w3.eth.gas_price,
+            'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+        })
+
+    # sign transaction
+    signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+    # return transaction hash after being sent and mined
+    txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+    return jsonify(
+        status=0,
+        receipt=w3.toHex(txn_address)
+    )
+
+@app.route('/api/eth/request-loan', methods=['POST'])
+def request_loan():
+    data = request.json
+
+    contractHash = data['contractHash']
+
+    sender = data['sender']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    # build transaction
+    unsigned_txn = decentraloan_contract.functions.\
+        RequestLoan(
+            sender
+        ).buildTransaction({
+            'gas': 4000000,
+            'gasPrice': w3.eth.gas_price,
+            'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+        })
+
+    # sign transaction
+    signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+    # return transaction hash after being sent and mined
+    txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+    return jsonify(
+        status=0,
+        receipt=w3.toHex(txn_address)
+    )
+
+@app.route('/api/eth/accept-loan-request', methods=['POST'])
+def accept_loan_request():
+    data = request.json
+
+    contractHash = data['contractHash']
+
+    sender = data['sender']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    # build transaction
+    unsigned_txn = decentraloan_contract.functions.\
+        AcceptRequest(
+            sender
+        ).buildTransaction({
+            'gas': 4000000,
+            'gasPrice': w3.eth.gas_price,
+            'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+        })
+
+    # sign transaction
+    signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+    # return transaction hash after being sent and mined
+    txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+
+    return jsonify(
+        status=0,
+        receipt=w3.toHex(txn_address)
     )
 
 
-@app.route('/api/payment/validate', methods=['POST'])
+@app.route('/api/eth/payment/validate', methods=['POST'])
 def validate_payment():
     # PARAMS: contractHash, paymentNumber, sender, evidenceHash
     data = request.json
@@ -403,7 +515,7 @@ def validate_payment():
 
     # if evidence[paymentNumber] found in the blockchain, decrypt and verify against submited evidence hash
     # if equal, return True to sender, set payment as valid a update contract accordingly
-    if decrypted(evidence['transactionHash']) == evidenceHash:
+    if evidence['transactionHash'] == evidenceHash:
         # build transaction
         unsigned_txn = decentraloan_contract.functions.\
             ValidateEvidence(
@@ -422,6 +534,23 @@ def validate_payment():
         return jsonify(isvalid=True)
 
     return jsonify(isvalid=False)
+
+@app.route('/api/eth/loan-info', methods=['GET'])
+def loan_info():
+    data = request.json
+
+    contractHash = data['contractHash']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    # get contract info
+    res = decentraloan_contract.functions.\
+        Info().call()
+
+    return jsonify(response=res)
 
 
 @app.route('/api/user-payments', methods=['GET'])
