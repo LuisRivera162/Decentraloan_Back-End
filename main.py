@@ -34,8 +34,11 @@ decentraloan_contract_bin = ''
 # DecentraLoan.json
 with open(decentraloan_compiled_path) as file:
     decentraloan_contract_json = json.load(file)  # load contract info as JSON
+    
     # fetch contract's abi - necessary to call its functions
     decentraloan_contract_abi = decentraloan_contract_json['abi']
+
+    # fetch contract's bytecode
     decentraloan_contract_bytecode = decentraloan_contract_json['bytecode']
 
 # DecentraLoanToken.json
