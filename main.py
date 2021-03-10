@@ -582,7 +582,16 @@ def loan_payments():
     payload = list()
 
     for p in paymentList:
-        payload.append(dict(p.args))
+        payment = dict(p.args)
+        payment['valid'] = False
+
+        evidence = decentraloan_contract.functions.GetEvidence(payment['paymentNumber']).call()
+        
+        if evidence[2] == 2:
+            payment['valid'] = True
+
+        
+        payload.append(payment)
 
     return jsonify(payload)
 
