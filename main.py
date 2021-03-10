@@ -296,13 +296,14 @@ def create_offer():
         data = request.json
         loan_id = data['loan_id']
         borrower_id = data['borrower_id']
+        lender_id = data['lender_id']
         loan_amount = data['loan_amount']
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
 
         result = OffersHandler.create_offer(
-            loan_id, borrower_id, loan_amount, time_frame, interest, None)
+            loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None)
 
         if result:
             return jsonify(Status="CREATE OFFER Success."), 200
@@ -336,6 +337,16 @@ def get_all_user_pending_offers():
     user_id = request.args.get('user_id')
     if user_id:
         return OffersHandler.get_all_user_pending_offers(user_id), 200
+    else:
+        return jsonify(Error="User not found."), 404
+
+
+@app.route('/api/total-offers', methods=['GET'])
+def get_offer_count():
+
+    user_id = request.args.get('user_id')
+    if user_id:
+        return OffersHandler.get_offer_count(user_id), 200
     else:
         return jsonify(Error="User not found."), 404
 

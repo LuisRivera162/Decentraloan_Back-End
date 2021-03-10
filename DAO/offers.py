@@ -30,14 +30,24 @@ class OffersDAO:
             result.append(row)
         return result
 
-    def get_all_user_pending_offers(self, borrower_id):
+    def get_all_user_pending_offers(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where borrower_id = {borrower_id} order by created_on DESC;'
+        query = f'select * from offer where borrower_id = {user_id} or lender_id = {user_id} order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
             result.append(row)
         return result
+
+    def get_offer_count(self, user_id):
+        cursor = self.conn.cursor()
+        query = f'select count (*) from offer where borrower_id = {user_id} or lender_id = {user_id};'
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        else: 
+            return 0
 
     def get_offer(self, offer_id):
         cursor = self.conn.cursor()
@@ -61,11 +71,11 @@ class OffersDAO:
 
     # POST
     # expiration date not used, not sure how to use. 
-    def create_offer(self, loan_id, borrower_id, loan_amount, time_frame, interest, expiration_date):
+    def create_offer(self, loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, expiration_date):
         cursor = self.conn.cursor()
-        query = "insert into OFFER(LOAN_ID, BORROWER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE) \
-                values (%s, %s, %s, %s, %s, now(), now()) returning offer_id;"
-        cursor.execute(query, (loan_id, borrower_id, loan_amount, time_frame, interest))
+        query = "insert into OFFER(LOAN_ID, BORROWER_ID, LENDER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE) \
+                values (%s, %s, %s, %s, %s, %s, now(), now()) returning offer_id;"
+        cursor.execute(query, (loan_id, borrower_id, lender_id, loan_amount, time_frame, interest))
         offer_id = cursor.fetchone()[0]
         self.conn.commit()
         return offer_id

@@ -10,22 +10,23 @@ class OffersHandler:
         result['offer_id'] = row[0]
         result['loan_id'] = row[1]
         result['borrower_id'] = row[2]
-        result['amount'] = row[3]
-        result['months'] = row[4]
-        result['interest'] = row[5]
-        result['accepted'] = row[7]
-        result['expiration_date'] = row[8]
+        result['lender_id'] = row[3]
+        result['amount'] = row[4]
+        result['months'] = row[5]
+        result['interest'] = row[6]
+        result['accepted'] = row[8]
+        result['expiration_date'] = row[9]
         return result
 
     # POST
-    def create_offer(self, loan_id, borrower_id, amount, months, interest, expiration_date):
+    def create_offer(self, loan_id, borrower_id, lender_id, amount, months, interest, expiration_date):
         # NEED TO HANDLE IF OFFER EXISTS
         dao = OffersDAO()
         offer = dao.get_borrower_loan_offer(borrower_id, loan_id)
         if offer: 
             return dao.edit_offer(offer, amount, months, interest, expiration_date), 200
         try:
-            return dao.create_offer(loan_id, borrower_id, amount, months, interest, expiration_date), 200
+            return dao.create_offer(loan_id, borrower_id, lender_id, amount, months, interest, expiration_date), 200
         except:
             return jsonify("Error processing, query."), 400
 
@@ -47,11 +48,18 @@ class OffersHandler:
         result_list = []
         for row in offers:
             result = self.build_offer_dict(row)
-            lender_id = loan_dao.get_loan_lender_id(row[1])
-            result['username'] = user_dao.get_username(lender_id)
+            result['username'] = user_dao.get_username(row[3])
             result['eth_address'] = loan_dao.get_loan_eth_address(row[1])
             result_list.append(result)
         return jsonify(Offers=result_list)
+
+    def get_offer_count(self, user_id):
+        dao = OffersDAO()
+        offers = dao.get_offer_count(user_id)
+        if offers: 
+            return jsonify(result=offers)
+        else:
+            return jsonify(result=0)
 
     def get_all_loan_offers(self, loan_id):
         dao = OffersDAO()
