@@ -192,16 +192,14 @@ contract DecentraLoan {
                 (user == Borrower && receiver == Lender)
         ); // require sender is borrower and receiver is lender or vice-versa
         require(State == StateType.Active); // require that it is an active contract
-        require(amount != 0); // require payment amount is not 0
+        require(amount > 0); // require payment amount is not 0
 
         Balance = Balance - amount;
 
         // send evidence for counterparty validation, initialy unverified
-        Evidences[paymentNumber] = Evidence(
-            user,
-            evidence,
-            EvidenceStatus.Unverified
-        );
+        Evidences[paymentNumber] =
+            Evidence(user, evidence, EvidenceStatus.Unverified);
+        
 
         State = StateType.AwaitingValidation; // set state to awaiting validation
 
@@ -210,7 +208,7 @@ contract DecentraLoan {
             receiver,
             amount,
             paymentNumber,
-            Evidences[paymentNumber]
+            Evidences[paymentNumber].transactionHash
         );
     }
 
@@ -242,7 +240,7 @@ contract DecentraLoan {
 
         State = StateType.Active; // set loan state back to active
 
-        emit PaymentValidated(user, paymentNumber, Evidences[paymentNumber]);
+        emit PaymentValidated(user, paymentNumber, Evidences[paymentNumber].transactionHash);
     }
 
     /**
@@ -276,12 +274,12 @@ contract DecentraLoan {
         address receiver,
         uint256 amount,
         uint256 paymentNumber,
-        Evidence evidence
+        string evidence
     );
     event PaymentValidated(
         address sender,
         uint256 paymentNumber,
-        Evidence evidence
+        string evidence
     );
     event BorrowerConfirmed(address sender);
     event OfferAccepted(address sender);

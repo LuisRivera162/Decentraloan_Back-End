@@ -355,8 +355,6 @@ def get_offer_count():
 def send_payment():
     data = request.json
 
-    print(request.json)
-
     sender = w3.toChecksumAddress(data['sender'])
     receiver = data['receiver']
     amount = data['amount']
@@ -508,9 +506,9 @@ def validate_payment():
     # PARAMS: contractHash, paymentNumber, sender, evidenceHash
     data = request.json
 
-    sender = w3.toChecksumAddress(data['sender'])
-    paymentNumber = data['paymentNumber']
+    sender = data['sender']
 
+    paymentNumber = data['paymentNumber']
     contractHash = data['contractHash']
     evidenceHash = data['evidenceHash']
 
@@ -524,15 +522,19 @@ def validate_payment():
     evidence = decentraloan_contract.functions.GetEvidence(
         paymentNumber).call()
 
+    print(evidence)
+
     # if evidence[paymentNumber] found in the blockchain, decrypt and verify against submited evidence hash
     # if equal, return True to sender, set payment as valid a update contract accordingly
-    if evidence['transactionHash'] == evidenceHash:
+    if evidence[1] == evidenceHash:
         # build transaction
         unsigned_txn = decentraloan_contract.functions.\
             ValidateEvidence(
                 sender,
                 paymentNumber
             ).buildTransaction({
+                'gas': 4000000,
+                'gasPrice': w3.eth.gas_price,
                 'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
             })
 
@@ -563,6 +565,26 @@ def loan_info():
 
     return jsonify(response=res)
 
+@app.route('/api/eth/loan-payments', methods=['GET'])
+def loan_payments():
+    data = request.json
+
+    contractHash = data['contractHash']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    paymenEventFilter = decentraloan_contract.events.PaymentSent.createFilter(fromBlock=0)
+    paymentList = paymenEventFilter.get_all_entries()
+
+    payload = list()
+
+    for p in paymentList:
+        payload.append(dict(p.args))
+
+    return jsonify(payload)
 
 @app.route('/api/user-payments', methods=['GET'])
 def get_all_user_payments():
