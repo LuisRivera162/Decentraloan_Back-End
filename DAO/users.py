@@ -95,6 +95,13 @@ class UsersDAO:
         self.conn.commit()
         return query
 
+    def edit_user_pass(self, uid, n_password):
+        cursor = self.conn.cursor()
+        query = f"update users set password = '{n_password}' where user_id = {uid};"
+        cursor.execute(query)
+        self.conn.commit()
+        return uid
+
     def check_emailsUsersname(self, email, username):
         cursor = self.conn.cursor()
         query = f"select * from users where email = '{email}' or username = '{username}';"

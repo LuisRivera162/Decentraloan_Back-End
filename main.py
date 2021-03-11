@@ -123,7 +123,6 @@ def check_emailsUsersname():
 @cross_origin()
 def register():
     if request.method == 'POST':
-        # need to handle case if user already exists.
         data = request.json
         username = data['username']
         first_name = data['first_name']
@@ -168,7 +167,6 @@ def login():
 
 @app.route('/api/edituser', methods=['PUT'])
 def edit_user():
-    # need to handle case if user already exists.
     data = request.json
     uid = data['user_id']
     username = data['username']
@@ -182,6 +180,20 @@ def edit_user():
         return jsonify({"email": email, "localId": uid, "status": 'success'}), 200
     except:
         return jsonify({'email': 'null', 'localId': 'null', 'status': 'failure'}), 404
+
+@app.route('/api/editpass', methods=['PUT'])
+def edit_user_pass():
+    data = request.json
+    uid = data['user_id']
+    email = data['email']
+    old_password = data['old_password']
+    new_password = data['new_password']
+    uid = UsersHandler.validate_user_login(email, old_password)
+    if uid:
+        UsersHandler.edit_user_pass(uid, new_password)
+        return jsonify(email=email, localId=uid, status='success')
+    else:
+        return jsonify(email=email, localId=uid, status='fail')
 
 
 @app.route('/api/logout')

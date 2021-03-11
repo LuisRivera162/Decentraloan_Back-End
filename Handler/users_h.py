@@ -36,7 +36,7 @@ class UsersHandler:
 
     def get_user_by_email(self, email):
         dao = UsersDAO()
-        row = dao.get_user_by_email(email)
+        row = dao.get_user_by_email_or_username(email)
         if not row:
             return jsonify(Error="User Not Found"), 404
         else:
@@ -61,7 +61,6 @@ class UsersHandler:
         return results
 
     def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone, lender):
-        # NEED TO HANDLE IF USER EXISTS
         dao = UsersDAO()
 
         if password == confirm_password:
@@ -72,6 +71,12 @@ class UsersHandler:
                 return jsonify("Email or Username already exists.")
         else:
             return jsonify("Passwords do not match."), 405
+        return uid
+
+    def edit_user_pass(self, uid, password):
+        dao = UsersDAO()
+        n_password = generate_password_hash(password)
+        dao.edit_user_pass(uid, n_password)
         return uid
 
     def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
@@ -85,7 +90,7 @@ class UsersHandler:
 
     def get_potential(self, potential):
         dao = UsersDAO()
-        uidE = dao.get_user_by_email(potential)
+        uidE = dao.get_user_by_email_or_username(potential)
 
         # Try to use Switch
         if uidE == -1:
