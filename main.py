@@ -106,6 +106,14 @@ def get_user():
     else:
         return jsonify(Error="User not found.")
 
+
+@app.route('/api/check-emails_user', methods=['GET'])
+def check_emailsUsersname():
+    email = request.args.get('email')
+    username = request.args.get('username')
+    return UsersHandler.check_emailsUsersname(email, username)
+
+
 # -----------------------
 #  Log | Register Routes
 # -----------------------

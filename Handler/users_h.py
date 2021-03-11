@@ -52,6 +52,14 @@ class UsersHandler:
             result_list.append(result)
         return jsonify(Users=result_list)
 
+    def check_emailsUsersname(self, email, username):
+        dao = UsersDAO()
+        result = dao.check_emailsUsersname(email, username)
+        results = {}
+        results['Result1'] = result[0] #duplicate email
+        results['Result2'] = result[1] #duplicate username
+        return results
+
     def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone, lender):
         # NEED TO HANDLE IF USER EXISTS
         dao = UsersDAO()
@@ -89,7 +97,7 @@ class UsersHandler:
         dao = UsersDAO()
         passw = dao.get_user_password_hash(email)
         if passw and check_password_hash(passw, password):
-            uid = dao.get_user_by_email(email)
+            uid = dao.get_user_by_email_or_username(email)
             return uid
         else:
             return None
