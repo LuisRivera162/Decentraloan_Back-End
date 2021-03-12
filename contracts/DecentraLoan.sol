@@ -10,7 +10,8 @@ contract DecentraLoan {
         Active,
         AwaitingValidation,
         Delinquent,
-        Terminated
+        Terminated,
+        Withdrawn
     }
 
     enum EvidenceStatus {Unverified, Invalid, Valid}
@@ -180,32 +181,25 @@ contract DecentraLoan {
 
     // sends payment with required evidence attached [lender|borrower]
     function SendPayment(
-        address user,
-        address receiver,
+        address sender,
         uint256 paymentNumber,
         uint256 amount,
         string memory evidence
     ) public payable {
         require(msg.sender == _owner);
-        require(
-            (user == Lender && receiver == Borrower) ||
-                (user == Borrower && receiver == Lender)
-        ); // require sender is borrower and receiver is lender or vice-versa
+        require(sender == Lender || sender == Borrower || sender == _owner); // require sender is lender or borrower
         require(State == StateType.Active); // require that it is an active contract
         require(amount > 0); // require payment amount is not 0
 
         Balance = Balance - amount;
 
         // send evidence for counterparty validation, initialy unverified
-        Evidences[paymentNumber] =
-            Evidence(user, evidence, EvidenceStatus.Unverified);
+        Evidences[paymentNumber] = Evidence(sender, evidence, EvidenceStatus.Unverified);
         
-
         State = StateType.AwaitingValidation; // set state to awaiting validation
 
         emit PaymentSent(
-            user,
-            receiver,
+            sender,
             amount,
             paymentNumber,
             Evidences[paymentNumber].transactionHash
@@ -237,6 +231,8 @@ contract DecentraLoan {
         // encryption is only lifted by having the decryption key that is server unique
         // after some checks, validate...
         Evidences[paymentNumber].evidenceStatus = EvidenceStatus.Valid;
+
+        PaymentNumber++;
 
         State = StateType.Active; // set loan state back to active
 
@@ -271,7 +267,6 @@ contract DecentraLoan {
     );
     event PaymentSent(
         address sender,
-        address receiver,
         uint256 amount,
         uint256 paymentNumber,
         string evidence

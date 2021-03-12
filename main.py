@@ -2,6 +2,7 @@
 # Needs DEV_KETH_PRIVATE_KEY, WEB3_INFURA_PROJECT_ID and WEB3_INFURA_API_SECRET set as env variables
 # project WILL NOT be able to connect the the blockchain if not set!
 # run env.bat to populate this data
+from web3 import eth
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
 from Handler.offers_h import OffersHandler
@@ -34,7 +35,7 @@ decentraloan_contract_bin = ''
 # DecentraLoan.json
 with open(decentraloan_compiled_path) as file:
     decentraloan_contract_json = json.load(file)  # load contract info as JSON
-    
+
     # fetch contract's abi - necessary to call its functions
     decentraloan_contract_abi = decentraloan_contract_json['abi']
 
@@ -181,6 +182,7 @@ def edit_user():
     except:
         return jsonify({'email': 'null', 'localId': 'null', 'status': 'failure'}), 404
 
+
 @app.route('/api/editpass', methods=['PUT'])
 def edit_user_pass():
     data = request.json
@@ -224,31 +226,33 @@ def create_loan():
                 loan_amount,
                 int(interest*100),
                 time_frame
-            ).buildTransaction({
-                'gas': 4000000,
-                'gasPrice': w3.eth.gas_price,
-                'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
-            })
+        ).buildTransaction({
+            'gas': 4000000,
+            'gasPrice': w3.eth.gas_price,
+            'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+        })
 
         # sign transaction
         signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
 
         # Save loan to DB
-        loan_id = LoansHandler.insert_loan(loan_amount, lender, None, interest, time_frame)
-        
+        loan_id = LoansHandler.insert_loan(
+            loan_amount, lender, None, interest, time_frame)
+
         if loan_id:
             # send eth transaction and wait for response
-            txn_receipt = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            txn_receipt = w3.eth.send_raw_transaction(
+                signed_txn.rawTransaction)
             contractReceipt = w3.eth.waitForTransactionReceipt(txn_receipt)
 
-            LoansHandler.edit_loan(loan_id[0], loan_amount, interest, time_frame, None, contractReceipt['contractAddress'])
-            
+            LoansHandler.edit_loan(
+                loan_id[0], loan_amount, interest, time_frame, None, contractReceipt['contractAddress'])
+
             return jsonify(contractAddress=contractReceipt['contractAddress'])
 
             # return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
         else:
             return jsonify(Error="Invalid credentials."), 404
-        
 
     else:
         return jsonify(Error="Method not allowed."), 405
@@ -265,7 +269,31 @@ def get_all_user_loans():
 
     user_id = request.args.get('user_id')
     if user_id:
-        return LoansHandler.get_all_user_loans(user_id), 200
+        userLoans = LoansHandler.get_all_user_loans(user_id)
+
+        newResponse = list()
+
+        for loan in userLoans:
+            payload = {}
+
+            # only info needed from sql db
+            payload['eth_address'] = loan['eth_address']
+            payload['created_on'] = loan['created_on']
+
+            # this is all loaded from the ethereum blockchain
+            info_from_blockchain = loan_info(loan['eth_address'])
+
+            payload['lender'] = info_from_blockchain[0]
+            payload['borrower'] = info_from_blockchain[1]
+            payload['amount'] = info_from_blockchain[2]
+            payload['paymentNumber'] = info_from_blockchain[3]
+            payload['interest'] = info_from_blockchain[4]/10000
+            payload['months'] = info_from_blockchain[5]
+            payload['state'] = info_from_blockchain[6]
+
+            newResponse.append(payload)
+
+        return jsonify(newResponse), 200
     else:
         return jsonify(Error="User not found."), 404
 
@@ -375,8 +403,7 @@ def get_offer_count():
 def send_payment():
     data = request.json
 
-    sender = w3.toChecksumAddress(data['sender'])
-    receiver = data['receiver']
+    sender_eth = data['sender_eth']
     amount = data['amount']
     paymentNumber = data['paymentNumber']
     contractHash = data['contractHash']
@@ -390,8 +417,7 @@ def send_payment():
     # build transaction
     unsigned_txn = decentraloan_contract.functions.\
         SendPayment(
-            sender,
-            receiver,
+            sender_eth,
             paymentNumber,
             amount,
             evidenceHash
@@ -411,6 +437,7 @@ def send_payment():
         status=0,
         receipt=w3.toHex(txn_address)
     )
+
 
 @app.route('/api/eth/make-offer', methods=['POST'])
 def make_offer():
@@ -452,12 +479,12 @@ def make_offer():
         receipt=w3.toHex(txn_address)
     )
 
+
 @app.route('/api/eth/request-loan', methods=['POST'])
 def request_loan():
     data = request.json
 
     contractHash = data['contractHash']
-
     sender = data['sender']
 
     # initialize loan contract object from address and abi
@@ -485,6 +512,7 @@ def request_loan():
         status=0,
         receipt=w3.toHex(txn_address)
     )
+
 
 @app.route('/api/eth/accept-loan-request', methods=['POST'])
 def accept_loan_request():
@@ -568,11 +596,12 @@ def validate_payment():
 
     return jsonify(isvalid=False)
 
-@app.route('/api/eth/loan-info', methods=['GET'])
-def loan_info():
-    data = request.json
 
-    contractHash = data['contractHash']
+# @app.route('/api/eth/loan-info', methods=['GET'])
+def loan_info(contractHash):
+    # data = request.json
+
+    # contractHash = data['contractHash']
 
     # initialize loan contract object from address and abi
     decentraloan_contract = w3.eth.contract(
@@ -583,7 +612,9 @@ def loan_info():
     res = decentraloan_contract.functions.\
         Info().call()
 
-    return jsonify(response=res)
+    # return jsonify(response=res)
+    return res
+
 
 @app.route('/api/eth/loan-payments', methods=['GET'])
 def loan_payments():
@@ -596,7 +627,8 @@ def loan_payments():
         address=contractHash,
         abi=decentraloan_contract_abi)
 
-    paymenEventFilter = decentraloan_contract.events.PaymentSent.createFilter(fromBlock=0)
+    paymenEventFilter = decentraloan_contract.events.PaymentSent.createFilter(
+        fromBlock=0)
     paymentList = paymenEventFilter.get_all_entries()
 
     payload = list()
@@ -605,15 +637,46 @@ def loan_payments():
         payment = dict(p.args)
         payment['valid'] = False
 
-        evidence = decentraloan_contract.functions.GetEvidence(payment['paymentNumber']).call()
-        
+        evidence = decentraloan_contract.functions.GetEvidence(
+            payment['paymentNumber']).call()
+
         if evidence[2] == 2:
             payment['valid'] = True
 
-        
         payload.append(payment)
 
     return jsonify(payload)
+
+
+@app.route('/api/eth/loan-activity', methods=['GET'])
+def loan_activity():
+    data = request.json
+
+    contractHash = data['contractHash']
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    events = []
+
+    for event in decentraloan_contract.events:
+        filter = event.createFilter(fromBlock=0)
+
+        eventEntries = filter.get_all_entries()
+
+        for e in eventEntries:
+            events.append(
+                dict(e.args) |
+                {
+                    'timestamp': w3.eth.get_block(e.blockNumber).timestamp, 
+                    'event': e.event
+                }
+            )
+
+    return jsonify(events)
+
 
 @app.route('/api/user-payments', methods=['GET'])
 def get_all_user_payments():
