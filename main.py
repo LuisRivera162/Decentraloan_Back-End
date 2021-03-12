@@ -286,7 +286,7 @@ def get_all_user_loans():
             payload['lender'] = info_from_blockchain[0]
             payload['borrower'] = info_from_blockchain[1]
             payload['amount'] = info_from_blockchain[2]
-            payload['paymentNumber'] = info_from_blockchain[3]
+            payload['balance'] = info_from_blockchain[3]
             payload['interest'] = info_from_blockchain[4]/10000
             payload['months'] = info_from_blockchain[5]
             payload['state'] = info_from_blockchain[6]
@@ -674,6 +674,8 @@ def loan_activity():
                     'event': e.event
                 }
             )
+    
+    events.sort(key=lambda x: x.get('timestamp'), reverse=True)
 
     return jsonify(events)
 
