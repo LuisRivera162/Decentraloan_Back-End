@@ -16,6 +16,10 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### Before Running main.py
+
+It is important to define WEB3 INFURA constant variables in order to communicate with the block chain. Do this by running the ```env.bat``` file. 
+
 ### Project structure
 
 The back-end project repository looks to follow the Model-View-Controller design model in terms of interactions between the database and the REST API. 
