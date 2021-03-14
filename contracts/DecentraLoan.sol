@@ -33,6 +33,7 @@ contract DecentraLoan {
     uint256 public LoanAmount;
     uint256 public InterestRate;
     uint256 public RepaymentPeriod;
+    uint256 public Platform;
 
     // loan contract specific variables
     StateType public State;
@@ -40,18 +41,20 @@ contract DecentraLoan {
     uint256 public Balance;
     uint256 public PaymentNumber;
 
-    // contract constructor [factory]
+    // contract constructor
     constructor(
         address owner,
         address lender,
         uint256 amount,
         uint256 interest,
-        uint256 repaymentPeriod
+        uint256 repaymentPeriod,
+        uint256 platform
     ) {
         Lender = lender;
         LoanAmount = amount;
         InterestRate = interest;
         RepaymentPeriod = repaymentPeriod;
+        Platform = platform;
 
         _owner = owner; // set owner to custom address
 

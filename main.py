@@ -212,7 +212,7 @@ def create_loan():
         loan_amount = data['loan_amount']
         interest = data['interest']
         time_frame = data['time_frame']
-        platform = data['platform']
+        platform = int(data['platform'])
         lender = data['lender']
         lender_eth = data['lender_eth']
 
@@ -225,7 +225,8 @@ def create_loan():
                 lender_eth,
                 loan_amount,
                 int(interest*100),
-                time_frame
+                time_frame,
+                platform
         ).buildTransaction({
             'gas': 4000000,
             'gasPrice': w3.eth.gas_price,
@@ -235,24 +236,25 @@ def create_loan():
         # sign transaction
         signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
 
-        # Save loan to DB
-        loan_id = LoansHandler.insert_loan(
-            loan_amount, lender, None, interest, time_frame)
+        # send eth transaction and wait for response
+        txn_receipt = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        contractReceipt = w3.eth.waitForTransactionReceipt(txn_receipt)
 
-        if loan_id:
-            # send eth transaction and wait for response
-            txn_receipt = w3.eth.send_raw_transaction(
-                signed_txn.rawTransaction)
-            contractReceipt = w3.eth.waitForTransactionReceipt(txn_receipt)
+        if contractReceipt['contractAddress']:
+            # Save loan to DB
+            loan_id = LoansHandler.insert_loan(
+                loan_amount, lender, None, interest, time_frame)
 
-            LoansHandler.edit_loan(
-                loan_id[0], loan_amount, interest, time_frame, None, contractReceipt['contractAddress'])
-
-            return jsonify(contractAddress=contractReceipt['contractAddress'])
-
-            # return jsonify({'email': "email", 'localId': "uid", 'status': 'success'})
+            if loan_id:
+                LoansHandler.edit_loan(
+                    loan_id[0], loan_amount, interest, time_frame, platform, contractReceipt['contractAddress'])
+                
+                return jsonify(contractAddress=contractReceipt['contractAddress'])
+            else:
+                return jsonify(Error="Invalid credentials."), 404
+            
         else:
-            return jsonify(Error="Invalid credentials."), 404
+            return jsonify(Error="Error inserting to the blockchain"), 404
 
     else:
         return jsonify(Error="Method not allowed."), 405

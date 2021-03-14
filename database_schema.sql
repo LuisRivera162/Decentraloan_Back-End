@@ -28,6 +28,13 @@ CREATE TABLE LOANERS (
 	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
+CREATE TABLE ACTIVITY (
+	activity_id serial PRIMARY KEY,
+	user INTEGER,
+	activity_type INTEGER,
+	FOREIGN KEY (user) REFERENCES USERS(user_id),
+)
+
 CREATE TABLE LOANS (
 	loan_id serial PRIMARY KEY,
 	lender INTEGER,
