@@ -26,7 +26,7 @@ CAPSTONE_APP/                 # Root directory.
 |- Handler/                   # Handler classes in order to handle database output from the DAO class.
 |- DAO/                       # Object creations in order to interact with the database.
 |- images/                    # Images folder.
-|- main.py                    # Main file, responsible for hosting the server, routing and handling HTTP requests.
+|- main.py                    # Responsible for hosting the server, routing and handling HTTP requests.
 |- config/                    # Configuration file, used to setup the database connection credentials.
 |- database_schema.sql        # Defines the table schema querries being used in the database.
 |- config/                    # Configuration file, used to setup the database connection credentials.
