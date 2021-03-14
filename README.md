@@ -62,5 +62,7 @@ Inside main.py is where the server routes are created and manage HTTP requests t
 
 ![ROUTE EXAMPLE](images/ROUTE_EXAMPLE.PNG)
 
+## Back-End Architecture: 
 
+![BACK-END ARCHITECTURE](images/BACK_END_ARCHITECTURE.PNG)
 
