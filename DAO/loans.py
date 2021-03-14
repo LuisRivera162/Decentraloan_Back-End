@@ -11,22 +11,9 @@ class LoansDAO:
                                                             pg_config['port'])
         self.conn = psycopg2._connect(connection_url)
 
-    # POST 
-    def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST):
-        cursor = self.conn.cursor()
-        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, created_on) values (%s, %s, %s, %s, %s, now()) returning loan_id;"
-        cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST))
-        loan_id = cursor.fetchone()[0]
-        self.conn.commit()
-        return loan_id
-
-
     # GET
     def get_all_loans(self, user_id):
         cursor = self.conn.cursor()
-        # if user_id: 
-        #     query = f'select * from loans where user_id != {user_id};'
-        # else:
         query = f'select * from loans;'
         cursor.execute(query)
         result = []
@@ -78,5 +65,14 @@ class LoansDAO:
         cursor = self.conn.cursor()
         query = f"update loans set amount = {loan_amount}, interest = {int(interest) / 100}, months = {time_frame}, eth_address = '{eth_address}' where loan_id = {loan_id};"
         cursor.execute(query)
+        self.conn.commit()
+        return loan_id
+
+    # POST 
+    def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST):
+        cursor = self.conn.cursor()
+        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, created_on) values (%s, %s, %s, %s, %s, now()) returning loan_id;"
+        cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST))
+        loan_id = cursor.fetchone()[0]
         self.conn.commit()
         return loan_id

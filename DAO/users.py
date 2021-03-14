@@ -1,7 +1,7 @@
-from config.dbconfig import pg_config
-import psycopg2
 from eth_account import Account
 import web3 as w3
+from config.dbconfig import pg_config
+import psycopg2
 
 class UsersDAO:
 
@@ -13,6 +13,7 @@ class UsersDAO:
                                                                     pg_config['port'])
         self.conn = psycopg2._connect(connection_url)
 
+    # GET 
     def get_all_users(self):
         cursor = self.conn.cursor()
         query = 'select * from users;'
@@ -22,7 +23,6 @@ class UsersDAO:
             result.append(row)
         return result
 
-    # Gets User Data
     def get_user(self, uid):
         cursor = self.conn.cursor()
         query = "select * from Users where user_id = %s;"
@@ -86,6 +86,7 @@ class UsersDAO:
         self.conn.commit()
         return uid
 
+    # PUT
     def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
         cursor = self.conn.cursor()
 
@@ -101,25 +102,6 @@ class UsersDAO:
         cursor.execute(query)
         self.conn.commit()
         return uid
-
-    def check_emailsUsersname(self, email, username):
-        cursor = self.conn.cursor()
-        query = f"select * from users where email = '{email}' or username = '{username}';"
-        cursor.execute(query)
-        result = []
-        for row in cursor:
-            result.append(row)
-        final_resut = []
-        if len(result) == 0:  # no diuplicate
-            final_resut.append(False)
-            final_resut.append(False)
-        elif len(result) == 1:  # duplicate username or password or both in one user
-            final_resut.append((result[0])[5] == email)  # 5 is the index for the email on the row
-            final_resut.append((result[0])[1] == username)
-        else:  # duplicate user and email on diferent users
-            final_resut.append(True)
-            final_resut.append(True)
-        return final_resut
 
     # ----------------------
     #   Login Validations
@@ -155,3 +137,22 @@ class UsersDAO:
         cursor = self.conn.cursor()
         query = "UPDATE USERS SET logged_in = %s WHERE user_id = %s;"
         cursor.execute(query, ('FALSE', user_id))
+        
+    def check_emailsUsersname(self, email, username):
+        cursor = self.conn.cursor()
+        query = f"select * from users where email = '{email}' or username = '{username}';"
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        final_resut = []
+        if len(result) == 0:  # no diuplicate
+            final_resut.append(False)
+            final_resut.append(False)
+        elif len(result) == 1:  # duplicate username or password or both in one user
+            final_resut.append((result[0])[5] == email)  # 5 is the index for the email on the row
+            final_resut.append((result[0])[1] == username)
+        else:  # duplicate user and email on diferent users
+            final_resut.append(True)
+            final_resut.append(True)
+        return final_resut
