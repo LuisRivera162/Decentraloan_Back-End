@@ -4,9 +4,7 @@ pragma solidity ^0.8.0;
 contract DecentraLoan {
     enum StateType {
         Available,
-        OfferPlaced,
-        LenderAccepted,
-        Confirmed,
+        DealReached,
         Active,
         AwaitingValidation,
         Delinquent,
@@ -14,7 +12,11 @@ contract DecentraLoan {
         Withdrawn
     }
 
-    enum EvidenceStatus {Unverified, Invalid, Valid}
+    enum EvidenceStatus {
+        Unverified, 
+        Invalid, 
+        Valid
+    }
 
     struct Evidence {
         address sender;
@@ -27,15 +29,10 @@ contract DecentraLoan {
 
     // lender specific variables
     address public Lender;
+    address public Borrower;
     uint256 public LoanAmount;
     uint256 public InterestRate;
     uint256 public RepaymentPeriod;
-
-    // borrower specific variables
-    address public Borrower;
-    uint256 public OfferAmout;
-    uint256 public OfferInterestRate;
-    uint256 public OfferRepaymentPeriod;
 
     // loan contract specific variables
     StateType public State;
@@ -65,79 +62,6 @@ contract DecentraLoan {
         emit Created(lender, amount, interest, repaymentPeriod);
     }
 
-    // Request Loan Directly (accept default terms and wait for lender confirmation) [borrower]
-    function RequestLoan( 
-        address user
-    ) public payable {
-        require(msg.sender == _owner);
-        require(State == StateType.Available);
-
-        Borrower = user;
-        State = StateType.Confirmed;
-
-        emit Requested(user);
-    }
-
-    // Accept Loan Directly (accept default terms and wait for lender confirmation)
-    function AcceptRequest(
-        address user
-    ) public payable {
-        require(msg.sender == _owner);
-        require(user == Lender);
-        require(State == StateType.Confirmed);
-
-        State = StateType.Active;
-        Balance = LoanAmount;
-
-        emit Accepted(user);
-    }
-
-    // make offer with different terms [lender|borrower]
-    function MakeOffer(
-        address user,
-        uint256 offerAmount,
-        uint256 offerInterestRate,
-        uint256 offerRepaymentPeriod
-    ) public payable {
-        require(msg.sender == _owner);
-        require(user == Lender || user == Borrower);
-        require(
-            offerAmount != 0 &&
-                offerRepaymentPeriod != 0 &&
-                offerInterestRate != 0
-        );
-        require(State == StateType.Available || State == StateType.OfferPlaced);
-
-        if (user != Lender) {
-            Borrower = user;
-        }
-
-        OfferAmout = offerAmount;
-        OfferInterestRate = offerInterestRate;
-        OfferRepaymentPeriod = offerRepaymentPeriod;
-
-        State = StateType.OfferPlaced;
-
-        emit OfferPlaced(
-            user,
-            offerAmount,
-            offerInterestRate,
-            offerRepaymentPeriod
-        );
-    }
-
-    // confirm lender offer [borrower]
-    function ConfirmLenderOffer(address user) public payable {
-        require(msg.sender == _owner);
-        require(user == Borrower);
-        require(State == StateType.LenderAccepted);
-
-        // set state to confirmed (not active yet)
-        State = StateType.Confirmed;
-
-        emit BorrowerConfirmed(Borrower);
-    }
-
     // modify available (non-active) contract [lender]
     function Modify(
         address user,
@@ -156,27 +80,47 @@ contract DecentraLoan {
         emit Modified(Lender, amount, interest, repaymentPeriod);
     }
 
-    // accept borrower offer [lender]
-    function AcceptOffer(address user) public payable {
+    // leander and borrower reached a deal, 
+    // do virtual handshake and set loan state to Active
+    function Deal(
+        address user,
+        address _borrower,
+        uint256 _amount,
+        uint256 _interest,
+        uint256 _repaymentPeriod
+    ) public payable {
         require(msg.sender == _owner);
         require(user == Lender);
-        require(State == StateType.OfferPlaced);
+        require(State == StateType.Available);
 
-        State = StateType.LenderAccepted;
+        // set borrower
+        Borrower = _borrower;
+        
+        // change loan parameters if reached deal changed any
+        LoanAmount = _amount;
+        InterestRate = _interest;
+        RepaymentPeriod = _repaymentPeriod;
 
-        emit OfferAccepted(user);
+        // set loan status to Active
+        State = StateType.Active;
+
+        emit DealReached(
+            Lender,
+            Borrower,
+            LoanAmount,
+            InterestRate,
+            RepaymentPeriod
+        );
     }
 
-    // reject offer [lender|borrower]
-    function RejectOffer(address user) public payable {
+    function Withdraw(address _lender, string memory _reason) public payable {
         require(msg.sender == _owner);
-        require(user == Lender || user == Borrower);
-        require(State == StateType.OfferPlaced);
+        require(State == StateType.Available);
+        require(_lender == Lender);
 
-        Borrower = 0x0000000000000000000000000000000000000000;
-        State = StateType.Available;
+        State = StateType.Withdrawn;
 
-        emit OfferRejected(user);
+        emit Withdrawn(_lender, _reason);
     }
 
     // sends payment with required evidence attached [lender|borrower]
@@ -194,8 +138,12 @@ contract DecentraLoan {
         Balance = Balance - amount;
 
         // send evidence for counterparty validation, initialy unverified
-        Evidences[paymentNumber] = Evidence(sender, evidence, EvidenceStatus.Unverified);
-        
+        Evidences[paymentNumber] = Evidence(
+            sender,
+            evidence,
+            EvidenceStatus.Unverified
+        );
+
         State = StateType.AwaitingValidation; // set state to awaiting validation
 
         emit PaymentSent(
@@ -236,16 +184,17 @@ contract DecentraLoan {
 
         State = StateType.Active; // set loan state back to active
 
-        emit PaymentValidated(user, paymentNumber, Evidences[paymentNumber].transactionHash);
+        emit PaymentValidated(
+            user,
+            paymentNumber,
+            Evidences[paymentNumber].transactionHash
+        );
     }
 
     /**
      * EVENTS
      **/
     event Received(address sender, uint256 amount);
-
-    event Requested(address borrower);
-    event Accepted(address lender);
 
     event Created(
         address lender,
@@ -254,16 +203,21 @@ contract DecentraLoan {
         uint256 repaymentPeriod
     );
     event Modified(
-        address sender,
+        address lender,
         uint256 amount,
         uint256 interest,
         uint256 repaymentPeriod
     );
-    event OfferPlaced(
-        address sender,
-        uint256 offerAmount,
-        uint256 offerInterestRate,
-        uint256 offerRepaymentPeriod
+    event Withdrawn(
+        address lender,
+        string reason 
+    );
+    event DealReached(
+        address lender,
+        address borrower,
+        uint256 amount,
+        uint256 interest,
+        uint256 repaymentPeriod
     );
     event PaymentSent(
         address sender,
@@ -276,9 +230,6 @@ contract DecentraLoan {
         uint256 paymentNumber,
         string evidence
     );
-    event BorrowerConfirmed(address sender);
-    event OfferAccepted(address sender);
-    event OfferRejected(address sender);
 
     // Receive any ethereum randomly sent to the contract from outside
     receive() external payable {
@@ -296,7 +247,6 @@ contract DecentraLoan {
             uint256,
             uint256,
             uint256,
-            // Evidence[] memory,
             StateType
         )
     {
@@ -307,7 +257,6 @@ contract DecentraLoan {
             Balance,
             InterestRate,
             RepaymentPeriod,
-            // Evidences,
             State
         );
     }
