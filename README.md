@@ -40,10 +40,18 @@ CAPSTONE_APP/              # Root directory.
 
 ### Data Access Object folder: 
 
-Inside the Data Access Object (DAO) folder, there will exist classes for each entity that needs to fetch, store, update and delete from the Database. Most methods inside these classes follow a common occurence of creating a query based on parameters from the controller, executing the query with the cursor object that is responsable of initializing connection with the database, specified under the ```config``` folder and once a result is received from the database, we return it.
+Inside the Data Access Object (DAO) folder, there will exist classes for each entity that needs to fetch, store, update and delete from the Database. Most methods inside these classes follow a common occurence of creating a query based on parameters from the handler, executing the query with the cursor object that is responsable of initializing connection with the database, specified under the ```config``` folder, executing the query and once a result is received from the database, we return it.
 
 #### Example: 
 
 ![DAO EXAMPLE](images/DAO_EXAMPLE.PNG)
+
+### Handler folder: 
+
+Inside this folder there will exist classes that correspond to all entities used through the program, acting as an intermediary between the HTTP responses and the database in order to execute extensive logic if need be. 
+
+#### Example: 
+
+![DAO EXAMPLE](images/HANDLER_EXAMPLE.PNG)
 
 
