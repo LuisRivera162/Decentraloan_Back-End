@@ -44,7 +44,27 @@ Inside the Data Access Object (DAO) folder, there will exist classes for each en
 
 #### Example: 
 
-![DAO EXAMPLE](images/DAO_EXAMPLE.PNG)
+```
+class UsersDAO:
+
+    def __init__(self):
+
+        connection_url = "dbname=%s user=%s password=%s port=%s" % (pg_config['dbname'],
+                                                                    pg_config['user'],
+                                                                    pg_config['passwd'],
+                                                                    pg_config['port'])
+        self.conn = psycopg2._connect(connection_url)
+
+    # GET 
+    def get_all_users(self):
+        cursor = self.conn.cursor()
+        query = 'select * from users;'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
+```
 
 ### Handler folder: 
 
@@ -52,7 +72,30 @@ Inside this folder there will exist classes that correspond to all entities used
 
 #### Example: 
 
-![HANDLER EXAMPLE](images/HANDLER_EXAMPLE.PNG)
+```
+class UsersHandler:
+
+    def build_user_dict(self, row):
+        result = {}
+        result['user_id'] = row[0]
+        result['username'] = row[1]
+        result['first_name'] = row[2]
+        result['last_name'] = row[3]
+        result['email'] = row[5]
+        result['age'] = row[8]
+        result['phone'] = row[9]
+        result['wallet'] = row[10]
+        result['lender'] = row[12]
+        return result
+
+    def get_user(self, uid):
+        dao = UsersDAO()
+        row = dao.get_user(uid)
+        if not row:
+            return jsonify(Error="User Not Found"), 404
+        else:
+            return self.build_user_dict(row)
+```
 
 ### main.py file: 
 
@@ -60,7 +103,24 @@ Inside main.py is where the server routes are created and manage HTTP requests t
 
 #### Example: 
 
-![ROUTE EXAMPLE](images/ROUTE_EXAMPLE.PNG)
+```
+@app.route('/api/login', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        data = request.json
+        email = data['email']
+        password = data['password']
+        uid = UsersHandler.validate_user_login(email, password)
+        lender = UsersHandler.get_user(uid).get("lender")
+        wallet = UsersHandler.get_user(uid).get("wallet")
+        if uid:
+            return jsonify(email=email, localId=uid, status='success', wallet=wallet, lender=lender)
+        else:
+            return jsonify(Error="Invalid credentials."), 404
+
+    else:
+        return jsonify(Error="Method not allowed."), 405
+```
 
 ## Back-End Architecture: 
 
