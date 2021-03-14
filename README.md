@@ -52,6 +52,15 @@ Inside this folder there will exist classes that correspond to all entities used
 
 #### Example: 
 
-![DAO EXAMPLE](images/HANDLER_EXAMPLE.PNG)
+![HANDLER EXAMPLE](images/HANDLER_EXAMPLE.PNG)
+
+### main.py file: 
+
+Inside main.py is where the server routes are created and manage HTTP requests through the Python Flask framework. 
+
+#### Example: 
+
+![ROUTE EXAMPLE](images/ROUTE_EXAMPLE.PNG)
+
 
 
