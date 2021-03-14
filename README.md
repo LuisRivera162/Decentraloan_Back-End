@@ -26,16 +26,16 @@ The back-end project repository looks to follow the Model-View-Controller design
 
 #### Main folders/files: 
 ```
-CAPSTONE_APP/                 # Root directory.
-|- Handler/                   # Handler classes in order to handle database output from the DAO class.
-|- DAO/                       # Object creations in order to interact with the database.
-|- images/                    # Images folder.
-|- main.py                    # Responsible for hosting the server, routing and handling HTTP requests.
-|- config/                    # Configuration file, used to setup the database connection credentials.
-|- database_schema.sql        # Defines the table schema querries being used in the database.
-|- config/                    # Configuration file, used to setup the database connection credentials.
-|- contracts                  # add usability
-|- build/                     # add usability
+CAPSTONE_APP/              # Root directory.
+|- Handler/                # Handler classes in order to handle database output from the DAO class.
+|- DAO/                    # Object creations in order to interact with the database.
+|- images/                 # Images folder.
+|- main.py                 # Responsible for hosting the server, routing and handling HTTP requests.
+|- config/                 # Configuration file, used to setup the database connection credentials.
+|- database_schema.sql     # Defines the table schema querries being used in the database.
+|- config/                 # Configuration file, used to setup the database connection credentials.
+|- contracts               # add usability
+|- build/                  # add usability
 ```
 
 ### Data Access Object folder: 
@@ -44,6 +44,6 @@ Inside the Data Access Object (DAO) folder, there will exist classes for each en
 
 #### Example: 
 
-![DAO EXAMPLE](images/DAO_EXAMPLE.png)
+![DAO EXAMPLE](images/DAO_EXAMPLE.PNG)
 
 
