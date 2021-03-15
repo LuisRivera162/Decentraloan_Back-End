@@ -126,3 +126,7 @@ def login():
 
 ![BACK-END ARCHITECTURE](images/BACK_END_ARCHITECTURE.PNG)
 
+## Database ER Diagram: 
+
+![DATABASE ERD](images/DATABASE_ERD.PNG)
+
