@@ -130,3 +130,10 @@ def login():
 
 ![DATABASE ERD](images/DATABASE_ERD.PNG)
 
+## Credits
+
+### Luis G. Rivera Gonzalez (luis.rivera162@upr.edu) 
+### Hector A. Rodriguez  (hector.rodriguez49@upr.edu) 
+### Josian A. Velez (josian.velez@upr.edu) 
+
+
