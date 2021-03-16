@@ -34,8 +34,8 @@ CAPSTONE_APP/              # Root directory.
 |- config/                 # Configuration file, used to setup the database connection credentials.
 |- database_schema.sql     # Defines the table schema querries being used in the database.
 |- config/                 # Configuration file, used to setup the database connection credentials.
-|- contracts               # add usability
-|- build/                  # add usability
+|- contracts/              # Source Code of Ethereum Smart Contracts used for the Project.
+|- build/                  # Compiled Contracts, ready to be deployed in the Blockchain.
 ```
 
 ### Data Access Object folder: 
@@ -64,6 +64,21 @@ class UsersDAO:
         for row in cursor:
             result.append(row)
         return result
+```
+
+### Contracts folder
+
+This folder contain source files for smart contracts used in the Ethereum Blockchain. These contracts are written in the Solidity v8.0.0 programming language. Solidity is a simple and powerful language that is exclusively used for the development of Ethereum Smart Contracts. For this project, the main contract is DecentraLoan.sol. This contract has the structure and required methods to track a loan contract.
+
+```
+contract DecentraLoan:
+    Constructor(address lender, uint amount, uint interest, uint repaymentPeriod)
+    Modify(uint amount, uint interest, uint repaymentPeriod)
+    Deal(address borrower, uint amount, uint interest, uint repaymentPeriod)
+    Withdraw(address lender, string reason)
+    SendPayment(address sender, uint paymentNumber, uint amount, string evidence)
+    GetEvidence(uint paymentNumber)
+    ValidateEvidence(address user, uint paymentNumber)
 ```
 
 ### Handler folder: 
