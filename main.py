@@ -7,6 +7,8 @@ from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
 from Handler.offers_h import OffersHandler
 from Handler.payments_h import PaymentsHandler
+from Handler.notifications_h import NotificationsHandler
+
 
 # from wtforms import Form, BooleanField, TextField, PasswordField, validators
 
@@ -62,6 +64,7 @@ UsersHandler = UsersHandler()
 LoansHandler = LoansHandler()
 OffersHandler = OffersHandler()
 PaymentsHandler = PaymentsHandler()
+NotificationsHandler = NotificationsHandler()
 
 # Initialize Web3 Account object from private key
 # This account is internal and will pay for TX fees
@@ -106,6 +109,26 @@ def get_user():
         return UsersHandler.get_user(user_id)
     else:
         return jsonify(Error="User not found.")
+
+
+@app.route('/api/notifications', methods=['GET', 'POST'])
+def alert_user_notifications():
+    if request.method == 'GET':
+        user_id = request.args.get('user_id')
+        if user_id:
+            result = NotificationsHandler.get_all_user_notifications(user_id)
+            return result
+        else:
+            return jsonify(Error="User not found.")
+    elif request.method == 'POST':
+        user_id = request.args.get('user_id')
+        message = request.args.get('message')
+        if user_id:
+            return NotificationsHandler.create_notification(user_id, message)
+        else:
+            return jsonify(Error="User not found.")
+    else:
+        return jsonify(Error="Method not allowed."), 405
 
 
 @app.route('/api/check-emails_user', methods=['GET'])
