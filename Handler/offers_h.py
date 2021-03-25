@@ -66,9 +66,9 @@ class OffersHandler:
         offers = dao.get_all_loan_offers(loan_id)
         result_list = []
         for row in offers:
-            result = self.build_loan_dict(row)
+            result = self.build_offer_dict(row)
             result_list.append(result)
-        return jsonify(Offers=result_list)
+        return result_list
 
     def get_offer(self, offer_id):
         dao = OffersDAO()

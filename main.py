@@ -316,6 +316,8 @@ def get_all_user_loans():
             payload['months'] = info_from_blockchain[5]
             payload['state'] = info_from_blockchain[6]
 
+            payload['offers'] = OffersHandler.get_all_loan_offers(loan['loan_id'])
+
             newResponse.append(payload)
 
         return jsonify(newResponse), 200
@@ -713,6 +715,13 @@ def get_all_user_payments():
         return PaymentsHandler.get_all_user_payments(user_id), 200
     else:
         return jsonify(Error="User not found."), 404
+
+@app.route('/api/withdraw-loan', methods=['GET'])
+def withdraw_loan():
+    # 1. remove loan from Blockchain
+    # 2. rescind all offers related to loan in DB
+    # 3. remove loan from DB
+    return jsonify(status='ok')
 
 
 @app.route('/payments', methods=['GET'])
