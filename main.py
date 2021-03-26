@@ -123,8 +123,9 @@ def alert_user_notifications():
     elif request.method == 'POST':
         user_id = request.args.get('user_id')
         message = request.args.get('message')
+        notification_type = request.args.get('notification_type')
         if user_id:
-            return NotificationsHandler.create_notification(user_id, message)
+            return NotificationsHandler.create_notification(user_id, message, notification_type)
         else:
             return jsonify(Error="User not found.")
     else:

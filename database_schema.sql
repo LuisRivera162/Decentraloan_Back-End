@@ -108,8 +108,9 @@ CREATE TABLE NOTIFICATIONS (
 	notification_id serial PRIMARY KEY,
 	user_id INTEGER,
 	message VARCHAR,
-	payment_date TIMESTAMP NOT null,
+	created_on TIMESTAMP NOT null,
 	dismissed BOOLEAN default false, 
+	notification_type INTEGER,
 	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 

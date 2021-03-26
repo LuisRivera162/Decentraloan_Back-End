@@ -22,11 +22,11 @@ class NotificationsDAO:
         return result
 
     # POST
-    def create_notification(self, user_id, message):
+    def create_notification(self, user_id, message, notification_type):
         cursor = self.conn.cursor()
-        query = "insert into NOTIFICATIONS(user_id, message, created_on) \
-                values (%s, %s, now()) returning offer_id;"
-        cursor.execute(query, (user_id, message))
+        query = "insert into NOTIFICATIONS(user_id, message, created_on, notification_type) \
+                values (%s, %s, now(), %s) returning offer_id;"
+        cursor.execute(query, (user_id, message, notification_type))
         notification_id = cursor.fetchone()[0]
         self.conn.commit()
         return notification_id
