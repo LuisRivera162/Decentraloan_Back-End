@@ -25,7 +25,7 @@ class NotificationsDAO:
     def create_notification(self, user_id, message, notification_type):
         cursor = self.conn.cursor()
         query = "insert into NOTIFICATIONS(user_id, message, created_on, notification_type) \
-                values (%s, %s, now(), %s) returning offer_id;"
+                values (%s, %s, now(), %s) returning notification_id;"
         cursor.execute(query, (user_id, message, notification_type))
         notification_id = cursor.fetchone()[0]
         self.conn.commit()
