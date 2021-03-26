@@ -1,3 +1,4 @@
+import json
 from DAO.notifications import NotificationsDAO
 from flask import jsonify
 
@@ -10,6 +11,7 @@ class NotificationsHandler:
         result['message'] = row[2]
         result['created_on'] = row[3]
         result['dismissed'] = row[4]
+        result['notification_type'] = row[5]
         return result
 
     def get_all_user_notifications(self, user_id):
@@ -22,9 +24,10 @@ class NotificationsHandler:
         return jsonify(Notifications=result_list)
 
     # POST
-    def create_notification(self, user_id, message):
+    def create_notification(self, user_id, message, notification_type):
         dao = NotificationsDAO()
         try: 
-            return dao.create_notification(user_id, message), 200
+            notif_id = dao.create_notification(user_id, message, notification_type)
+            return jsonify(NotificationID=notif_id),200
         except:
-            return jsonify("Error processing, query."), 400
+            return jsonify(Error="Error processing, query."), 400
