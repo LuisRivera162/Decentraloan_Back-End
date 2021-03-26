@@ -50,6 +50,13 @@ class OffersHandler:
             result = self.build_offer_dict(row)
             result['username'] = user_dao.get_username(row[3])
             result['eth_address'] = loan_dao.get_loan_eth_address(row[1])
+
+            loan_orig = loan_dao.get_single_user_loan(row[1])
+
+            result['amount_orig'] = loan_orig[3]
+            result['months_orig'] = loan_orig[4]
+            result['interest_orig'] = loan_orig[5]
+
             result_list.append(result)
         return jsonify(Offers=result_list)
 
