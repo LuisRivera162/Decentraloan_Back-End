@@ -122,7 +122,6 @@ def alert_user_notifications():
             return jsonify(Error="User not found.")
     elif request.method == 'POST':
         data = request.json
-        print(data)
         user_id = data['user_id']
         message = data['message']
         notification_type = request.args.get('notification_type')
@@ -719,12 +718,22 @@ def get_all_user_payments():
     else:
         return jsonify(Error="User not found."), 404
 
+
 @app.route('/api/withdraw-loan', methods=['GET'])
 def withdraw_loan():
     # 1. remove loan from Blockchain
     # 2. rescind all offers related to loan in DB
     # 3. remove loan from DB
     return jsonify(status='ok')
+
+
+@app.route('/api/withdraw-offer', methods=['DELETE'])
+def withdraw_offer():
+    offer_id = request.args.get('offer_id')
+    if offer_id:
+        return OffersHandler.withdraw_offer(offer_id)
+    else:
+        return jsonify(Error="Offer not found."), 404
 
 
 @app.route('/payments', methods=['GET'])

@@ -89,3 +89,11 @@ class OffersDAO:
         cursor.execute(query)
         self.conn.commit()
         return offer_id
+
+    # DELETE
+    def withdraw_offer(self, offer_id):
+        cursor = self.conn.cursor()
+        query = f"DELETE from offer where offer_id = {offer_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return offer_id

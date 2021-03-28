@@ -103,3 +103,12 @@ class OffersHandler:
             return offer_id, 200
         else: 
             return None
+
+    # DELETE
+    def withdraw_offer(self, offer_id):
+        dao = OffersDAO()
+        offer_id = dao.withdraw_offer(offer_id)
+        if offer_id: 
+            return offer_id, 200
+        else: 
+            return None
