@@ -273,11 +273,11 @@ def create_loan():
             if loan_id:
                 LoansHandler.edit_loan(
                     loan_id[0], loan_amount, interest, time_frame, platform, contractReceipt['contractAddress'])
-                
+
                 return jsonify(contractAddress=contractReceipt['contractAddress'])
             else:
                 return jsonify(Error="Invalid credentials."), 404
-            
+
         else:
             return jsonify(Error="Error inserting to the blockchain"), 404
 
@@ -318,7 +318,8 @@ def get_all_user_loans():
             payload['months'] = info_from_blockchain[5]
             payload['state'] = info_from_blockchain[6]
 
-            payload['offers'] = OffersHandler.get_all_loan_offers(loan['loan_id'])
+            payload['offers'] = OffersHandler.get_all_loan_offers(
+                loan['loan_id'])
 
             newResponse.append(payload)
 
@@ -379,10 +380,12 @@ def create_offer():
         time_frame = data['time_frame']
         platform = data['platform']
 
+        print(data)
         result = OffersHandler.create_offer(
             loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None)
 
         if result:
+            print(result)
             return jsonify(Status="CREATE OFFER Success."), 200
         else:
             return jsonify(Error="Offer not created."), 404
@@ -699,11 +702,11 @@ def loan_activity():
             events.append(
                 dict(e.args) |
                 {
-                    'timestamp': w3.eth.get_block(e.blockNumber).timestamp, 
+                    'timestamp': w3.eth.get_block(e.blockNumber).timestamp,
                     'event': e.event
                 }
             )
-    
+
     events.sort(key=lambda x: x.get('timestamp'), reverse=True)
 
     return jsonify(events)
@@ -719,11 +722,48 @@ def get_all_user_payments():
         return jsonify(Error="User not found."), 404
 
 
-@app.route('/api/withdraw-loan', methods=['GET'])
+@app.route('/api/withdraw-loan', methods=['POST'])
 def withdraw_loan():
-    # 1. remove loan from Blockchain
-    # 2. rescind all offers related to loan in DB
-    # 3. remove loan from DB
+    data = request.json
+
+    contractHash = data['contractHash']
+
+    lender = data['lender']
+    reason = data['reason']
+
+    # 1. rescind all offers related to loan in DB
+
+    # 2. remove loan from Blockchain
+
+    # initialize loan contract object from address and abi
+    decentraloan_contract = w3.eth.contract(
+        address=contractHash,
+        abi=decentraloan_contract_abi)
+
+    # build transaction
+    unsigned_txn = decentraloan_contract.functions.\
+        Withdraw(
+            lender,
+            reason
+        ).buildTransaction({
+            'gas': 4000000,
+            'gasPrice': w3.eth.gas_price,
+            'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+        })
+
+    # sign transaction
+    signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+    # return transaction hash after being sent and mined
+    txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    txn_receipt = w3.eth.waitForTransactionReceipt(txn_address)
+
+    if txn_receipt['status']:
+            # 3. remove loan from DB
+            pass
+    else:
+        return jsonify(Error="Error inserting to the blockchain"), 404
+    
     return jsonify(status='ok')
 
 
@@ -742,6 +782,15 @@ def reject_offer():
     offer_id = data['offer_id']
     if offer_id:
         return OffersHandler.reject_offer(offer_id)
+    else:
+        return jsonify(Error="Offer not found."), 404
+
+@app.route('/api/accept-offer', methods=['PUT'])
+def accept_offer():
+    data = request.json
+    offer_id = data['offer_id']
+    if offer_id:
+        return OffersHandler.accept_offer(offer_id)
     else:
         return jsonify(Error="Offer not found."), 404
 

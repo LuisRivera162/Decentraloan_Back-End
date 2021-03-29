@@ -99,7 +99,13 @@ class OffersDAO:
         self.conn.commit()
         return offer_id
 
-    
+    def accept_offer(self, offer_id):
+        cursor = self.conn.cursor()
+        query = f"update offer set accepted = true where offer_id = {offer_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return offer_id
+
     def reject_offer(self, offer_id):
         cursor = self.conn.cursor()
         query = f"update offer set rejected = true where offer_id = {offer_id};"

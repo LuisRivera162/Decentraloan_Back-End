@@ -47,6 +47,7 @@ class OffersHandler:
         loan_dao = LoansDAO()
         user_dao = UsersDAO()
         offers = dao.get_all_user_pending_offers(user_id)
+
         result_list = []
         for row in offers:
             result = self.build_offer_dict(row)
@@ -137,6 +138,13 @@ class OffersHandler:
         else: 
             return None
 
+    def accept_offer(self, offer_id):
+        dao = OffersDAO()
+        offer_id = dao.accept_offer(offer_id)
+        if offer_id: 
+            return jsonify(offer_id=offer_id), 200
+        else: 
+            return None
 
     # DELETE
     def withdraw_offer(self, offer_id):
