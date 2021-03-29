@@ -74,6 +74,7 @@ CREATE TABLE OFFER (
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
 	expiration_date DATE,
+	rejected BOOLEAN default false,
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
