@@ -23,7 +23,7 @@ class OffersDAO:
 
     def get_all_loan_offers(self, loan_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where loan_id = {loan_id};'
+        query = f'select * from offer where loan_id = {loan_id} and rejected = false;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -32,7 +32,16 @@ class OffersDAO:
 
     def get_all_user_pending_offers(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where borrower_id = {user_id} or lender_id = {user_id} order by created_on DESC;'
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = false order by created_on DESC;'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
+
+    def get_all_user_rejected_offers(self, user_id):
+        cursor = self.conn.cursor()
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = true order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -86,6 +95,14 @@ class OffersDAO:
     def edit_offer(self, offer_id, amount, months, interest, expiration_date):
         cursor = self.conn.cursor()
         query = f"update offer set amount = {amount}, interest = {int(interest) / 100}, months = {months} where offer_id = {offer_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return offer_id
+
+    
+    def reject_offer(self, offer_id):
+        cursor = self.conn.cursor()
+        query = f"update offer set rejected = true where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id

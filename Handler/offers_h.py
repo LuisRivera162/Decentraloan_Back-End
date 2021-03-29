@@ -16,6 +16,8 @@ class OffersHandler:
         result['interest'] = row[6]
         result['accepted'] = row[8]
         result['expiration_date'] = row[9]
+        result['rejected'] = row[10]
+
         return result
 
     # POST
@@ -40,11 +42,11 @@ class OffersHandler:
             result_list.append(result)
         return jsonify(Offers=result_list)
 
-    def get_all_user_pending_offers(self, borrower_id):
+    def get_all_user_pending_offers(self, user_id):
         dao = OffersDAO()
         loan_dao = LoansDAO()
         user_dao = UsersDAO()
-        offers = dao.get_all_user_pending_offers(borrower_id)
+        offers = dao.get_all_user_pending_offers(user_id)
         result_list = []
         for row in offers:
             result = self.build_offer_dict(row)
@@ -59,6 +61,29 @@ class OffersHandler:
 
             result_list.append(result)
         return jsonify(Offers=result_list)
+
+
+    def get_all_user_rejected_offers(self, user_id):
+        dao = OffersDAO()
+        loan_dao = LoansDAO()
+        user_dao = UsersDAO()
+        offers = dao.get_all_user_rejected_offers(user_id)
+        result_list = []
+        for row in offers:
+            result = self.build_offer_dict(row)
+            result['username'] = user_dao.get_username(row[3])
+            result['eth_address'] = loan_dao.get_loan_eth_address(row[1])
+
+            loan_orig = loan_dao.get_single_user_loan(row[1])
+
+            result['amount_orig'] = loan_orig[3]
+            result['months_orig'] = loan_orig[4]
+            result['interest_orig'] = loan_orig[5]
+
+            result_list.append(result)
+            print(result)
+        return jsonify(rejectedOffers=result_list)
+
 
     def get_offer_count(self, user_id):
         dao = OffersDAO()
@@ -103,6 +128,15 @@ class OffersHandler:
             return offer_id, 200
         else: 
             return None
+
+    def reject_offer(self, offer_id):
+        dao = OffersDAO()
+        offer_id = dao.reject_offer(offer_id)
+        if offer_id: 
+            return jsonify(offer_id=offer_id), 200
+        else: 
+            return None
+
 
     # DELETE
     def withdraw_offer(self, offer_id):

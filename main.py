@@ -736,6 +736,25 @@ def withdraw_offer():
         return jsonify(Error="Offer not found."), 404
 
 
+@app.route('/api/reject-offer', methods=['PUT'])
+def reject_offer():
+    data = request.json
+    offer_id = data['offer_id']
+    if offer_id:
+        return OffersHandler.reject_offer(offer_id)
+    else:
+        return jsonify(Error="Offer not found."), 404
+
+
+@app.route('/api/rejected-offers', methods=['GET'])
+def get_rejected_offers():
+    user_id = request.args.get('user_id')
+    if user_id:
+        return OffersHandler.get_all_user_rejected_offers(user_id), 200
+    else:
+        return jsonify(Error="Offers not found."), 404
+
+
 @app.route('/payments', methods=['GET'])
 def get_all_payments():
     return PaymentsHandler.get_all_payments()
