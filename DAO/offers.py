@@ -120,3 +120,10 @@ class OffersDAO:
         cursor.execute(query)
         self.conn.commit()
         return offer_id
+
+    def delete_all_loans_offers(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f"DELETE from offer where loan_id = {loan_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return loan_id

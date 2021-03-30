@@ -60,6 +60,16 @@ class LoansDAO:
         else:
             return -1
 
+    def get_loan_by_address(self, eth_address):
+        cursor = self.conn.cursor()
+        query = f"select loan_id from loans where eth_address = '{eth_address}';"
+        cursor.execute(query)
+        result = cursor.fetchone()[0]
+        if result:
+            return result
+        else:
+            return None
+
     # PUT
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform, eth_address):
         cursor = self.conn.cursor()
@@ -74,5 +84,13 @@ class LoansDAO:
         query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, created_on) values (%s, %s, %s, %s, %s, now()) returning loan_id;"
         cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST))
         loan_id = cursor.fetchone()[0]
+        self.conn.commit()
+        return loan_id
+        
+    # DELETE
+    def delete_loan(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f"DELETE from loans where loan_id = {loan_id};"
+        cursor.execute(query)
         self.conn.commit()
         return loan_id

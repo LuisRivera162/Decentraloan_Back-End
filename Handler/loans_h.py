@@ -74,10 +74,25 @@ class LoansHandler:
             result['borrower_eth'] = user_dao.get_user_wallet_address(result['user_id'])
             return jsonify(Loan=result)
 
+    def get_loan_by_address(self, eth_address):
+        dao = LoansDAO()
+        result = dao.get_loan_by_address(eth_address)
+        return result
+
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform, eth_address):
         dao = LoansDAO()
         loan_id = dao.edit_loan(loan_id, loan_amount, interest, time_frame, platform, eth_address)
         if loan_id: 
+            return loan_id, 200
+        else: 
+            return None
+
+    # DELETE
+    def delete_loan(self, contractHash):
+        dao = LoansDAO()
+        loan_id = self.get_loan_by_address(contractHash)
+        result = dao.delete_loan(loan_id)
+        if result: 
             return loan_id, 200
         else: 
             return None

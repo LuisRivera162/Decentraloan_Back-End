@@ -2,6 +2,7 @@
 # Needs DEV_KETH_PRIVATE_KEY, WEB3_INFURA_PROJECT_ID and WEB3_INFURA_API_SECRET set as env variables
 # project WILL NOT be able to connect the the blockchain if not set!
 # run env.bat to populate this data
+from DAO.loans import LoansDAO
 from web3 import eth
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
@@ -727,11 +728,15 @@ def withdraw_loan():
     data = request.json
 
     contractHash = data['contractHash']
-
     lender = data['lender']
     reason = data['reason']
 
     # 1. rescind all offers related to loan in DB
+
+    if contractHash:
+        OffersHandler.delete_all_loans_offers(contractHash)
+    else:
+        return jsonify(Error="Loan not found."), 404
 
     # 2. remove loan from Blockchain
 
@@ -759,8 +764,12 @@ def withdraw_loan():
     txn_receipt = w3.eth.waitForTransactionReceipt(txn_address)
 
     if txn_receipt['status']:
-            # 3. remove loan from DB
-            pass
+        # 3. remove loan from DB
+        if contractHash:
+            LoansHandler.delete_loan(contractHash)
+        else:
+            return jsonify(Error="Loan not found."), 404
+
     else:
         return jsonify(Error="Error inserting to the blockchain"), 404
     
@@ -772,6 +781,15 @@ def withdraw_offer():
     offer_id = request.args.get('offer_id')
     if offer_id:
         return OffersHandler.withdraw_offer(offer_id)
+    else:
+        return jsonify(Error="Offer not found."), 404
+
+
+@app.route('/api/delete-loan-offers', methods=['DELETE'])
+def delete_all_loans_offers():
+    loan_id = request.args.get('loan_id')
+    if loan_id:
+        return OffersHandler.delete_all_loans_offers(loan_id)
     else:
         return jsonify(Error="Offer not found."), 404
 

@@ -154,3 +154,13 @@ class OffersHandler:
             return offer_id, 200
         else: 
             return None
+
+    def delete_all_loans_offers(self, contractHash):
+        dao = OffersDAO()
+        loan_dao = LoansDAO()
+        loan_id = loan_dao.get_loan_by_address(contractHash)
+        contractHash = dao.delete_all_loans_offers(loan_id)
+        if loan_id: 
+            return loan_id, 200
+        else: 
+            return None
