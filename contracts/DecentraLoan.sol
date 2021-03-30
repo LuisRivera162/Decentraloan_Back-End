@@ -250,6 +250,7 @@ contract DecentraLoan {
             uint256,
             uint256,
             uint256,
+            uint256,
             StateType
         )
     {
@@ -260,6 +261,7 @@ contract DecentraLoan {
             Balance,
             InterestRate,
             RepaymentPeriod,
+            PaymentNumber,
             State
         );
     }

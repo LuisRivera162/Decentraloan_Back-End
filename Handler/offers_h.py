@@ -110,7 +110,8 @@ class OffersHandler:
             return jsonify(Error="Offer Not Found"), 404
         else:
             result = self.build_offer_dict(row)
-            return jsonify(Offer=result)
+            # return jsonify(Offer=result)
+            return result
 
     def exists_offer(self, borrower_id, loan_id):
         dao = OffersDAO()
