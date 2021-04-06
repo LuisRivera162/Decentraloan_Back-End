@@ -308,19 +308,24 @@ def get_all_user_loans():
             payload['eth_address'] = loan['eth_address']
             payload['created_on'] = loan['created_on']
 
-            # this is all loaded from the ethereum blockchain
-            info_from_blockchain = loan_info(loan['eth_address'])
+            try:
+                # this is all loaded from the ethereum blockchain
+                info_from_blockchain = loan_info(loan['eth_address'])
 
-            payload['lender'] = info_from_blockchain[0]
-            payload['borrower'] = info_from_blockchain[1]
-            payload['amount'] = info_from_blockchain[2]
-            payload['balance'] = info_from_blockchain[3]
-            payload['interest'] = info_from_blockchain[4]/10000
-            payload['months'] = info_from_blockchain[5]
-            payload['state'] = info_from_blockchain[6]
+                print(info_from_blockchain)
 
-            payload['offers'] = OffersHandler.get_all_loan_offers(
-                loan['loan_id'])
+                payload['lender'] = info_from_blockchain[0]
+                payload['borrower'] = info_from_blockchain[1]
+                payload['amount'] = info_from_blockchain[2]
+                payload['balance'] = info_from_blockchain[3]
+                payload['interest'] = info_from_blockchain[4]/100
+                payload['months'] = info_from_blockchain[5]
+                payload['paymentNumber'] = info_from_blockchain[6]
+                payload['state'] = info_from_blockchain[7]
+
+                payload['offers'] = OffersHandler.get_all_loan_offers(loan['loan_id'])
+            except:
+                pass
 
             newResponse.append(payload)
 
@@ -446,6 +451,11 @@ def send_payment():
     decentraloan_contract = w3.eth.contract(
         address=contractHash,
         abi=decentraloan_contract_abi)
+
+    print(sender_eth,
+            paymentNumber,
+            amount,
+            evidenceHash)
 
     # build transaction
     unsigned_txn = decentraloan_contract.functions.\

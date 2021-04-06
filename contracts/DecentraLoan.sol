@@ -37,7 +37,7 @@ contract DecentraLoan {
 
     // loan contract specific variables
     StateType public State;
-    mapping(uint256 => Evidence) public Evidences;
+    Evidence[] public Evidences;
     uint256 public Balance;
     uint256 public PaymentNumber;
 
@@ -138,14 +138,18 @@ contract DecentraLoan {
         require(State == StateType.Active); // require that it is an active contract
         require(amount > 0); // require payment amount is not 0
 
-        Balance = Balance - amount;
+        if (PaymentNumber == 0) {
+            Balance = amount;
+        } else {
+            Balance = Balance - amount;
+        }
 
         // send evidence for counterparty validation, initialy unverified
-        Evidences[paymentNumber] = Evidence(
+        Evidences.push(Evidence(
             sender,
             evidence,
             EvidenceStatus.Unverified
-        );
+        ));
 
         State = StateType.AwaitingValidation; // set state to awaiting validation
 
