@@ -270,7 +270,7 @@ def create_loan():
             # Save loan to DB
         
         loan_id = LoansHandler.insert_loan(
-            loan_amount, lender, None, interest, time_frame)
+            loan_amount, lender, None, interest, time_frame, platform)
 
         if loan_id:
             LoansHandler.edit_loan(

@@ -21,7 +21,7 @@ class LoansHandler:
         result['platform'] = row[12]
         return result
 
-    def insert_loan(self, loan_amount, lender, borrower, interest, time_frame):
+    def insert_loan(self, loan_amount, lender, borrower, interest, time_frame, platform):
         dao = LoansDAO()
         
         try:
