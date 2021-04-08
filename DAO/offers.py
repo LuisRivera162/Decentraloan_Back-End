@@ -32,7 +32,7 @@ class OffersDAO:
 
     def get_all_user_pending_offers(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = false order by created_on DESC;'
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = false and accepted = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
