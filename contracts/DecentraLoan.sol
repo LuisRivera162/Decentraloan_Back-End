@@ -43,7 +43,6 @@ contract DecentraLoan {
 
     // contract constructor
     constructor(
-        address owner,
         address lender,
         uint256 amount,
         uint256 interest,
@@ -56,7 +55,7 @@ contract DecentraLoan {
         RepaymentPeriod = repaymentPeriod;
         Platform = platform;
 
-        _owner = owner; // set owner to custom address
+        _owner = msg.sender; // set owner to custom address
 
         State = StateType.Available;
 
@@ -67,13 +66,13 @@ contract DecentraLoan {
 
     // modify available (non-active) contract [lender]
     function Modify(
-        address user,
+        // address user,
         uint256 amount,
         uint256 interest,
         uint256 repaymentPeriod
     ) public payable {
         require(msg.sender == _owner);
-        require(user == Lender);
+        // require(user == Lender);
         require(State == StateType.Available);
 
         LoanAmount = amount;
@@ -86,14 +85,14 @@ contract DecentraLoan {
     // leander and borrower reached a deal, 
     // do virtual handshake and set loan state to Active
     function Deal(
-        address user,
+        // address user,
         address _borrower,
         uint256 _amount,
         uint256 _interest,
         uint256 _repaymentPeriod
     ) public payable {
         require(msg.sender == _owner);
-        require(user == Lender);
+        // require(user == Lender);
         require(State == StateType.Available);
 
         // set borrower
@@ -116,14 +115,14 @@ contract DecentraLoan {
         );
     }
 
-    function Withdraw(address _lender, string memory _reason) public payable {
+    function Withdraw() public payable {
         require(msg.sender == _owner);
         require(State == StateType.Available);
-        require(_lender == Lender);
+        // require(_lender == Lender);
 
         State = StateType.Withdrawn;
 
-        emit Withdrawn(_lender, _reason);
+        emit Withdrawn(Lender);
     }
 
     // sends payment with required evidence attached [lender|borrower]
@@ -139,17 +138,21 @@ contract DecentraLoan {
         require(amount > 0); // require payment amount is not 0
 
         if (PaymentNumber == 0) {
+            // Lender sent core loan amount, this is considered as payment 0.
             Balance = amount;
         } else {
+            // subtract paid amount to the balance
             Balance = Balance - amount;
         }
 
         // send evidence for counterparty validation, initialy unverified
-        Evidences.push(Evidence(
-            sender,
-            evidence,
-            EvidenceStatus.Unverified
-        ));
+        Evidences.push(
+            Evidence(
+                sender,
+                evidence,
+                EvidenceStatus.Unverified
+            )
+        );
 
         State = StateType.AwaitingValidation; // set state to awaiting validation
 
@@ -171,31 +174,31 @@ contract DecentraLoan {
         return Evidences[paymentNumber];
     }
 
-    function ValidateEvidence(address user, uint256 paymentNumber)
+    function ValidateEvidence(address user)
         public
         payable
     {
         require(msg.sender == _owner);
         require(
-            (user == Borrower && Evidences[paymentNumber].sender == Lender) ||
-                (user == Lender && Evidences[paymentNumber].sender == Borrower)
+            (user == Borrower && Evidences[PaymentNumber].sender == Lender) ||
+                (user == Lender && Evidences[PaymentNumber].sender == Borrower)
         );
         require(State == StateType.AwaitingValidation);
 
         // validate from website, validation code is stored encrypted in the blockchain
         // encryption is only lifted by having the decryption key that is server unique
         // after some checks, validate...
-        Evidences[paymentNumber].evidenceStatus = EvidenceStatus.Valid;
-
-        PaymentNumber++;
+        Evidences[PaymentNumber].evidenceStatus = EvidenceStatus.Valid;
 
         State = StateType.Active; // set loan state back to active
 
         emit PaymentValidated(
             user,
-            paymentNumber,
-            Evidences[paymentNumber].transactionHash
+            PaymentNumber,
+            Evidences[PaymentNumber].transactionHash
         );
+        
+        PaymentNumber++;
     }
 
     /**
@@ -216,8 +219,7 @@ contract DecentraLoan {
         uint256 repaymentPeriod
     );
     event Withdrawn(
-        address lender,
-        string reason 
+        address lender
     );
     event DealReached(
         address lender,
