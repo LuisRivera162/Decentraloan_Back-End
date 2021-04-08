@@ -18,13 +18,14 @@ class LoansHandler:
         result['monthly_repayment'] = row[9]
         result['balance'] = row[10]
         result['est_total_interest'] = row[11]
+        result['platform'] = row[12]
         return result
 
     def insert_loan(self, loan_amount, lender, borrower, interest, time_frame):
         dao = LoansDAO()
         
         try:
-            loan_id = dao.insert_loan(lender, borrower, loan_amount, time_frame, interest/100)
+            loan_id = dao.insert_loan(lender, borrower, loan_amount, time_frame, interest/100, platform)
         except:
             return jsonify("Error processing, query."), 400
 

@@ -79,10 +79,10 @@ class LoansDAO:
         return loan_id
 
     # POST 
-    def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST):
+    def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM):
         cursor = self.conn.cursor()
-        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, created_on) values (%s, %s, %s, %s, %s, now()) returning loan_id;"
-        cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST))
+        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, PLATFORM, created_on) values (%s, %s, %s, %s, %s, %s, now()) returning loan_id;"
+        cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM))
         loan_id = cursor.fetchone()[0]
         self.conn.commit()
         return loan_id
