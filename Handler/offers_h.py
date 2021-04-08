@@ -22,7 +22,6 @@ class OffersHandler:
 
     # POST
     def create_offer(self, loan_id, borrower_id, lender_id, amount, months, interest, expiration_date):
-        # NEED TO HANDLE IF OFFER EXISTS
         dao = OffersDAO()
         offer = dao.get_borrower_loan_offer(borrower_id, loan_id)
         if offer: 
