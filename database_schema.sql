@@ -95,7 +95,7 @@ CREATE TABLE MESSAGE (
 
 CREATE TABLE PAYMENTS (
 	payment_id serial PRIMARY KEY,
-	loan_eth_address VARCHAR,
+	loan_id INTEGER,
 	receiver_id INTEGER,
 	sender_id INTEGER,
 	amount INTEGER,
@@ -103,7 +103,8 @@ CREATE TABLE PAYMENTS (
 	validated BOOLEAN default false, 
 	validation_hash VARCHAR (300),
 	FOREIGN KEY (receiver_id) REFERENCES USERS(user_id),
-	FOREIGN KEY (sender_id) REFERENCES USERS(user_id)
+	FOREIGN KEY (sender_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
 );
 
 CREATE TABLE NOTIFICATIONS (
