@@ -379,7 +379,7 @@ def create_offer():
         borrower_id = data['borrower_id']
         lender_id = data['lender_id']
         loan_amount = data['loan_amount']
-        interest = data['interest']
+        interest = data['interest'] * 100
         time_frame = data['time_frame']
         platform = data['platform']
 
@@ -395,7 +395,7 @@ def create_offer():
         data = request.json
         offer_id = data['offer_id']
         loan_amount = data['loan_amount']
-        interest = data['interest']
+        interest = data['interest'] * 100
         time_frame = data['time_frame']
         # expiration_date = data['expiration_date']
         platform = data['platform']
@@ -837,15 +837,14 @@ def accept_offer():
     # return transaction hash after being sent and mined
     txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
     txn_receipt = w3.eth.waitForTransactionReceipt(txn_address)
-
-    if txn_receipt['status']:
-        if contractHash:
+    if txn_receipt['status'] != None:
+        if contractHash != '':
             return OffersHandler.accept_offer(offer_id)
         else:
             return jsonify(Error="Offer not found."), 404
 
     else:
-        return jsonify(Error="Error inserting to the blockchain"), 404
+        return jsonify(Error="Error inserting to the blockchain"), 405
 
 
 @app.route('/api/rejected-offers', methods=['GET'])
