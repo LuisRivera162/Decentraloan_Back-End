@@ -48,6 +48,7 @@ CREATE TABLE LOANS (
 	monthly_repayment FLOAT,
 	balance FLOAT,
 	est_total_interest FLOAT,
+	platform INTEGER,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
@@ -115,3 +116,11 @@ CREATE TABLE NOTIFICATIONS (
 	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
+CREATE TABLE PARTICIPANT (
+	lender_id INTEGER,
+	borrower_id INTEGER,
+	loan_id INTEGER,
+	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
+);

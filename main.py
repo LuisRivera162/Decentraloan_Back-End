@@ -516,8 +516,7 @@ def accept_offer():
     # if txn_receipt['status'] != None:
     #     if contractHash != '':
     if _offer:
-        print(_offer)
-        ParticipantHandler.insert_participant(_offer['lender_id'], _offer['borrower_id'], _offer['loan_id'])
+        ParticipantHandler.insert_participant(lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
         return OffersHandler.accept_offer(offer_id)
     else:
         return jsonify(Error="Offer not found."), 404

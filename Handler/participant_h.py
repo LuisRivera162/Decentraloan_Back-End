@@ -23,9 +23,8 @@ class ParticipantHandler:
         return jsonify(Participants=result_list)
 
     # POST
-    def insert_participant(self, lender_id, borrower_id, loan_id):
+    def insert_participant(lender_id, borrower_id, loan_id):
         dao = ParticipantDAO()
-        
         try:
             dao.insert_participant(lender_id, borrower_id, loan_id)
         except:
