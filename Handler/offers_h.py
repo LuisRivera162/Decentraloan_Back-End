@@ -155,11 +155,10 @@ class OffersHandler:
         else: 
             return None
 
-    def delete_all_loans_offers(self, contractHash):
+    def delete_all_loans_offers(self, loan_id):
         dao = OffersDAO()
-        loan_dao = LoansDAO()
-        loan_id = loan_dao.get_loan_by_address(contractHash)
-        contractHash = dao.delete_all_loans_offers(loan_id)
+        # loan_dao = LoansDAO()
+        dao.delete_all_loans_offers(loan_id)
         if loan_id: 
             return loan_id, 200
         else: 

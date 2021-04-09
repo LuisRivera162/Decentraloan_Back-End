@@ -430,13 +430,13 @@ def get_all_user_payments():
 def withdraw_loan():
     data = request.json
 
-    contractHash = data['contractHash']
+    loan_id = data['loan_id']
 
     # 1. rescind all offers related to loan in DB
-    OffersHandler.delete_all_loans_offers(contractHash)
+    OffersHandler.delete_all_loans_offers(loan_id)
 
     # 2. remove loan from DB
-    LoansHandler.delete_loan(contractHash)
+    LoansHandler.delete_loan(loan_id)
     
     return jsonify(status='ok')
 
