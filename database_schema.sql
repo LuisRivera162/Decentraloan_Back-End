@@ -49,7 +49,7 @@ CREATE TABLE LOANS (
 	balance FLOAT,
 	est_total_interest FLOAT,
 	platform INTEGER,
-	state INTEGER,
+	state INTEGER default 0,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
