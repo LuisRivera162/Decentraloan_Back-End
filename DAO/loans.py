@@ -30,6 +30,15 @@ class LoansDAO:
             result.append(row)
         return result
 
+    def get_all_unaccepted_user_loans(self, uid):
+        cursor = self.conn.cursor()
+        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and accepted = false;'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
+
     def get_single_user_loan(self, loan_id):
         cursor = self.conn.cursor()
         query = f'select * from loans where loan_id = {loan_id};'
@@ -74,6 +83,13 @@ class LoansDAO:
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform, eth_address):
         cursor = self.conn.cursor()
         query = f"update loans set amount = {loan_amount}, interest = {int(interest) / 100}, months = {time_frame}, eth_address = '{eth_address}' where loan_id = {loan_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return loan_id
+
+    def edit_loan_state(self, loan_id, state):
+        cursor = self.conn.cursor()
+        query = f"update loans set state = {state} where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
         return loan_id

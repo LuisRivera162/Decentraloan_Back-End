@@ -2,8 +2,6 @@
 # Needs DEV_KETH_PRIVATE_KEY, WEB3_INFURA_PROJECT_ID and WEB3_INFURA_API_SECRET set as env variables
 # project WILL NOT be able to connect the the blockchain if not set!
 # run env.bat to populate this data
-from DAO.payments import PaymentsDAO
-from DAO.loans import LoansDAO
 from web3 import contract, eth
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
@@ -313,6 +311,21 @@ def get_single_user_loans():
         return jsonify(Error="Method not allowed."), 405
 
 
+@app.route('/api/update-loan-state', methods=['PUT'])
+def edit_loan_state():
+    data = request.json
+    loan_id = data['loan_id']
+    state = data['state']
+
+    result = LoansHandler.edit_loan_state(loan_id, state)
+
+    if result:
+        return jsonify(Response="Success"), 200
+    else:
+        return jsonify(Error="User not found."), 404
+
+
+
 @app.route('/api/create-offer', methods=['POST', 'PUT'])
 def create_offer():
     if request.method == 'POST':
@@ -324,7 +337,7 @@ def create_offer():
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
-
+        
         result = OffersHandler.create_offer(
             loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None)
 

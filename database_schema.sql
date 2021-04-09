@@ -49,9 +49,11 @@ CREATE TABLE LOANS (
 	balance FLOAT,
 	est_total_interest FLOAT,
 	platform INTEGER,
+	state INTEGER default 0,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
+
 
 CREATE TABLE CHATS (
 	chat_id serial PRIMARY KEY,
