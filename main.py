@@ -10,6 +10,7 @@ from Handler.loans_h import LoansHandler
 from Handler.offers_h import OffersHandler
 from Handler.payments_h import PaymentsHandler
 from Handler.notifications_h import NotificationsHandler
+from Handler.participant_h import ParticipantHandler
 
 
 # from wtforms import Form, BooleanField, TextField, PasswordField, validators
@@ -241,17 +242,50 @@ def create_loan():
         time_frame = data['time_frame']
         platform = int(data['platform'])
         lender = data['lender']
+        lender_eth = data['lender_eth']
 
-        # Save loan to DB
-        loan_id = LoansHandler.insert_loan(loan_amount, lender, None, interest, time_frame, platform)
+        # build transaction
+        # unsigned_txn = w3.eth.contract(
+        #     abi=decentraloan_contract_abi,
+        #     bytecode=decentraloan_contract_bytecode)\
+        #     .constructor(
+        #         lender_eth,
+        #         loan_amount,
+        #         int(interest*100),
+        #         time_frame,
+        #         platform
+        # ).buildTransaction({
+        #     'gas': 4000000,
+        #     'gasPrice': w3.eth.gas_price,
+        #     'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+        # })
+
+        # sign transaction
+        # signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+
+        # send eth transaction and wait for response
+        # txn_receipt = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        # contractReceipt = w3.eth.waitForTransactionReceipt(txn_receipt)
+
+        # if contractReceipt['contractAddress']:
+            # Save loan to DB
+        
+        loan_id = LoansHandler.insert_loan(
+            loan_amount, lender, None, interest, time_frame, platform)
 
         if loan_id:
-            return jsonify('created new loan with id: %s'%(loan_id[0]))
+            LoansHandler.edit_loan(
+                loan_id[0], loan_amount, interest, time_frame, platform, '0x000000000000000')
+
+            return jsonify(contractAddress='0x000000000000000')
         else:
             return jsonify(Error="Invalid credentials."), 404
 
-    else:
-        return jsonify(Error="Method not allowed."), 405
+    #     else:
+    #         return jsonify(Error="Error inserting to the blockchain"), 404
+
+    # else:
+    #     return jsonify(Error="Method not allowed."), 405
 
 
 @app.route('/api/loans', methods=['GET'])
@@ -467,37 +501,39 @@ def accept_offer():
     _borrower = UsersHandler.get_user(uid=_offer['borrower_id'])
 
     # initialize loan contract object from address and abi
-    decentraloan_contract = w3.eth.contract(
-        address=contractHash,
-        abi=decentraloan_contract_abi)
+    # decentraloan_contract = w3.eth.contract(
+    #     address=contractHash,
+    #     abi=decentraloan_contract_abi)
 
-    # build transaction
-    unsigned_txn = decentraloan_contract.functions.\
-        Deal(
-            _borrower['wallet'],
-            int(_offer['amount']),
-            int(_offer['interest'] * 100),
-            _offer['months']
-        ).buildTransaction({
-            'gas': 4000000,
-            'gasPrice': w3.eth.gas_price,
-            'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
-        })
+    # # build transaction
+    # unsigned_txn = decentraloan_contract.functions.\
+    #     Deal(
+    #         _borrower['wallet'],
+    #         int(_offer['amount']),
+    #         int(_offer['interest'] * 100),
+    #         _offer['months']
+    #     ).buildTransaction({
+    #         'gas': 4000000,
+    #         'gasPrice': w3.eth.gas_price,
+    #         'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+    #     })
 
-    # sign transaction
-    signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
+    # # sign transaction
+    # signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
 
-    # return transaction hash after being sent and mined
-    txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-    txn_receipt = w3.eth.waitForTransactionReceipt(txn_address)
-    if txn_receipt['status'] != None:
-        if contractHash != '':
-            return OffersHandler.accept_offer(offer_id)
-        else:
-            return jsonify(Error="Offer not found."), 404
-
+    # # return transaction hash after being sent and mined
+    # txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+    # txn_receipt = w3.eth.waitForTransactionReceipt(txn_address)
+    # if txn_receipt['status'] != None:
+    #     if contractHash != '':
+    if _offer:
+        ParticipantHandler.insert_participant(lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
+        return OffersHandler.accept_offer(offer_id)
     else:
-        return jsonify(Error="Error inserting to the blockchain"), 405
+        return jsonify(Error="Offer not found."), 404
+
+    # else:
+    #     return jsonify(Error="Error inserting to the blockchain"), 405
 
 
 @app.route('/api/rejected-offers', methods=['GET'])

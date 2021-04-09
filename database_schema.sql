@@ -48,6 +48,7 @@ CREATE TABLE LOANS (
 	monthly_repayment FLOAT,
 	balance FLOAT,
 	est_total_interest FLOAT,
+	platform INTEGER,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
@@ -94,7 +95,7 @@ CREATE TABLE MESSAGE (
 
 CREATE TABLE PAYMENTS (
 	payment_id serial PRIMARY KEY,
-	loan_eth_address VARCHAR,
+	loan_id INTEGER,
 	receiver_id INTEGER,
 	sender_id INTEGER,
 	amount INTEGER,
@@ -102,7 +103,8 @@ CREATE TABLE PAYMENTS (
 	validated BOOLEAN default false, 
 	validation_hash VARCHAR (300),
 	FOREIGN KEY (receiver_id) REFERENCES USERS(user_id),
-	FOREIGN KEY (sender_id) REFERENCES USERS(user_id)
+	FOREIGN KEY (sender_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
 );
 
 CREATE TABLE NOTIFICATIONS (
@@ -115,3 +117,11 @@ CREATE TABLE NOTIFICATIONS (
 	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
+CREATE TABLE PARTICIPANT (
+	lender_id INTEGER,
+	borrower_id INTEGER,
+	loan_id INTEGER,
+	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
+);

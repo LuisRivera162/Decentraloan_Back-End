@@ -22,7 +22,6 @@ class LoansHandler:
         return result
 
     def insert_loan(self, loan_amount, lender, borrower, interest, time_frame, platform):
-        # NEED TO HANDLE IF USER EXISTS
         dao = LoansDAO()
         
         try:
