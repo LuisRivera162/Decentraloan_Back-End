@@ -91,9 +91,20 @@ class LoansHandler:
         result = dao.get_loan_by_address(eth_address)
         return result
 
+
+    # PUT
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform, eth_address):
         dao = LoansDAO()
         loan_id = dao.edit_loan(loan_id, loan_amount, interest, time_frame, platform, eth_address)
+        if loan_id: 
+            return loan_id, 200
+        else: 
+            return None
+
+    
+    def edit_loan_state(self, loan_id, state):
+        dao = LoansDAO()
+        loan_id = dao.edit_loan_state(loan_id, state)
         if loan_id: 
             return loan_id, 200
         else: 

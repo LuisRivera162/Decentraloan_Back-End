@@ -311,6 +311,21 @@ def get_single_user_loans():
         return jsonify(Error="Method not allowed."), 405
 
 
+@app.route('/api/update-loan-state', methods=['PUT'])
+def edit_loan_state():
+    data = request.json
+    loan_id = data['loan_id']
+    state = data['state']
+
+    result = LoansHandler.edit_loan_state(loan_id, state)
+
+    if result:
+        return jsonify(Response="Success"), 200
+    else:
+        return jsonify(Error="User not found."), 404
+
+
+
 @app.route('/api/create-offer', methods=['POST', 'PUT'])
 def create_offer():
     if request.method == 'POST':

@@ -87,6 +87,13 @@ class LoansDAO:
         self.conn.commit()
         return loan_id
 
+    def edit_loan_state(self, loan_id, state):
+        cursor = self.conn.cursor()
+        query = f"update loans set state = {state} where loan_id = {loan_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return loan_id
+
     # POST 
     def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM):
         cursor = self.conn.cursor()
