@@ -29,3 +29,32 @@ class PaymentsDAO:
         for row in cursor:
             result.append(row)
         return result
+
+    def get_payment(self, payment_id):
+        cursor = self.conn.cursor()
+        query = f'select * from payments where payment_id = {payment_id};'
+        cursor.execute(query)
+
+        result = cursor.fetchone()
+        
+        return result
+
+    def insert_payment(self, sender, receiver, loan_id, amount, validated, validation_hash):
+        cursor = self.conn.cursor()
+        query = "insert into PAYMENTS(loan_id, sender_id, receiver_id, amount, validated, validation_hash, payment_date) values (%s, %s, %s, %s, %s, %s, now()) returning payment_id;"
+        cursor.execute(query, (loan_id, sender, receiver, amount, validated, validation_hash))
+        payment_id = cursor.fetchone()[0]
+        self.conn.commit()
+
+        return payment_id
+
+    def validate_payment(self, payment_id):
+        cursor = self.conn.cursor()
+        query = f'update PAYMENTS set validated=true where payment_id = {payment_id} returning payment_id'
+        cursor.execute(query)
+
+        payment_id = cursor.fetchone()[0]
+
+        self.conn.commit()
+
+        return payment_id

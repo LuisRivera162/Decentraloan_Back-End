@@ -2,6 +2,7 @@
 # Needs DEV_KETH_PRIVATE_KEY, WEB3_INFURA_PROJECT_ID and WEB3_INFURA_API_SECRET set as env variables
 # project WILL NOT be able to connect the the blockchain if not set!
 # run env.bat to populate this data
+from DAO.payments import PaymentsDAO
 from DAO.loans import LoansDAO
 from web3 import contract, eth
 from Handler.users_h import UsersHandler
@@ -376,20 +377,30 @@ def get_offer_count():
 def send_payment():
     data = request.json
 
-    sender_eth = data['sender_eth']
+    sender_id = data['sender_id']
+    receiver_id = data['receiver_id']
+    loan_id = data['loan_id']
     amount = data['amount']
-    paymentNumber = data['paymentNumber']
-    contractHash = data['contractHash']
-    evidenceHash = str(data['evidenceHash'])
+    evidenceHash = data['evidenceHash']
 
-    return jsonify(ok=True)
+    payment_id = PaymentsHandler.insert_payment(sender_id, receiver_id, loan_id, amount, False, evidenceHash)
+
+    return jsonify(payment_id=payment_id)
 
 @app.route('/api/validate-payment', methods=['POST'])
 def validate_payment():
     # PARAMS: contractHash, paymentNumber, sender, evidenceHash
     data = request.json
 
-    return jsonify(isvalid=False)
+    sender_id = data['sender_id']
+    receiver_id = data['receiver_id']
+    payment_id = data['payment_id']
+    amount = data['amount']
+    evidenceHash = data['evidenceHash']
+
+    isValid = PaymentsHandler.validate_payment(payment_id, sender_id, evidenceHash)
+
+    return jsonify(isvalid=isValid)
 
 @app.route('/api/user-payments', methods=['GET'])
 def get_all_user_payments():
