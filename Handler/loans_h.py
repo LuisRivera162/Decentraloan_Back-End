@@ -44,6 +44,17 @@ class LoansHandler:
             result_list.append(result)
         return jsonify(Loans=result_list)
 
+    def get_all_unaccepted_user_loans(self, user_id):
+        dao = LoansDAO()
+        user_dao = UsersDAO()
+        loans = dao.get_all_unaccepted_user_loans(user_id)
+        result_list = []
+        for row in loans:
+            result = self.build_loan_dict(row)
+            result['username'] = user_dao.get_username(row[1])
+            result_list.append(result)
+        return jsonify(Loans=result_list)
+
     def get_all_user_loans(self, uid):
         dao = LoansDAO()
         user_dao = UsersDAO()
