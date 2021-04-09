@@ -19,6 +19,7 @@ class LoansHandler:
         result['balance'] = row[10]
         result['est_total_interest'] = row[11]
         result['platform'] = row[12]
+        result['state'] = row[13]
         return result
 
     def insert_loan(self, loan_amount, lender, borrower, interest, time_frame, platform):

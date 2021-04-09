@@ -242,50 +242,14 @@ def create_loan():
         time_frame = data['time_frame']
         platform = int(data['platform'])
         lender = data['lender']
-        lender_eth = data['lender_eth']
-
-        # build transaction
-        # unsigned_txn = w3.eth.contract(
-        #     abi=decentraloan_contract_abi,
-        #     bytecode=decentraloan_contract_bytecode)\
-        #     .constructor(
-        #         lender_eth,
-        #         loan_amount,
-        #         int(interest*100),
-        #         time_frame,
-        #         platform
-        # ).buildTransaction({
-        #     'gas': 4000000,
-        #     'gasPrice': w3.eth.gas_price,
-        #     'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
-        # })
-
-        # sign transaction
-        # signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
-
-        # send eth transaction and wait for response
-        # txn_receipt = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-        # contractReceipt = w3.eth.waitForTransactionReceipt(txn_receipt)
-
-        # if contractReceipt['contractAddress']:
-            # Save loan to DB
         
         loan_id = LoansHandler.insert_loan(
             loan_amount, lender, None, interest, time_frame, platform)
+        
+        return jsonify(loan_id=loan_id), 200
 
-        if loan_id:
-            LoansHandler.edit_loan(
-                loan_id[0], loan_amount, interest, time_frame, platform, '0x000000000000000')
-
-            return jsonify(contractAddress='0x000000000000000')
-        else:
-            return jsonify(Error="Invalid credentials."), 404
-
-    #     else:
-    #         return jsonify(Error="Error inserting to the blockchain"), 404
-
-    # else:
-    #     return jsonify(Error="Method not allowed."), 405
+    else:
+        return jsonify(Error="Method not allowed."), 405
 
 
 @app.route('/api/loans', methods=['GET'])
@@ -300,6 +264,9 @@ def get_all_user_loans():
     user_id = request.args.get('user_id')
     if user_id:
         userLoans = LoansHandler.get_all_user_loans(user_id)
+
+        for i, loan in enumerate(userLoans):
+            userLoans[i]['offers'] = OffersHandler.get_all_loan_offers(loan['loan_id'])
 
         return jsonify(userLoans), 200
     else:
