@@ -2,8 +2,6 @@
 # Needs DEV_KETH_PRIVATE_KEY, WEB3_INFURA_PROJECT_ID and WEB3_INFURA_API_SECRET set as env variables
 # project WILL NOT be able to connect the the blockchain if not set!
 # run env.bat to populate this data
-from DAO.payments import PaymentsDAO
-from DAO.loans import LoansDAO
 from web3 import contract, eth
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
@@ -324,7 +322,7 @@ def create_offer():
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
-
+        
         result = OffersHandler.create_offer(
             loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None)
 
