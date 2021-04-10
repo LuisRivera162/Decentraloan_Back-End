@@ -22,11 +22,16 @@ class ParticipantHandler:
             result_list.append(result)
         return jsonify(Participants=result_list)
 
+    def get_participant(self, user_id):
+        dao = ParticipantDAO()
+        result = dao.get_participant(user_id)
+        return jsonify(Participant=result)
+
     # POST
     def insert_participant(lender_id, borrower_id, loan_id):
         dao = ParticipantDAO()
         try:
-            dao.insert_participant(lender_id, borrower_id, loan_id)
+            dao.insert_participant(int(lender_id), int(borrower_id), int(loan_id))
         except:
             return jsonify("Error processing, query."), 400
 

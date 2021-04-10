@@ -21,7 +21,16 @@ class ParticipantDAO:
             result.append(row)
         return result
 
-    
+    def get_participant(self, user_id):
+        cursor = self.conn.cursor()
+        query = f'select * from PARTICIPANT where lender_id = {user_id} or borrower_id = {user_id};'
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return None
+
     # POST
     def insert_participant(self, lender_id, borrower_id, loan_id):
         cursor = self.conn.cursor()
