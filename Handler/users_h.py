@@ -101,7 +101,9 @@ class UsersHandler:
     def validate_user_login(self, email, password):
         dao = UsersDAO()
         passw = dao.get_user_password_hash(email)
-        if passw and check_password_hash(passw, password):
+        if not passw:
+            return -1
+        if check_password_hash(passw, password):
             uid = dao.get_user_by_email_or_username(email)
             return uid
         else:

@@ -181,8 +181,13 @@ def login():
         email = data['email']
         password = data['password']
         uid = UsersHandler.validate_user_login(email, password)
+
+        if uid == -1:
+            return jsonify(Error="User not found."), 404
+
         lender = UsersHandler.get_user(uid).get("lender")
         wallet = UsersHandler.get_user(uid).get("wallet")
+        
         if uid:
             return jsonify(email=email, localId=uid, status='success', wallet=wallet, lender=lender)
         else:
@@ -473,12 +478,12 @@ def accept_offer():
     data = request.json
 
     offer_id = data['offer_id']
-    contractHash = data['contractHash']
+    # contractHash = data['contractHash']
 
     _offer = OffersHandler.get_offer(offer_id=offer_id)
 
     # _lender = UsersHandler.get_user(uid=_offer['lender_id'])
-    _borrower = UsersHandler.get_user(uid=_offer['borrower_id'])
+    # _borrower = UsersHandler.get_user(uid=_offer['borrower_id'])
 
     # initialize loan contract object from address and abi
     # decentraloan_contract = w3.eth.contract(
