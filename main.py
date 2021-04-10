@@ -435,13 +435,13 @@ def get_all_user_payments():
 def withdraw_loan():
     data = request.json
 
-    contractHash = data['contractHash']
+    loan_id = data['loan_id']
 
     # 1. rescind all offers related to loan in DB
-    OffersHandler.delete_all_loans_offers(contractHash)
+    OffersHandler.delete_all_loans_offers(loan_id)
 
     # 2. remove loan from DB
-    LoansHandler.delete_loan(contractHash)
+    LoansHandler.delete_loan(loan_id)
     
     return jsonify(status='ok')
 
@@ -485,40 +485,11 @@ def accept_offer():
     # _lender = UsersHandler.get_user(uid=_offer['lender_id'])
     # _borrower = UsersHandler.get_user(uid=_offer['borrower_id'])
 
-    # initialize loan contract object from address and abi
-    # decentraloan_contract = w3.eth.contract(
-    #     address=contractHash,
-    #     abi=decentraloan_contract_abi)
-
-    # # build transaction
-    # unsigned_txn = decentraloan_contract.functions.\
-    #     Deal(
-    #         _borrower['wallet'],
-    #         int(_offer['amount']),
-    #         int(_offer['interest'] * 100),
-    #         _offer['months']
-    #     ).buildTransaction({
-    #         'gas': 4000000,
-    #         'gasPrice': w3.eth.gas_price,
-    #         'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
-    #     })
-
-    # # sign transaction
-    # signed_txn = _backend_eth_account.sign_transaction(unsigned_txn)
-
-    # # return transaction hash after being sent and mined
-    # txn_address = w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-    # txn_receipt = w3.eth.waitForTransactionReceipt(txn_address)
-    # if txn_receipt['status'] != None:
-    #     if contractHash != '':
     if _offer:
         ParticipantHandler.insert_participant(lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
         return OffersHandler.accept_offer(offer_id)
     else:
         return jsonify(Error="Offer not found."), 404
-
-    # else:
-    #     return jsonify(Error="Error inserting to the blockchain"), 405
 
 
 @app.route('/api/rejected-offers', methods=['GET'])

@@ -111,9 +111,8 @@ class LoansHandler:
             return None
 
     # DELETE
-    def delete_loan(self, contractHash):
+    def delete_loan(self, loan_id):
         dao = LoansDAO()
-        loan_id = self.get_loan_by_address(contractHash)
         result = dao.delete_loan(loan_id)
         if result: 
             return loan_id, 200

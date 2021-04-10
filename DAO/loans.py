@@ -73,7 +73,7 @@ class LoansDAO:
         cursor = self.conn.cursor()
         query = f"select loan_id from loans where eth_address = '{eth_address}';"
         cursor.execute(query)
-        result = cursor.fetchone()[0]
+        result = cursor.fetchone()
         if result:
             return result
         else:
