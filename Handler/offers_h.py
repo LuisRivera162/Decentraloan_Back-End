@@ -17,17 +17,17 @@ class OffersHandler:
         result['accepted'] = row[8]
         result['expiration_date'] = row[9]
         result['rejected'] = row[10]
-
+        result['platform'] = row[11]
         return result
 
     # POST
-    def create_offer(self, loan_id, borrower_id, lender_id, amount, months, interest, expiration_date):
+    def create_offer(self, loan_id, borrower_id, lender_id, amount, months, interest, expiration_date, platform):
         dao = OffersDAO()
         offer = dao.get_borrower_loan_offer(borrower_id, loan_id)
         if offer: 
-            return dao.edit_offer(offer, amount, months, interest, expiration_date), 200
+            return dao.edit_offer(offer, amount, months, interest, expiration_date, platform), 200
         try:
-            return dao.create_offer(loan_id, borrower_id, lender_id, amount, months, interest, expiration_date), 200
+            return dao.create_offer(loan_id, borrower_id, lender_id, amount, months, interest, expiration_date, platform), 200
         except:
             return jsonify("Error processing, query."), 400
 
@@ -122,9 +122,9 @@ class OffersHandler:
 
 
     # PUT
-    def edit_offer(self, offer_id, loan_amount, time_frame, interest, expiration_date):
+    def edit_offer(self, offer_id, loan_amount, time_frame, interest, expiration_date, platform):
         dao = OffersDAO()
-        offer_id = dao.edit_offer(offer_id, loan_amount, time_frame, interest, expiration_date)
+        offer_id = dao.edit_offer(offer_id, loan_amount, time_frame, interest, expiration_date, platform)
         if offer_id: 
             return offer_id, 200
         else: 

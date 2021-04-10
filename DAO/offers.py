@@ -80,11 +80,11 @@ class OffersDAO:
 
     # POST
     # expiration date not used, not sure how to use. 
-    def create_offer(self, loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, expiration_date):
+    def create_offer(self, loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, expiration_date, platform):
         cursor = self.conn.cursor()
-        query = "insert into OFFER(LOAN_ID, BORROWER_ID, LENDER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE) \
-                values (%s, %s, %s, %s, %s, %s, now(), now()) returning offer_id;"
-        cursor.execute(query, (loan_id, borrower_id, lender_id, loan_amount, time_frame, interest))
+        query = "insert into OFFER(LOAN_ID, BORROWER_ID, LENDER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE, PLATFORM) \
+                values (%s, %s, %s, %s, %s, %s, now(), now(), %s) returning offer_id;"
+        cursor.execute(query, (loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, platform))
         offer_id = cursor.fetchone()[0]
         self.conn.commit()
         return offer_id
@@ -92,9 +92,10 @@ class OffersDAO:
     
     # PUT
     # expiration date not used, not sure how to use. 
-    def edit_offer(self, offer_id, amount, months, interest, expiration_date):
+    def edit_offer(self, offer_id, amount, months, interest, expiration_date, platform):
         cursor = self.conn.cursor()
-        query = f"update offer set amount = {amount}, interest = {int(interest) / 100}, months = {months}, rejected = false where offer_id = {offer_id};"
+        query = f"update offer set amount = {amount}, interest = {int(interest) / 100}, months = {months}, rejected = false, platform = {platform} where offer_id = {offer_id};"
+        print(query)
         cursor.execute(query)
         self.conn.commit()
         return offer_id
