@@ -66,6 +66,7 @@ LoansHandler = LoansHandler()
 OffersHandler = OffersHandler()
 PaymentsHandler = PaymentsHandler()
 NotificationsHandler = NotificationsHandler()
+ParticipantHandler = ParticipantHandler()
 
 # Initialize Web3 Account object from private key
 # This account is internal and will pay for TX fees
@@ -344,7 +345,7 @@ def create_offer():
         platform = data['platform']
         
         result = OffersHandler.create_offer(
-            loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None)
+            loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None, platform)
 
         if result:
             return jsonify(Status="CREATE OFFER Success."), 200
@@ -355,13 +356,12 @@ def create_offer():
         data = request.json
         offer_id = data['offer_id']
         loan_amount = data['loan_amount']
-        interest = data['interest'] * 100
+        interest = data['interest']
         time_frame = data['time_frame']
         # expiration_date = data['expiration_date']
         platform = data['platform']
 
-        result = OffersHandler.edit_offer(
-            offer_id, loan_amount, interest, time_frame, None)
+        result = OffersHandler.edit_offer(offer_id, loan_amount, time_frame, interest, None, platform)
 
         if result:
             return jsonify(Response="EDIT OFFER Success"), 200
@@ -473,23 +473,26 @@ def reject_offer():
     else:
         return jsonify(Error="Offer not found."), 404
 
+
 @app.route('/api/accept-offer', methods=['PUT'])
 def accept_offer():
     data = request.json
-
     offer_id = data['offer_id']
-    # contractHash = data['contractHash']
-
     _offer = OffersHandler.get_offer(offer_id=offer_id)
-
-    # _lender = UsersHandler.get_user(uid=_offer['lender_id'])
-    # _borrower = UsersHandler.get_user(uid=_offer['borrower_id'])
-
     if _offer:
         ParticipantHandler.insert_participant(lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
         return OffersHandler.accept_offer(offer_id)
     else:
         return jsonify(Error="Offer not found."), 404
+
+
+@app.route('/api/get-participant', methods=['GET'])
+def get_participant():
+    user_id = request.args.get('user_id')
+    if user_id:
+        return ParticipantHandler.get_participant(user_id), 200
+    else:
+        return jsonify(Error="User not found."), 404
 
 
 @app.route('/api/rejected-offers', methods=['GET'])
