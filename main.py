@@ -412,14 +412,17 @@ def validate_payment():
     data = request.json
 
     sender_id = data['sender_id']
-    receiver_id = data['receiver_id']
     payment_id = data['payment_id']
-    amount = data['amount']
-    evidenceHash = data['evidenceHash']
+    evidenceHash = str(data['evidenceHash'])
 
     isValid = PaymentsHandler.validate_payment(payment_id, sender_id, evidenceHash)
 
-    return jsonify(isvalid=isValid)
+    print(isValid)
+
+    if isValid > 0:
+        return jsonify(isvalid=True)
+
+    return jsonify(isvalid=False)
 
 @app.route('/api/user-payments', methods=['GET'])
 def get_all_user_payments():
