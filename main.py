@@ -187,7 +187,7 @@ def login():
 
         lender = UsersHandler.get_user(uid).get("lender")
         wallet = UsersHandler.get_user(uid).get("wallet")
-        
+
         if uid:
             return jsonify(email=email, localId=uid, status='success', wallet=wallet, lender=lender)
         else:
@@ -299,13 +299,13 @@ def get_single_user_loans():
     elif request.method == 'PUT':
         data = request.json
         loan_id = data['loan_id']
-        loan_amount = data['loan_amount']
+        amount = data['amount']
         interest = data['interest']
-        time_frame = data['time_frame']
+        months = data['months']
         platform = data['platform']
 
         result = LoansHandler.edit_loan(
-            loan_id, loan_amount, interest, time_frame, platform)
+            loan_id, amount, interest, months, platform)
 
         if result:
             return jsonify(Response="Success"), 200
