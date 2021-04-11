@@ -94,8 +94,7 @@ class OffersDAO:
     # expiration date not used, not sure how to use. 
     def edit_offer(self, offer_id, amount, months, interest, expiration_date, platform):
         cursor = self.conn.cursor()
-        query = f"update offer set amount = {amount}, interest = {int(interest) / 100}, months = {months}, rejected = false, platform = {platform} where offer_id = {offer_id};"
-        print(query)
+        query = f"update offer set amount = {amount}, interest = {interest}, months = {months}, rejected = false, platform = {platform} where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id
@@ -110,6 +109,13 @@ class OffersDAO:
     def reject_offer(self, offer_id):
         cursor = self.conn.cursor()
         query = f"update offer set rejected = true where offer_id = {offer_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return offer_id
+
+    def reject_all_loan_offers(self, offer_id, loan_id):
+        cursor = self.conn.cursor()
+        query = f"update offer set rejected = true where loan_id = {loan_id} and offer_id != {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id

@@ -138,6 +138,14 @@ class OffersHandler:
         else: 
             return None
 
+    def reject_all_loan_offers(self, offer_id, loan_id):
+        dao = OffersDAO()
+        status = dao.reject_all_loan_offers(offer_id, loan_id)
+        if status: 
+            return jsonify(offer_id=offer_id), 200
+        else: 
+            return None
+
     def accept_offer(self, offer_id):
         dao = OffersDAO()
         offer_id = dao.accept_offer(offer_id)

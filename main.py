@@ -258,8 +258,7 @@ def create_loan():
 
 @app.route('/api/loans', methods=['GET'])
 def get_all_loans():
-    user_id = request.args.get('user_id')
-    return LoansHandler.get_all_loans(user_id)
+    return LoansHandler.get_all_loans()
 
 
 @app.route('/api/user-loans', methods=['GET'])
@@ -484,6 +483,8 @@ def accept_offer():
     _offer = OffersHandler.get_offer(offer_id=offer_id)
     if _offer:
         ParticipantHandler.insert_participant(lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
+        LoansHandler.accept_loan_offer(_offer['loan_id'], _offer['borrower_id'], _offer['amount'], _offer['months'], _offer['interest'], _offer['platform'])
+        OffersHandler.reject_all_loan_offers(offer_id, _offer['loan_id'])
         return OffersHandler.accept_offer(offer_id)
     else:
         return jsonify(Error="Offer not found."), 404

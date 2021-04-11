@@ -12,9 +12,9 @@ class LoansDAO:
         self.conn = psycopg2._connect(connection_url)
 
     # GET
-    def get_all_loans(self, user_id):
+    def get_all_loans(self):
         cursor = self.conn.cursor()
-        query = f'select * from loans;'
+        query = f'select * from loans where accepted = false;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -23,7 +23,7 @@ class LoansDAO:
 
     def get_all_user_loans(self, uid):
         cursor = self.conn.cursor()
-        query = f'select * from loans where lender = {uid} or borrower = {uid};'
+        query = f'select * from loans where lender = {uid} or borrower = {uid} order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -32,7 +32,7 @@ class LoansDAO:
 
     def get_all_unaccepted_user_loans(self, uid):
         cursor = self.conn.cursor()
-        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and accepted = false;'
+        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and accepted = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -82,7 +82,8 @@ class LoansDAO:
     # PUT
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
         cursor = self.conn.cursor()
-        query = f"update loans set amount = {loan_amount}, interest = {int(interest) / 100}, months = {time_frame}, platform = {platform} where loan_id = {loan_id};"
+        query = f"update loans set amount = {loan_amount}, interest = {int(interest) / 100}, months = {time_frame}, \
+            platform = {platform} where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
         return loan_id
@@ -94,10 +95,21 @@ class LoansDAO:
         self.conn.commit()
         return loan_id
 
+    def accept_loan_offer(self, loan_id, borrower_id, amount, months, interest, platform):
+        cursor = self.conn.cursor()
+        query = f"update loans set amount = {amount}, months = {months}, interest = {interest}, platform = {platform}, \
+            accepted = true, borrower = {borrower_id} where loan_id = {loan_id};"
+        print(query)
+        cursor.execute(query)
+        self.conn.commit()
+        return loan_id
+
+
     # POST 
     def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM):
         cursor = self.conn.cursor()
-        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, PLATFORM, created_on) values (%s, %s, %s, %s, %s, %s, now()) returning loan_id;"
+        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, PLATFORM, created_on) \
+            values (%s, %s, %s, %s, %s, %s, now()) returning loan_id;"
         cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM))
         loan_id = cursor.fetchone()[0]
         self.conn.commit()
