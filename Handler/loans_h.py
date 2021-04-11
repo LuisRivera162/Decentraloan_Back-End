@@ -33,10 +33,10 @@ class LoansHandler:
         return loan_id, 200
 
     # GET
-    def get_all_loans(self, user_id):
+    def get_all_loans(self):
         dao = LoansDAO()
         user_dao = UsersDAO()
-        loans = dao.get_all_loans(user_id)
+        loans = dao.get_all_loans()
         result_list = []
         for row in loans:
             result = self.build_loan_dict(row)
@@ -105,6 +105,15 @@ class LoansHandler:
     def edit_loan_state(self, loan_id, state):
         dao = LoansDAO()
         loan_id = dao.edit_loan_state(loan_id, state)
+        if loan_id: 
+            return loan_id, 200
+        else: 
+            return None
+    
+
+    def accept_loan_offer(self, loan_id, borrower_id, amount, months, interest, platform):
+        dao = LoansDAO()
+        loan_id = dao.accept_loan_offer(loan_id, borrower_id, amount, months, interest, platform)
         if loan_id: 
             return loan_id, 200
         else: 
