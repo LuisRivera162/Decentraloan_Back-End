@@ -23,7 +23,7 @@ class LoansDAO:
 
     def get_all_user_loans(self, uid):
         cursor = self.conn.cursor()
-        query = f'select * from loans where lender = {uid} or borrower = {uid};'
+        query = f'select * from loans where lender = {uid} or borrower = {uid} order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -32,7 +32,7 @@ class LoansDAO:
 
     def get_all_unaccepted_user_loans(self, uid):
         cursor = self.conn.cursor()
-        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and accepted = false;'
+        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and accepted = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
