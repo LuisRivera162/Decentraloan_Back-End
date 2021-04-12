@@ -44,16 +44,25 @@ class PaymentsDAO:
         query = "insert into PAYMENTS(loan_id, sender_id, receiver_id, amount, validated, validation_hash, payment_date) values (%s, %s, %s, %s, %s, %s, now()) returning payment_id;"
         cursor.execute(query, (loan_id, sender, receiver, amount, validated, validation_hash))
         payment_id = cursor.fetchone()[0]
+
+        query = 'UPDATE LOANS SET balance = %s where loan_id = %s'
+        cursor.execute(query,(amount, loan_id))
+
         self.conn.commit()
 
         return payment_id
 
     def validate_payment(self, payment_id):
         cursor = self.conn.cursor()
-        query = f'update PAYMENTS set validated=true where payment_id = {payment_id} returning payment_id'
+        query = f'update PAYMENTS set validated=true where payment_id = {payment_id} returning payment_id, loan_id'
         cursor.execute(query)
 
-        payment_id = cursor.fetchone()[0]
+        cursor_res = cursor.fetchone()
+        payment_id = cursor_res[0]
+        loan_id = cursor_res[1]
+
+        query = 'UPDATE LOANS SET state = %s where loan_id = %s'
+        cursor.execute(query,(2, loan_id))
 
         self.conn.commit()
 
