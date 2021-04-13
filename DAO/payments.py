@@ -30,6 +30,15 @@ class PaymentsDAO:
             result.append(row)
         return result
 
+    def get_loan_payments(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f'select * from payments where loan_id = {loan_id} order by payment_date DESC;'
+        cursor.execute(query)
+        result = []
+        for row in cursor:
+            result.append(row)
+        return result
+
     def get_payment(self, payment_id):
         cursor = self.conn.cursor()
         query = f'select * from payments where payment_id = {payment_id};'

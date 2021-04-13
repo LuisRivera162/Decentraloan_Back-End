@@ -25,6 +25,15 @@ class PaymentsHandler:
             result_list.append(result)
         return jsonify(Payments=result_list)
 
+    def get_loan_payments(self, loan_id):
+        dao = PaymentsDAO()
+        offers = dao.get_loan_payments(loan_id)
+        result_list = []
+        for row in offers:
+            result = self.build_payment_dict(row)
+            result_list.append(result)
+        return jsonify(Payments=result_list)
+
     def get_all_user_payments(self, borrower_id):
         dao = PaymentsDAO()
         users_dao = UsersDAO()

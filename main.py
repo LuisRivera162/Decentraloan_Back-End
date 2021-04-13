@@ -432,6 +432,15 @@ def get_all_user_payments():
     else:
         return jsonify(Error="User not found."), 404
 
+@app.route('/api/loan-payments', methods=['GET'])
+def get_all_loan_payments():
+
+    loan_id = request.args.get('loan_id')
+    if loan_id:
+        return PaymentsHandler.get_loan_payments(loan_id), 200
+    else:
+        return jsonify(Error="Loan not found."), 404
+
 
 @app.route('/api/withdraw-loan', methods=['POST'])
 def withdraw_loan():
