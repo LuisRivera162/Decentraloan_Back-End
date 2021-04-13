@@ -38,7 +38,6 @@ class PaymentsHandler:
 
     def insert_payment(self, sender, receiver, loan_id, amount, validated, validation_hash):
         dao = PaymentsDAO()
-        
         payment_id = dao.insert_payment(sender, receiver, loan_id, amount, validated, validation_hash)
 
         return payment_id
@@ -47,11 +46,9 @@ class PaymentsHandler:
         dao = PaymentsDAO()
 
         result = dao.get_payment(payment_id)
-        payment = None
 
         if result:
             payment = self.build_payment_dict(result)
-
             # check if sender not same person
             if payment['sender_id'] != sender and payment['receiver_id'] == sender:
                 if validation_hash != payment['validation_hash']:
@@ -60,7 +57,5 @@ class PaymentsHandler:
                 return dao.validate_payment(payment_id)
             else:
                 return -2 # sender not part of this transaction, abort..
-
-
 
         return -1 # no payment found with supplied payment_id

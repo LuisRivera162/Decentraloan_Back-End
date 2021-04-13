@@ -81,7 +81,6 @@ class OffersHandler:
             result['interest_orig'] = loan_orig[5]
 
             result_list.append(result)
-            print(result)
         return jsonify(rejectedOffers=result_list)
 
 

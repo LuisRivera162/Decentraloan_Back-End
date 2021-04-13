@@ -99,7 +99,6 @@ class LoansDAO:
         cursor = self.conn.cursor()
         query = f"update loans set amount = {amount}, months = {months}, interest = {interest}, platform = {platform}, \
             accepted = true, borrower = {borrower_id} where loan_id = {loan_id};"
-        print(query)
         cursor.execute(query)
         self.conn.commit()
         return loan_id
