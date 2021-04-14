@@ -145,6 +145,107 @@ def login():
 
 ![DATABASE ERD](images/DATABASE_ERD.PNG)
 
+## Backend Routes: 
+
+```
+# verify if connected to Infura
+# return _backend_account address
+@app.route('/checkonline')
+
+# Gets all users
+@app.route('/users', methods=['GET'])
+
+# requires a user_id returns user data
+@app.route('/api/user', methods=['GET'])
+
+#gets or creates notifications returns notification or id
+@app.route('/api/notifications', methods=['GET', 'POST'])
+
+requires email and username and check if these exist in the DB
+@app.route('/api/check-emails_user', methods=['GET'])
+
+requires all info of the user, returns user_id
+@app.route('/api/register', methods=['POST'])
+
+# validates user login data and logs them in
+@app.route('/api/login', methods=['POST'])
+
+# requires data to be changed returns email user_id and the status
+@app.route('/api/edituser', methods=['PUT'])
+
+#requires new and old password and the user_id, changes the users password
+@app.route('/api/editpass', methods=['PUT'])
+
+# validates user login data and logs them out
+@app.route('/api/logout')
+
+# creates a contract for the loan created returns contract adress
+@app.route('/api/create-loan', methods=['POST'])
+
+# gets all loans
+@app.route('/api/loans', methods=['GET'])
+
+# gets loan data for a provided user_id
+@app.route('/api/user-loans', methods=['GET'])
+
+# get all the loans of a user, requires user_id 
+@app.route('/api/user-loan-count', methods=['GET'])
+
+#gets a loan from a loan_id
+@app.route('/api/user-loan', methods=['GET', 'PUT'])
+
+#create or edit an offer happening between loaner and borrower
+@app.route('/api/create-offer', methods=['POST', 'PUT'])
+
+# gets all offers or a specific user
+@app.route('/api/pending-offers', methods=['GET'])
+
+# get total number of offers
+@app.route('/api/total-offers', methods=['GET'])
+
+# creates a payment and updates/creates a contract to save this information
+@app.route('/api/payment/send', methods=['POST'])
+
+# validate that all the payment info is correct
+@app.route('/api/eth/payment/validate', methods=['POST'])
+
+# gets the loan contract to get the info
+@app.route('/api/eth/loan-info', methods=['GET'])
+
+# gets the loan contract to dela with payment data
+@app.route('/api/eth/loan-payments', methods=['GET'])
+
+# gets the loan contract to get activity and sort via timestamp
+@app.route('/api/eth/loan-activity', methods=['GET'])
+
+# gets all user payments
+@app.route('/api/user-payments', methods=['GET'])
+
+# deletes a loan
+@app.route('/api/withdraw-loan', methods=['POST'])
+
+# deletes an offer
+@app.route('/api/withdraw-offer', methods=['DELETE'])
+
+# deletes all offers on a loan
+@app.route('/api/delete-loan-offers', methods=['DELETE'])
+
+# rejects the offer
+@app.route('/api/reject-offer', methods=['PUT'])
+
+# accept the offer
+@app.route('/api/accept-offer', methods=['PUT'])
+
+# gets all rejected offers from a user
+@app.route('/api/rejected-offers', methods=['GET'])
+
+# gets all payments done
+@app.route('/payments', methods=['GET'])
+
+
+```
+
+
 ## Credits
 
 ### Luis G. Rivera Gonzalez (luis.rivera162@upr.edu) 

@@ -84,7 +84,6 @@ class OffersHandler:
             print(result)
         return jsonify(rejectedOffers=result_list)
 
-
     def get_offer_count(self, user_id):
         dao = OffersDAO()
         offers = dao.get_offer_count(user_id)
@@ -119,7 +118,6 @@ class OffersHandler:
             return False
         else:
             return True
-
 
     # PUT
     def edit_offer(self, offer_id, loan_amount, time_frame, interest, expiration_date):

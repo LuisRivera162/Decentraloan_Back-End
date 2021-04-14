@@ -2,6 +2,7 @@ from DAO.loans import LoansDAO
 from DAO.users import UsersDAO
 from flask import jsonify
 
+
 class LoansHandler:
 
     def build_loan_dict(self, row):
@@ -21,9 +22,7 @@ class LoansHandler:
         return result
 
     def insert_loan(self, loan_amount, lender, borrower, interest, time_frame):
-        # NEED TO HANDLE IF USER EXISTS
         dao = LoansDAO()
-        
         try:
             loan_id = dao.insert_loan(lender, borrower, loan_amount, time_frame, interest/100)
         except:
@@ -53,7 +52,6 @@ class LoansHandler:
             result = self.build_loan_dict(row)
             result['username'] = username
             result_list.append(result)
-        # return jsonify(Loans=result_list)
         return result_list
 
     def get_all_user_loan_count(self, uid):

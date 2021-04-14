@@ -2,6 +2,7 @@ from DAO.payments import PaymentsDAO
 from DAO.users import UsersDAO
 from flask import jsonify
 
+
 class PaymentsHandler:
 
     def build_payment_dict(self, row):

@@ -56,8 +56,8 @@ class UsersHandler:
         dao = UsersDAO()
         result = dao.check_emailsUsersname(email, username)
         results = {}
-        results['Result1'] = result[0] #duplicate email
-        results['Result2'] = result[1] #duplicate username
+        results['Result1'] = result[0]  # duplicate email
+        results['Result2'] = result[1]  # duplicate username
         return results
 
     def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone, lender):

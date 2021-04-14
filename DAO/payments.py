@@ -12,7 +12,11 @@ class PaymentsDAO:
         self.conn = psycopg2._connect(connection_url)
 
     # GET
-    def get_all_payments(self): 
+    def get_all_payments(self):
+        """
+        gets all payments
+        :return: list of payments
+        """
         cursor = self.conn.cursor()
         query = 'select * from payments;'
         cursor.execute(query)
@@ -22,6 +26,11 @@ class PaymentsDAO:
         return result
 
     def get_all_user_payments(self, user_id):
+        """
+        get all payments by a user
+        :param user_id: user id of sender or receiver
+        :return: all payments in order by date descending
+        """
         cursor = self.conn.cursor()
         query = f'select * from payments where sender_id = {user_id} or receiver_id = {user_id} order by payment_date DESC;'
         cursor.execute(query)

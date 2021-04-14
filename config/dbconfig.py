@@ -2,6 +2,6 @@
 pg_config = {
     'user' : 'postgres',
     'passwd' : 'password',
-    'dbname' : 'capstone_project',
+    'dbname' : 'postgres',
     'port' : '5432'
 }

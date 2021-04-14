@@ -13,6 +13,11 @@ class NotificationsDAO:
 
     # GET
     def get_all_user_notifications(self, user_id):
+        """
+        gets all notifications of a user
+        :param user_id: user id of user
+        :return: list of notifications
+        """
         cursor = self.conn.cursor()
         query = f'select * from notifications where user_id = {user_id} order by created_on DESC;'
         cursor.execute(query)
@@ -23,6 +28,13 @@ class NotificationsDAO:
 
     # POST
     def create_notification(self, user_id, message, notification_type):
+        """
+        creates a notification
+        :param user_id: user that created the notification
+        :param message: text for notification
+        :param notification_type: type of notification
+        :return: notification id
+        """
         cursor = self.conn.cursor()
         query = "insert into NOTIFICATIONS(user_id, message, created_on, notification_type) \
                 values (%s, %s, now(), %s) returning notification_id;"
