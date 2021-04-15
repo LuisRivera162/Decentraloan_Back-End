@@ -400,8 +400,9 @@ def send_payment():
     loan_id = data['loan_id']
     amount = data['amount']
     evidenceHash = data['evidenceHash']
+    paymentNumber = data['paymentNumber']
 
-    payment_id = PaymentsHandler.insert_payment(sender_id, receiver_id, loan_id, amount, False, evidenceHash)
+    payment_id = PaymentsHandler.insert_payment(paymentNumber, sender_id, receiver_id, loan_id, amount, False, evidenceHash)
 
     return jsonify(payment_id=payment_id)
 

@@ -32,7 +32,7 @@ class PaymentsDAO:
 
     def get_loan_payments(self, loan_id):
         cursor = self.conn.cursor()
-        query = f'select * from payments where loan_id = {loan_id} order by payment_date DESC;'
+        query = f'select * from payments where loan_id = {loan_id} order by payment_date ASC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -48,13 +48,17 @@ class PaymentsDAO:
         
         return result
 
-    def insert_payment(self, sender, receiver, loan_id, amount, validated, validation_hash):
+    def insert_payment(self, paymentNumber, sender, receiver, loan_id, amount, validated, validation_hash):
         cursor = self.conn.cursor()
         query = "insert into PAYMENTS(loan_id, sender_id, receiver_id, amount, validated, validation_hash, payment_date) values (%s, %s, %s, %s, %s, %s, now()) returning payment_id;"
         cursor.execute(query, (loan_id, sender, receiver, amount, validated, validation_hash))
         payment_id = cursor.fetchone()[0]
 
-        query = 'UPDATE LOANS SET balance = %s where loan_id = %s'
+        query = 'UPDATE LOANS SET balance = balance - %s where loan_id = %s'
+
+        if paymentNumber == 0:
+            query = 'UPDATE LOANS SET balance = %s where loan_id = %s'
+
         cursor.execute(query,(amount, loan_id))
 
         self.conn.commit()
@@ -70,7 +74,7 @@ class PaymentsDAO:
         payment_id = cursor_res[0]
         loan_id = cursor_res[1]
 
-        query = 'UPDATE LOANS SET state = %s where loan_id = %s'
+        query = 'update LOANS set state = %s, payment_number = payment_number + 1 where loan_id = %s'
         cursor.execute(query,(2, loan_id))
 
         self.conn.commit()
