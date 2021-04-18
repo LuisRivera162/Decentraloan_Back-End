@@ -42,6 +42,7 @@ class PaymentsHandler:
         for row in offers:
             result = self.build_payment_dict(row)
             result['receiver_username'] = users_dao.get_username(row[2])
+            result['sender_username'] = users_dao.get_username(row[3])
             result_list.append(result)
         return jsonify(Payments=result_list)
 
