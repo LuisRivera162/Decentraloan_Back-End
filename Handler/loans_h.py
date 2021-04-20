@@ -59,13 +59,16 @@ class LoansHandler:
     def get_all_user_loans(self, uid):
         dao = LoansDAO()
         user_dao = UsersDAO()
-        username = user_dao.get_username(uid)
         loans = dao.get_all_user_loans(uid)
         result_list = []
         for row in loans:
             result = self.build_loan_dict(row)
-            result['lender_username'] = user_dao.get_username(result['lender'])
-            result['borrower_username'] = user_dao.get_username(result['borrower'])
+            lender_username = result['lender']
+            borrower_username = result['borrower']
+            if lender_username:
+                result['lender_username'] = user_dao.get_username(result['lender'])
+            if borrower_username:
+                result['borrower_username'] = user_dao.get_username(result['borrower'])
             result_list.append(result)
         # return jsonify(Loans=result_list)
         return result_list
