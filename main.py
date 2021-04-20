@@ -17,7 +17,7 @@ from flask_cors import CORS, cross_origin
 from flask import (Flask, g, jsonify, session, url_for, request)
 
 from eth_account import Account
-from web3.auto.infura.kovan import w3
+from web3.auto import w3
 import json
 import os
 
@@ -25,8 +25,8 @@ os.system('env.bat')
 DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
-decentraloanplatform_compiled_path = 'build/contracts/DecentraLoanPlatform.json'
-decentraloanplatform_deployed_address = '0x60699b2AeAEd556823b1A325385DA0204a383f17'
+platform_compiled_path = 'build/contracts/DecentraLoanPlatform.json'
+platform_deployed_address = '0x60699b2AeAEd556823b1A325385DA0204a383f17'
 
 decentraloantoken_compiled_path = 'build/contracts/DecentraLoanToken.json'
 decentraloantoken_deployed_address = '0xAE8c01a235f00251C0c579ae442ee460bdCAD030'
@@ -46,7 +46,7 @@ with open(decentraloan_compiled_path) as file:
     decentraloan_contract_bytecode = decentraloan_contract_json['bytecode']
 
 # DecentraLoanPlatform.json
-with open(decentraloanplatform_compiled_path) as file:
+with open(platform_compiled_path) as file:
     platform_contract_json = json.load(file)  # load contract info as JSON
     # fetch contract's abi - necessary to call its functions
     platform_contract_abi = platform_contract_json['abi']
@@ -73,6 +73,7 @@ ParticipantHandler = ParticipantHandler()
 # Initialize Web3 Account object from private key
 # This account is internal and will pay for TX fees
 _backend_eth_account = Account.from_key(DEV_KETH_PRIVATE_KEY)
+platform_contract = w3.eth.contract(address=platform_deployed_address, abi=platform_contract_abi)
 
 
 @app.before_request
@@ -106,7 +107,8 @@ def get_factory():
     return jsonify(
         abi=platform_contract_abi,
         bytecode=platform_contract_bytecode,
-        address=decentraloanplatform_deployed_address)
+        address=platform_deployed_address)
+
 
 @app.route('/api/getloan')
 def get_loan():
@@ -263,7 +265,12 @@ def create_loan():
         platform = int(data['platform'])
         lender = data['lender']
 
-        loan_id = LoansHandler.insert_loan(
+        lender_eth = UsersHandler.get_user(data['lender'])['wallet']
+
+        # create loan contract in the blockchain
+        loan_eth_address = eth_create_loan(lender_eth, loan_amount, int(interest*100), time_frame,  platform)
+
+        loan_id = LoansHandler.insert_loan(loan_eth_address,
             loan_amount, lender, None, interest, time_frame, platform)
 
         return jsonify(loan_id=loan_id), 200
@@ -545,6 +552,124 @@ def get_rejected_offers():
 @app.route('/payments', methods=['GET'])
 def get_all_payments():
     return PaymentsHandler.get_all_payments()
+
+# Blockchain Operations
+
+
+def eth_create_loan(lender, amount, interest, months, platform):
+    unsigned_tx = platform_contract.functions.NewLoan(
+        lender,
+        amount,
+        interest,
+        months,
+        platform
+    ).buildTransaction({
+        'gas': 4000000,
+        'gasPrice': w3.eth.gas_price,
+        'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+    })
+
+    # sign transaction
+    signed_tx = _backend_eth_account.sign_transaction(unsigned_tx)
+
+    # send eth transaction and wait for response
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
+    contractReceipt = w3.eth.waitForTransactionReceipt(tx_hash)
+
+    return contractReceipt['logs'][0]['address']
+
+
+def eth_reach_deal(lender, borrower, loan_id, amount, interest, months, platform):
+    loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
+
+    unsigned_tx = loan_contract.functions.Deal(
+        borrower,
+        amount,
+        interest,
+        months
+    ).buildTransaction({
+        'gas': 4000000,
+        'gasPrice': w3.eth.gas_price,
+        'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+    })
+
+    # sign transaction
+    signed_tx = _backend_eth_account.sign_transaction(unsigned_tx)
+
+    # send eth transaction and wait for response
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
+    contractReceipt = w3.eth.waitForTransactionReceipt(tx_hash)
+
+    return w3.toHex(tx_hash)
+
+
+def eth_withdraw_loan(loan_id):
+    loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
+
+    unsigned_tx = loan_contract.functions.Withdraw().buildTransaction({
+        'gas': 4000000,
+        'gasPrice': w3.eth.gas_price,
+        'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+    })
+
+    # sign transaction
+    signed_tx = _backend_eth_account.sign_transaction(unsigned_tx)
+
+    # send eth transaction and wait for response
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
+    w3.eth.waitForTransactionReceipt(tx_hash)
+
+    return w3.toHex(tx_hash)
+
+
+def eth_send_payment(sender, loan_id, amount, payment_number, evidence_hash):
+    loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
+
+    unsigned_tx = loan_contract.functions.SendPayment(
+        sender,
+        payment_number,
+        amount,
+        evidence_hash
+    ).buildTransaction({
+        'gas': 4000000,
+        'gasPrice': w3.eth.gas_price,
+        'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+    })
+
+    # sign transaction
+    signed_tx = _backend_eth_account.sign_transaction(unsigned_tx)
+
+    # send eth transaction and wait for response
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
+    w3.eth.waitForTransactionReceipt(tx_hash)
+
+    return w3.toHex(tx_hash)
+
+
+def eth_validate_payment(sender, loan_id):
+    loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
+
+    unsigned_tx = loan_contract.functions.ValidateEvidence(
+        sender
+    ).buildTransaction({
+        'gas': 4000000,
+        'gasPrice': w3.eth.gas_price,
+        'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+    })
+
+    # sign transaction
+    signed_tx = _backend_eth_account.sign_transaction(unsigned_tx)
+
+    # send eth transaction and wait for response
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
+    w3.eth.waitForTransactionReceipt(tx_hash)
+
+    return w3.toHex(tx_hash)
 
 
 if __name__ == '__main__':

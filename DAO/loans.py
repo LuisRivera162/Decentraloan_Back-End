@@ -105,11 +105,11 @@ class LoansDAO:
 
 
     # POST 
-    def insert_loan(self, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM):
+    def insert_loan(self, ETH_ADDRESS, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM):
         cursor = self.conn.cursor()
-        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, PLATFORM, created_on) \
-            values (%s, %s, %s, %s, %s, %s, now()) returning loan_id;"
-        cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM))
+        query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, ETH_ADDRESS, PLATFORM, created_on) \
+            values (%s, %s, %s, %s, %s, %s, %s, now()) returning loan_id;"
+        cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, ETH_ADDRESS, PLATFORM))
         loan_id = cursor.fetchone()[0]
         self.conn.commit()
         return loan_id

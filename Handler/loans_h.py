@@ -23,11 +23,11 @@ class LoansHandler:
         result['payment_number'] = row[14]
         return result
 
-    def insert_loan(self, loan_amount, lender, borrower, interest, time_frame, platform):
+    def insert_loan(self, eth_address, loan_amount, lender, borrower, interest, time_frame, platform):
         dao = LoansDAO()
         
         try:
-            loan_id = dao.insert_loan(lender, borrower, loan_amount, time_frame, interest/100, platform)
+            loan_id = dao.insert_loan(eth_address, lender, borrower, loan_amount, time_frame, interest/100, platform)
         except:
             return jsonify("Error processing, query."), 400
 
