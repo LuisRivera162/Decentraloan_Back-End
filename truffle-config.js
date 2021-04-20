@@ -58,12 +58,12 @@ module.exports = {
     // },
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
-    kovan: {
-      provider: () => new HDWalletProvider(mnemonic, `https://kovan.infura.io/v3/79018cb571954f159e09d92addd6803e`),
-      network_id: 42,       // Kovan's id
-      gasPrice: 20000000000, // gas price
-      gas: 3716887 ,        // gas limit
-    },
+    // kovan: {
+    //   provider: () => new HDWalletProvider(mnemonic, `https://kovan.infura.io/v3/79018cb571954f159e09d92addd6803e`),
+    //   network_id: 42,       // Kovan's id
+    //   gasPrice: 20000000000, // gas price
+    //   gas: 3716887 ,        // gas limit
+    // },
     // Useful for private networks
     // private: {
     // provider: () => new HDWalletProvider(mnemonic, `https://network.io`),

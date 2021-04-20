@@ -25,8 +25,8 @@ os.system('env.bat')
 DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
-# decentraloanfactory_compiled_path = 'build/contracts/DecentraLoanFactory.json'
-# decentraloanfactory_deployed_address = '0xA1ECB51222202b7CD05175703F440d8181c421aD'
+decentraloanplatform_compiled_path = 'build/contracts/DecentraLoanPlatform.json'
+decentraloanplatform_deployed_address = '0x60699b2AeAEd556823b1A325385DA0204a383f17'
 
 decentraloantoken_compiled_path = 'build/contracts/DecentraLoanToken.json'
 decentraloantoken_deployed_address = '0xAE8c01a235f00251C0c579ae442ee460bdCAD030'
@@ -45,11 +45,13 @@ with open(decentraloan_compiled_path) as file:
     # fetch contract's bytecode
     decentraloan_contract_bytecode = decentraloan_contract_json['bytecode']
 
-# DecentraLoanToken.json
-# with open(decentraloantoken_compiled_path) as file:
-#     contract_json = json.load(file)  # load contract info as JSON
-#     # fetch contract's abi - necessary to call its functions
-#     contract_abi = contract_json['abi']
+# DecentraLoanPlatform.json
+with open(decentraloanplatform_compiled_path) as file:
+    platform_contract_json = json.load(file)  # load contract info as JSON
+    # fetch contract's abi - necessary to call its functions
+    platform_contract_abi = platform_contract_json['abi']
+
+    platform_contract_bytecode = platform_contract_json['bytecode']
 
 # # Fetch deployed contract reference
 # decentraloantoken_contract = w3.eth.contract(
@@ -97,6 +99,20 @@ def check_online():
         backend_eth_balance=float(w3.fromWei(
             w3.eth.get_balance(_backend_eth_account.address), 'ether'))
     )
+
+
+@app.route('/api/getfactory')
+def get_factory():
+    return jsonify(
+        abi=platform_contract_abi,
+        bytecode=platform_contract_bytecode,
+        address=decentraloanplatform_deployed_address)
+
+@app.route('/api/getloan')
+def get_loan():
+    return jsonify(
+        abi=decentraloan_contract_abi,
+        bytecode=decentraloan_contract_bytecode)
 
 
 @app.route('/users', methods=['GET'])
@@ -246,10 +262,10 @@ def create_loan():
         time_frame = data['time_frame']
         platform = int(data['platform'])
         lender = data['lender']
-        
+
         loan_id = LoansHandler.insert_loan(
             loan_amount, lender, None, interest, time_frame, platform)
-        
+
         return jsonify(loan_id=loan_id), 200
 
     else:
@@ -269,7 +285,8 @@ def get_all_user_loans():
         userLoans = LoansHandler.get_all_user_loans(user_id)
 
         for i, loan in enumerate(userLoans):
-            userLoans[i]['offers'] = OffersHandler.get_all_loan_offers(loan['loan_id'])
+            userLoans[i]['offers'] = OffersHandler.get_all_loan_offers(
+                loan['loan_id'])
 
         return jsonify(userLoans), 200
     else:
@@ -330,7 +347,6 @@ def edit_loan_state():
         return jsonify(Error="User not found."), 404
 
 
-
 @app.route('/api/create-offer', methods=['POST', 'PUT'])
 def create_offer():
     if request.method == 'POST':
@@ -342,7 +358,7 @@ def create_offer():
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
-        
+
         result = OffersHandler.create_offer(
             loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None, platform)
 
@@ -360,7 +376,8 @@ def create_offer():
         # expiration_date = data['expiration_date']
         platform = data['platform']
 
-        result = OffersHandler.edit_offer(offer_id, loan_amount, time_frame, interest, None, platform)
+        result = OffersHandler.edit_offer(
+            offer_id, loan_amount, time_frame, interest, None, platform)
 
         if result:
             return jsonify(Response="EDIT OFFER Success"), 200
@@ -402,9 +419,11 @@ def send_payment():
     evidenceHash = data['evidenceHash']
     paymentNumber = data['paymentNumber']
 
-    payment_id = PaymentsHandler.insert_payment(paymentNumber, sender_id, receiver_id, loan_id, amount, False, evidenceHash)
+    payment_id = PaymentsHandler.insert_payment(
+        paymentNumber, sender_id, receiver_id, loan_id, amount, False, evidenceHash)
 
     return jsonify(payment_id=payment_id)
+
 
 @app.route('/api/validate-payment', methods=['POST'])
 def validate_payment():
@@ -415,7 +434,8 @@ def validate_payment():
     payment_id = data['payment_id']
     evidenceHash = str(data['evidenceHash'])
 
-    isValid = PaymentsHandler.validate_payment(payment_id, sender_id, evidenceHash)
+    isValid = PaymentsHandler.validate_payment(
+        payment_id, sender_id, evidenceHash)
 
     print(isValid)
 
@@ -423,6 +443,7 @@ def validate_payment():
         return jsonify(isvalid=True)
 
     return jsonify(isvalid=False)
+
 
 @app.route('/api/user-payments', methods=['GET'])
 def get_all_user_payments():
@@ -432,6 +453,7 @@ def get_all_user_payments():
         return PaymentsHandler.get_all_user_payments(user_id), 200
     else:
         return jsonify(Error="User not found."), 404
+
 
 @app.route('/api/loan-payments', methods=['GET'])
 def get_all_loan_payments():
@@ -454,7 +476,7 @@ def withdraw_loan():
 
     # 2. remove loan from DB
     LoansHandler.delete_loan(loan_id)
-    
+
     return jsonify(status='ok')
 
 
@@ -492,8 +514,10 @@ def accept_offer():
     offer_id = data['offer_id']
     _offer = OffersHandler.get_offer(offer_id=offer_id)
     if _offer:
-        ParticipantHandler.insert_participant(lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
-        LoansHandler.accept_loan_offer(_offer['loan_id'], _offer['borrower_id'], _offer['amount'], _offer['months'], _offer['interest'], _offer['platform'])
+        ParticipantHandler.insert_participant(
+            lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
+        LoansHandler.accept_loan_offer(_offer['loan_id'], _offer['borrower_id'],
+                                       _offer['amount'], _offer['months'], _offer['interest'], _offer['platform'])
         OffersHandler.reject_all_loan_offers(offer_id, _offer['loan_id'])
         return OffersHandler.accept_offer(offer_id)
     else:
