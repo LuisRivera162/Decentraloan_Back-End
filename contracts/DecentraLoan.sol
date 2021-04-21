@@ -26,7 +26,7 @@ contract DecentraLoan {
 
     // contract owner (who pays for the gas fees..)
     address private _owner;
-    address[10] private _investors;
+    address payable[10] private _investors;
     uint256 InvestorIndex;
 
     // lender specific variables
@@ -45,6 +45,7 @@ contract DecentraLoan {
 
     // contract constructor
     constructor(
+        address owner,
         address lender,
         uint256 amount,
         uint256 interest,
@@ -57,7 +58,7 @@ contract DecentraLoan {
         RepaymentPeriod = repaymentPeriod;
         Platform = platform;
 
-        _owner = msg.sender;
+        _owner = owner;
 
         State = StateType.Available;
 
@@ -72,14 +73,20 @@ contract DecentraLoan {
     
     function Invest() public payable {
         require(InvestorIndex < 10);
-        require(msg.value ==  ((LoanAmount/10)*(5e14)));
+        require(msg.value == ((LoanAmount/10)*(5e14)));
         
-        _investors[InvestorIndex] = msg.sender;
+        _investors[InvestorIndex] = payable(msg.sender);
         InvestorIndex++;
     }
     
-    function GetInvestors() public view returns (address[10] memory) {
+    function GetInvestors() public view returns (address payable[10] memory) {
         return _investors;
+    }
+    
+    function PayInvestors() public payable {
+        for (uint256 i = 0; i < InvestorIndex; i++) {
+            _investors[i].transfer((LoanAmount/10)*(5e14));
+        }
     }
 
     // modify available (non-active) contract [lender]

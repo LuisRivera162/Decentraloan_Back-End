@@ -26,7 +26,7 @@ DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
 platform_compiled_path = 'build/contracts/DecentraLoanPlatform.json'
-platform_deployed_address = '0x60699b2AeAEd556823b1A325385DA0204a383f17'
+platform_deployed_address = '0x4Eca38Eb13ede78f59f42D6a7E428F5094f06ceF'
 
 decentraloantoken_compiled_path = 'build/contracts/DecentraLoanToken.json'
 decentraloantoken_deployed_address = '0xAE8c01a235f00251C0c579ae442ee460bdCAD030'
@@ -426,6 +426,11 @@ def send_payment():
     evidenceHash = data['evidenceHash']
     paymentNumber = data['paymentNumber']
 
+    sender_eth = UsersHandler.get_user(sender_id)['wallet']
+    loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
+
+    eth_send_payment(sender_eth, loan_eth, int(amount), paymentNumber, evidenceHash)
+
     payment_id = PaymentsHandler.insert_payment(
         paymentNumber, sender_id, receiver_id, loan_id, amount, False, evidenceHash)
 
@@ -440,6 +445,15 @@ def validate_payment():
     sender_id = data['sender_id']
     payment_id = data['payment_id']
     evidenceHash = str(data['evidenceHash'])
+
+    sender_eth = UsersHandler.get_user(sender_id)['wallet']
+    
+    loan_id = PaymentsHandler.get_payment(payment_id)['loan_id']
+    loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
+
+    print(loan_id, loan_eth)
+    
+    eth_validate_payment(sender_eth, loan_eth)
 
     isValid = PaymentsHandler.validate_payment(
         payment_id, sender_id, evidenceHash)
@@ -477,6 +491,15 @@ def withdraw_loan():
     data = request.json
 
     loan_id = data['loan_id']
+
+    print(loan_id)
+
+    loan_eth_address = LoansHandler.get_loan(loan_id)['eth_address']
+
+    print(loan_eth_address)
+
+    # 0. mark as withdrawn in Blockchain
+    eth_withdraw_loan(loan_eth_address)
 
     # 1. rescind all offers related to loan in DB
     OffersHandler.delete_all_loans_offers(loan_id)
@@ -526,6 +549,14 @@ def accept_offer():
         LoansHandler.accept_loan_offer(_offer['loan_id'], _offer['borrower_id'],
                                        _offer['amount'], _offer['months'], _offer['interest'], _offer['platform'])
         OffersHandler.reject_all_loan_offers(offer_id, _offer['loan_id'])
+
+        borrower_eth = UsersHandler.get_user(_offer['borrower_id'])['wallet']
+        loan_eth = LoansHandler.get_loan(_offer['loan_id'])['eth_address']
+
+        print(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*100), _offer['months'], _offer['platform'])
+
+        eth_reach_deal(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*100), _offer['months'], _offer['platform'])
+        
         return OffersHandler.accept_offer(offer_id)
     else:
         return jsonify(Error="Offer not found."), 404
@@ -580,7 +611,7 @@ def eth_create_loan(lender, amount, interest, months, platform):
     return contractReceipt['logs'][0]['address']
 
 
-def eth_reach_deal(lender, borrower, loan_id, amount, interest, months, platform):
+def eth_reach_deal(borrower, loan_id, amount, interest, months, platform):
     loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
 
     unsigned_tx = loan_contract.functions.Deal(

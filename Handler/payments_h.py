@@ -7,7 +7,7 @@ class PaymentsHandler:
     def build_payment_dict(self, row):
         result = {}
         result['payment_id'] = row[0]
-        result['eth_address'] = row[1]
+        result['loan_id'] = row[1]
         result['receiver_id'] = row[2]
         result['sender_id'] = row[3]
         result['amount'] = row[4]
@@ -24,6 +24,12 @@ class PaymentsHandler:
             result = self.build_payment_dict(row)
             result_list.append(result)
         return jsonify(Payments=result_list)
+
+    def get_payment(self, payment_id):
+        dao = PaymentsDAO()
+        payment = dao.get_payment(payment_id)
+
+        return self.build_payment_dict(payment)
 
     def get_loan_payments(self, loan_id):
         dao = PaymentsDAO()

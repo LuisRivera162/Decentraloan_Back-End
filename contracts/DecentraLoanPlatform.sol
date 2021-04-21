@@ -33,7 +33,7 @@ contract DecentraLoanPlatform {
     {
         require(!_obsolete);
         
-        DecentraLoan newContract = new DecentraLoan(lender, amount, interest, months, platform);
+        DecentraLoan newContract = new DecentraLoan(msg.sender, lender, amount, interest, months, platform);
         
         address contractAddress = address(newContract);
        
