@@ -52,9 +52,9 @@ class PaymentsHandler:
             result_list.append(result)
         return jsonify(Payments=result_list)
 
-    def insert_payment(self, paymentNumber, sender, receiver, loan_id, amount, validated, validation_hash):
+    def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
         dao = PaymentsDAO()
-        payment_id = dao.insert_payment(paymentNumber, sender, receiver, loan_id, amount, validated, validation_hash)
+        payment_id = dao.insert_payment(paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash)
 
         return payment_id
 

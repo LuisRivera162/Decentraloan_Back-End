@@ -48,18 +48,18 @@ class PaymentsDAO:
         
         return result
 
-    def insert_payment(self, paymentNumber, sender, receiver, loan_id, amount, validated, validation_hash):
+    def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
         cursor = self.conn.cursor()
         query = "insert into PAYMENTS(loan_id, sender_id, receiver_id, amount, validated, validation_hash, payment_date) values (%s, %s, %s, %s, %s, %s, now()) returning payment_id;"
         cursor.execute(query, (loan_id, sender, receiver, amount, validated, validation_hash))
         payment_id = cursor.fetchone()[0]
 
-        query = 'UPDATE LOANS SET balance = balance - %s where loan_id = %s'
+        query = 'UPDATE LOANS SET balance = balance - %s, rcvd_interest = rcvd_interest + %s where loan_id = %s'
 
         if paymentNumber == 0:
-            query = 'UPDATE LOANS SET balance = %s where loan_id = %s'
+            query = 'UPDATE LOANS SET balance = %s, rcvd_interest = rcvd_interest + %s where loan_id = %s'
 
-        cursor.execute(query,(amount, loan_id))
+        cursor.execute(query,(amount, rcvd_interest, loan_id))
 
         self.conn.commit()
 

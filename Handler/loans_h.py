@@ -17,7 +17,7 @@ class LoansHandler:
         result['eth_address'] = row[8]
         result['monthly_repayment'] = row[9]
         result['balance'] = row[10]
-        result['est_total_interest'] = row[11]
+        result['rcvd_interest'] = row[11]
         result['platform'] = row[12]
         result['state'] = row[13]
         result['payment_number'] = row[14]

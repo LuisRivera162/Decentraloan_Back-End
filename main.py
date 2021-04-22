@@ -328,6 +328,10 @@ def get_single_user_loans():
         months = data['months']
         platform = data['platform']
 
+        loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
+
+        eth_edit_loan(loan_eth, int(amount), int(interest*100), months)
+
         result = LoansHandler.edit_loan(
             loan_id, amount, interest, months, platform)
 
@@ -427,19 +431,23 @@ def send_payment():
     paymentNumber = data['paymentNumber']
 
     sender_eth = UsersHandler.get_user(sender_id)['wallet']
-    loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
+    loan = LoansHandler.get_loan(loan_id)
 
-    eth_send_payment(sender_eth, loan_eth, int(amount), paymentNumber, evidenceHash)
+    rcvd_interest = ((loan['interest']) / 12) * loan['balance']
+
+    if paymentNumber == 0: 
+        rcvd_interest = 0
+
+    eth_send_payment(sender_eth, loan['eth_address'], int(amount), paymentNumber, evidenceHash)
 
     payment_id = PaymentsHandler.insert_payment(
-        paymentNumber, sender_id, receiver_id, loan_id, amount, False, evidenceHash)
+        paymentNumber, sender_id, receiver_id, loan_id, rcvd_interest, amount, False, evidenceHash)
 
     return jsonify(payment_id=payment_id)
 
 
 @app.route('/api/validate-payment', methods=['POST'])
 def validate_payment():
-    # PARAMS: contractHash, paymentNumber, sender, evidenceHash
     data = request.json
 
     sender_id = data['sender_id']
@@ -586,7 +594,6 @@ def get_all_payments():
 
 # Blockchain Operations
 
-
 def eth_create_loan(lender, amount, interest, months, platform):
     unsigned_tx = platform_contract.functions.NewLoan(
         lender,
@@ -610,6 +617,28 @@ def eth_create_loan(lender, amount, interest, months, platform):
 
     return contractReceipt['logs'][0]['address']
 
+def eth_edit_loan(loan_id, amount, interest, months):
+    loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
+
+    unsigned_tx = loan_contract.functions.Modify(
+        amount,
+        interest,
+        months
+    ).buildTransaction({
+        'gas': 4000000,
+        'gasPrice': w3.eth.gas_price,
+        'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
+    })
+
+    # sign transaction
+    signed_tx = _backend_eth_account.sign_transaction(unsigned_tx)
+
+    # send eth transaction and wait for response
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    
+    w3.eth.waitForTransactionReceipt(tx_hash)
+
+    return w3.toHex(tx_hash)
 
 def eth_reach_deal(borrower, loan_id, amount, interest, months, platform):
     loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
@@ -635,7 +664,6 @@ def eth_reach_deal(borrower, loan_id, amount, interest, months, platform):
 
     return w3.toHex(tx_hash)
 
-
 def eth_withdraw_loan(loan_id):
     loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
 
@@ -654,7 +682,6 @@ def eth_withdraw_loan(loan_id):
     w3.eth.waitForTransactionReceipt(tx_hash)
 
     return w3.toHex(tx_hash)
-
 
 def eth_send_payment(sender, loan_id, amount, payment_number, evidence_hash):
     loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
@@ -679,7 +706,6 @@ def eth_send_payment(sender, loan_id, amount, payment_number, evidence_hash):
     w3.eth.waitForTransactionReceipt(tx_hash)
 
     return w3.toHex(tx_hash)
-
 
 def eth_validate_payment(sender, loan_id):
     loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
