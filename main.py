@@ -17,7 +17,7 @@ from flask_cors import CORS, cross_origin
 from flask import (Flask, g, jsonify, session, url_for, request)
 
 from eth_account import Account
-from web3.auto import w3
+from web3.auto.infura.kovan import w3
 import json
 import os
 
@@ -26,10 +26,10 @@ DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
 platform_compiled_path = 'build/contracts/DecentraLoanPlatform.json'
-platform_deployed_address = '0x4Eca38Eb13ede78f59f42D6a7E428F5094f06ceF'
+platform_deployed_address = '0x26Ddbc8Bd7b14CDE2f5f41227ddCA46eaeBaA2de'
 
 decentraloantoken_compiled_path = 'build/contracts/DecentraLoanToken.json'
-decentraloantoken_deployed_address = '0xAE8c01a235f00251C0c579ae442ee460bdCAD030'
+decentraloantoken_deployed_address = '0x940C6a951922C30e711F5c122fa1B9c2B762f0D6'
 
 decentraloan_compiled_path = 'build/contracts/DecentraLoan.json'
 decentraloan_contract_abi = ''
@@ -614,6 +614,8 @@ def eth_create_loan(lender, amount, interest, months, platform):
     tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
     
     contractReceipt = w3.eth.waitForTransactionReceipt(tx_hash)
+
+    print(contractReceipt)
 
     return contractReceipt['logs'][0]['address']
 
