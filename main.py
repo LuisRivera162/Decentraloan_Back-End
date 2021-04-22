@@ -328,6 +328,8 @@ def get_single_user_loans():
         months = data['months']
         platform = data['platform']
 
+        print(interest)
+
         loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
 
         eth_edit_loan(loan_eth, int(amount), int(interest*100), months)

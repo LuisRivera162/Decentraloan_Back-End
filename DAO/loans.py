@@ -82,7 +82,7 @@ class LoansDAO:
     # PUT
     def edit_loan(self, loan_id, loan_amount, interest, time_frame, platform):
         cursor = self.conn.cursor()
-        query = f"update loans set amount = {loan_amount}, interest = {int(interest) / 100}, months = {time_frame}, \
+        query = f"update loans set amount = {loan_amount}, interest = {interest / 100}, months = {time_frame}, \
             platform = {platform} where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
