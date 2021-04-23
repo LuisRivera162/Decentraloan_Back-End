@@ -1,6 +1,7 @@
 from DAO.payments import PaymentsDAO
 from DAO.users import UsersDAO
 from flask import jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class PaymentsHandler:
 
@@ -54,6 +55,7 @@ class PaymentsHandler:
 
     def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
         dao = PaymentsDAO()
+        validation_hash = generate_password_hash(validation_hash)
         payment_id = dao.insert_payment(paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash)
 
         return payment_id
@@ -67,7 +69,8 @@ class PaymentsHandler:
             payment = self.build_payment_dict(result)
             # check if sender not same person
             if payment['sender_id'] != sender and payment['receiver_id'] == sender:
-                if validation_hash != payment['validation_hash']:
+                
+                if check_password_hash(payment['validation_hash'], validation_hash) == False:
                     return -3 # validation_hash mismatch
 
                 return dao.validate_payment(payment_id)
