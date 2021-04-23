@@ -26,7 +26,7 @@ DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
 platform_compiled_path = 'build/contracts/DecentraLoanPlatform.json'
-platform_deployed_address = '0x2B740dA18A52c2FA4359C39577C6904d6c0cCf38'
+platform_deployed_address = '0x24BC89fe86eC9d562Fb3813E3Dd3C96d40c12196'
 
 decentraloantoken_compiled_path = 'build/contracts/DecentraLoanToken.json'
 decentraloantoken_deployed_address = '0x940C6a951922C30e711F5c122fa1B9c2B762f0D6'

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import './DecentraLoanToken.sol';
+
 contract DecentraLoan {
     enum StateType {
         Available,
@@ -26,6 +28,7 @@ contract DecentraLoan {
 
     // contract owner (who pays for the gas fees..)
     address private _owner;
+    
     address payable[10] private _investors;
     uint256 InvestorIndex;
 
@@ -82,6 +85,16 @@ contract DecentraLoan {
     
     function GetInvestors() public view returns (address payable[10] memory) {
         return _investors;
+    }
+    
+    function ReturnInvestments() public payable {
+        require(msg.sender == _owner);
+        
+        for (uint256 i = 0; i < InvestorIndex; i++) {
+            _investors[i].transfer((LoanAmount/InvestorIndex)*(5e14));
+            
+            emit ReturnedInvestment(_investors[i], (LoanAmount)*(5e14));
+        }
     }
     
     function PayInvestors(uint256 wei_amount) public payable {
@@ -271,7 +284,13 @@ contract DecentraLoan {
         uint256 paymentNumber,
         string evidence
     );
+    
     event PaidInvestor(
+        address investor,
+        uint256 weis    
+    );
+    
+    event ReturnedInvestment(
         address investor,
         uint256 weis    
     );
