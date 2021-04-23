@@ -563,9 +563,9 @@ def accept_offer():
         borrower_eth = UsersHandler.get_user(_offer['borrower_id'])['wallet']
         loan_eth = LoansHandler.get_loan(_offer['loan_id'])['eth_address']
 
-        print(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*100), _offer['months'], _offer['platform'])
+        # print(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*100), _offer['months'], _offer['platform'])
 
-        eth_reach_deal(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*100), _offer['months'], _offer['platform'])
+        eth_reach_deal(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*10000), _offer['months'], _offer['platform'])
         
         return OffersHandler.accept_offer(offer_id)
     else:
