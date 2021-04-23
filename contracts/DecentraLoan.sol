@@ -72,6 +72,7 @@ contract DecentraLoan {
     }
     
     function Invest() public payable {
+        require(State != StateType.Withdrawn || State != StateType.Delinquent);
         require(InvestorIndex < 10);
         require(msg.value == ((LoanAmount/10)*(5e14)));
         
@@ -83,9 +84,13 @@ contract DecentraLoan {
         return _investors;
     }
     
-    function PayInvestors() public payable {
+    function PayInvestors(uint256 wei_amount) public payable {
+        require(msg.sender == _owner);
+        
         for (uint256 i = 0; i < InvestorIndex; i++) {
-            _investors[i].transfer((LoanAmount/10)*(5e14));
+            _investors[i].transfer((wei_amount)*(5e14));
+            
+            emit PaidInvestor(_investors[i], (wei_amount)*(5e14));
         }
     }
 
@@ -155,6 +160,7 @@ contract DecentraLoan {
         address sender,
         uint256 paymentNumber,
         uint256 amount,
+        uint256 rcvd_interest,
         string memory evidence
     ) public payable {
         require(msg.sender == _owner);
@@ -168,6 +174,7 @@ contract DecentraLoan {
         } else {
             // subtract paid amount to the balance
             Balance = Balance - amount;
+            PayInvestors(rcvd_interest/(InvestorIndex+1)); // pay interest to investors
         }
 
         // send evidence for counterparty validation, initialy unverified
@@ -263,6 +270,10 @@ contract DecentraLoan {
         address sender,
         uint256 paymentNumber,
         string evidence
+    );
+    event PaidInvestor(
+        address investor,
+        uint256 weis    
     );
 
     // Receive any ethereum randomly sent to the contract from outside

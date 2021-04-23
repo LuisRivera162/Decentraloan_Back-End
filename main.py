@@ -435,12 +435,12 @@ def send_payment():
     sender_eth = UsersHandler.get_user(sender_id)['wallet']
     loan = LoansHandler.get_loan(loan_id)
 
-    rcvd_interest = ((loan['interest']) / 12) * loan['balance']
+    rcvd_interest = (((loan['interest']) / 12) * loan['balance'])*0.30
 
     if paymentNumber == 0: 
         rcvd_interest = 0
 
-    eth_send_payment(sender_eth, loan['eth_address'], int(amount), paymentNumber, evidenceHash)
+    eth_send_payment(sender_eth, loan['eth_address'], int(amount*100), paymentNumber, int(rcvd_interest*100), evidenceHash)
 
     payment_id = PaymentsHandler.insert_payment(
         paymentNumber, sender_id, receiver_id, loan_id, rcvd_interest, amount, False, evidenceHash)
@@ -687,13 +687,14 @@ def eth_withdraw_loan(loan_id):
 
     return w3.toHex(tx_hash)
 
-def eth_send_payment(sender, loan_id, amount, payment_number, evidence_hash):
+def eth_send_payment(sender, loan_id, amount, payment_number, rcvd_interest, evidence_hash):
     loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
 
     unsigned_tx = loan_contract.functions.SendPayment(
         sender,
         payment_number,
         amount,
+        rcvd_interest,
         evidence_hash
     ).buildTransaction({
         'gas': 4000000,
