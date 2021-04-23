@@ -328,8 +328,6 @@ def get_single_user_loans():
         months = data['months']
         platform = data['platform']
 
-        print(interest)
-
         loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
 
         eth_edit_loan(loan_eth, int(amount), int(interest*100), months)
@@ -460,15 +458,11 @@ def validate_payment():
     
     loan_id = PaymentsHandler.get_payment(payment_id)['loan_id']
     loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
-
-    print(loan_id, loan_eth)
     
     eth_validate_payment(sender_eth, loan_eth)
 
     isValid = PaymentsHandler.validate_payment(
         payment_id, sender_id, evidenceHash)
-
-    print(isValid)
 
     if isValid > 0:
         return jsonify(isvalid=True)
@@ -502,11 +496,8 @@ def withdraw_loan():
 
     loan_id = data['loan_id']
 
-    print(loan_id)
-
     loan_eth_address = LoansHandler.get_loan(loan_id)['eth_address']
 
-    print(loan_eth_address)
 
     # 0. mark as withdrawn in Blockchain
     eth_withdraw_loan(loan_eth_address)

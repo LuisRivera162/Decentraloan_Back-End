@@ -17,6 +17,21 @@ class PaymentsHandler:
         result['validation_hash'] = row[7]
         return result
 
+    def build_unified_payment_dict(self, row):
+        result = {}
+        result['receiver_id'] = row[0]
+        result['sender_id'] = row[1]
+        result['lender'] = row[2]
+        result['borrower'] = row[3]
+        result['amount'] = row[4]
+        result['payment_date'] = row[5]
+        result['offer_id'] = row[6]
+        result['loan_id'] = row[7]
+        result['payment_id'] = row[8]
+        result['validated'] = row[9]
+        result['validation_hash'] = row[10]
+        return result
+
     def get_all_payments(self):
         dao = PaymentsDAO()
         offers = dao.get_all_payments()
@@ -44,17 +59,20 @@ class PaymentsHandler:
     def get_all_user_payments(self, borrower_id):
         dao = PaymentsDAO()
         users_dao = UsersDAO()
-        offers = dao.get_all_user_payments(borrower_id)
+        payments = dao.get_all_user_payments(borrower_id)
         result_list = []
-        for row in offers:
-            result = self.build_payment_dict(row)
-            result['receiver_username'] = users_dao.get_username(row[2])
-            result['sender_username'] = users_dao.get_username(row[3])
+        for row in payments:
+            result = self.build_unified_payment_dict(row)
+            if row[0]:
+                result['receiver_username'] = users_dao.get_username(row[0])
+                result['sender_username'] = users_dao.get_username(row[1])
             result_list.append(result)
         return jsonify(Payments=result_list)
 
     def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
         dao = PaymentsDAO()
+        print('@@@@@@@@@@@')
+        print(validation_hash)
         validation_hash = generate_password_hash(validation_hash)
         payment_id = dao.insert_payment(paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash)
 
