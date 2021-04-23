@@ -45,12 +45,12 @@ CREATE TABLE LOANS (
 	created_on TIMESTAMP NOT null,
 	accepted BOOLEAN default false,
 	eth_address VARCHAR,
-	monthly_repayment FLOAT default 0,
+	monthly_repayment FLOAT,
 	balance FLOAT default 0,
-	est_total_interest FLOAT default 0,
-	platform INTEGER,
-	payment_number INTEGER default 0,
+	rcvd_interest FLOAT default 0,
+	platform INTEGER default 0,
 	state INTEGER default 0,
+	payment_number INTEGER default 0,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
