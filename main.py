@@ -153,7 +153,7 @@ def alert_user_notifications():
         return jsonify(Error="Method not allowed."), 405
 
 
-@app.route('/api/check-emails_user', methods=['GET'])
+@app.route('/api/check-emails-user', methods=['GET'])
 def check_emailsUsersname():
     email = request.args.get('email')
     username = request.args.get('username')

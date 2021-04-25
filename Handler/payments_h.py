@@ -71,8 +71,6 @@ class PaymentsHandler:
 
     def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
         dao = PaymentsDAO()
-        print('@@@@@@@@@@@')
-        print(validation_hash)
         validation_hash = generate_password_hash(validation_hash)
         payment_id = dao.insert_payment(paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash)
 

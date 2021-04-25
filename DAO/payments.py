@@ -23,7 +23,6 @@ class PaymentsDAO:
 
     def get_all_user_payments(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select * from payments where sender_id = {user_id} or receiver_id = {user_id} order by payment_date DESC;'
         query = f"select                                                                                                        \
                     receiver_id, sender_id, null as lender,                                                                     \
                     null as borrower, amount, payment_date,                                                                     \
@@ -34,7 +33,7 @@ class PaymentsDAO:
                     union select null, null, lender as lender, borrower as borrower, amount, created_on, cast(null as integer), \
                     loan_id, cast(null as integer), null, null                                                                  \
                     from loans                                                                                                  \
-                    where loans.lender = {user_id}                                                                           \
+                    where loans.lender = {user_id}                                                                              \
                     union                                                                                                       \
                     select null, null, lender_id as lender,                                                                     \
                     borrower_id as borrower, amount, created_on, offer_id, cast(null as integer), cast(null as integer),        \
