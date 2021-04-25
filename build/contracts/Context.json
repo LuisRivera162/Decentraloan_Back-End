@@ -10,7 +10,7 @@
   "sourceMap": "570:368:0:-:0;;;;;;;;;;;;;;;;;;;",
   "deployedSourceMap": "570:368:0:-:0;;;;;",
   "source": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\n/*\r\n * @dev Provides information about the current execution context, including the\r\n * sender of the transaction and its data. While these are generally available\r\n * via msg.sender and msg.data, they should not be accessed in such a direct\r\n * manner, since when dealing with GSN meta-transactions the account sending and\r\n * paying for execution may not be the actual sender (as far as an application\r\n * is concerned).\r\n *\r\n * This contract is only required for intermediate, library-like contracts.\r\n */\r\ncontract Context {\r\n    function _msgSender() internal view virtual returns (address) {\r\n        return msg.sender;\r\n    }\r\n\r\n    function _msgData() internal view virtual returns (bytes calldata) {\r\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\r\n        return msg.data;\r\n    }\r\n}",
-  "sourcePath": "C:\\Users\\abdie\\Documents\\Developer\\Capstone\\CAPSTONE_APP\\contracts\\Context.sol",
+  "sourcePath": "C:/Users/abdie/Documents/Developer/Capstone/CAPSTONE_APP/contracts/Context.sol",
   "ast": {
     "absolutePath": "/C/Users/abdie/Documents/Developer/Capstone/CAPSTONE_APP/contracts/Context.sol",
     "exportedSymbols": {
@@ -501,7 +501,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.3",
-  "updatedAt": "2021-04-23T20:52:25.758Z",
+  "updatedAt": "2021-04-25T03:57:57.882Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

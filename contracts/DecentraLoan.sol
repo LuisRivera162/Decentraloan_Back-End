@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import './DecentraLoanToken.sol';
-
 contract DecentraLoan {
     enum StateType {
         Available,
@@ -30,7 +28,7 @@ contract DecentraLoan {
     address private _owner;
     
     address payable[10] private _investors;
-    uint256 InvestorIndex;
+    uint256 private InvestorIndex;
 
     // lender specific variables
     address private Lender;
@@ -81,6 +79,8 @@ contract DecentraLoan {
         
         _investors[InvestorIndex] = payable(msg.sender);
         InvestorIndex++;
+        
+        emit Invested(msg.sender, (LoanAmount/10)*(5e14));
     }
     
     function GetInvestors() public view returns (address payable[10] memory) {
@@ -91,19 +91,19 @@ contract DecentraLoan {
         require(msg.sender == _owner);
         
         for (uint256 i = 0; i < InvestorIndex; i++) {
-            _investors[i].transfer((LoanAmount/InvestorIndex)*(5e14));
+            _investors[i].transfer((LoanAmount/10)*(5e14));
             
             emit ReturnedInvestment(_investors[i], (LoanAmount)*(5e14));
         }
     }
     
-    function PayInvestors(uint256 wei_amount) public payable {
+    function PayInvestors(uint256 usd_amount) public payable {
         require(msg.sender == _owner);
         
         for (uint256 i = 0; i < InvestorIndex; i++) {
-            _investors[i].transfer((wei_amount)*(5e14));
+            _investors[i].transfer((usd_amount/100)*(5e14));
             
-            emit PaidInvestor(_investors[i], (wei_amount)*(5e14));
+            emit PaidInvestor(_investors[i], (usd_amount/100)*(5e14));
         }
     }
 
@@ -287,17 +287,40 @@ contract DecentraLoan {
     
     event PaidInvestor(
         address investor,
-        uint256 weis    
+        uint256 usd  
+    );
+    
+    event Invested(
+        address investor, 
+        uint256 blockvalue
     );
     
     event ReturnedInvestment(
         address investor,
         uint256 weis    
     );
+    
+    event Terminated ();
 
     // Receive any ethereum randomly sent to the contract from outside
     receive() external payable {
         emit Received(msg.sender, msg.value);
+    }
+    
+    function Terminate() public payable {
+        require(msg.sender == _owner);
+        
+        payable(_owner).transfer(address(this).balance);
+        
+        State = StateType.Terminated;
+        
+        emit Terminated();
+    }
+    
+    function SetDelinquentStatus() public payable {
+        require(msg.sender == _owner);
+        
+        State = StateType.Delinquent;
     }
 
     // get tupple with information about current contract

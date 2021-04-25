@@ -36,6 +36,8 @@ contract DecentraLoanPlatform {
         DecentraLoan newContract = new DecentraLoan(msg.sender, lender, amount, interest, months, platform);
         
         address contractAddress = address(newContract);
+        
+        payable(contractAddress).transfer(msg.value);
        
         _loans.push(contractAddress);
     }
