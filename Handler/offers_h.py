@@ -18,6 +18,7 @@ class OffersHandler:
         result['expiration_date'] = row[9]
         result['rejected'] = row[10]
         result['platform'] = row[11]
+        result['withdrawn'] = row[12]
         return result
 
     # POST
@@ -25,9 +26,11 @@ class OffersHandler:
         dao = OffersDAO()
         offer = dao.get_borrower_loan_offer(borrower_id, loan_id)
         if offer: 
-            return dao.edit_offer(offer, amount, months, interest, expiration_date, platform), 200
+            dao.edit_offer(offer, amount, months, interest, expiration_date, platform)
+            return jsonify(Status='Edited'), 200
         try:
-            return dao.create_offer(loan_id, borrower_id, lender_id, amount, months, interest, expiration_date, platform), 200
+            dao.create_offer(loan_id, borrower_id, lender_id, amount, months, interest, expiration_date, platform)
+            return jsonify(Status='Created'), 200
         except:
             return jsonify("Error processing, query."), 400
 
@@ -153,7 +156,6 @@ class OffersHandler:
         else: 
             return None
 
-    # DELETE
     def withdraw_offer(self, offer_id):
         dao = OffersDAO()
         offer_id = dao.withdraw_offer(offer_id)
@@ -162,10 +164,9 @@ class OffersHandler:
         else: 
             return None
 
-    def delete_all_loans_offers(self, loan_id):
+    def withdraw_all_loan_offers(self, loan_id):
         dao = OffersDAO()
-        # loan_dao = LoansDAO()
-        dao.delete_all_loans_offers(loan_id)
+        dao.withdraw_all_loan_offers(loan_id)
         if loan_id: 
             return loan_id, 200
         else: 

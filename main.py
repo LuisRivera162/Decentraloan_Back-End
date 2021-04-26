@@ -144,7 +144,7 @@ def alert_user_notifications():
         data = request.json
         user_id = data['user_id']
         message = data['message']
-        notification_type = request.args.get('notification_type')
+        notification_type = data['notification_type']
         if user_id:
             return NotificationsHandler.create_notification(user_id, message, notification_type)
         else:
@@ -370,13 +370,8 @@ def create_offer():
         time_frame = data['time_frame']
         platform = data['platform']
 
-        result = OffersHandler.create_offer(
+        return OffersHandler.create_offer(
             loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None, platform)
-
-        if result:
-            return jsonify(Status="CREATE OFFER Success."), 200
-        else:
-            return jsonify(Error="Offer not created."), 404
 
     elif request.method == 'PUT':
         data = request.json
@@ -503,28 +498,30 @@ def withdraw_loan():
     eth_withdraw_loan(loan_eth_address)
 
     # 1. rescind all offers related to loan in DB
-    OffersHandler.delete_all_loans_offers(loan_id)
+    OffersHandler.withdraw_all_loan_offers(loan_id)
 
     # 2. remove loan from DB
-    LoansHandler.delete_loan(loan_id)
+    LoansHandler.withdraw_loan(loan_id)
 
     return jsonify(status='ok')
 
 
-@app.route('/api/withdraw-offer', methods=['DELETE'])
+@app.route('/api/withdraw-offer', methods=['PUT'])
 def withdraw_offer():
-    offer_id = request.args.get('offer_id')
+    data = request.json
+    offer_id = data['offer_id']
     if offer_id:
-        return OffersHandler.withdraw_offer(offer_id)
+        return jsonify(offer_id=OffersHandler.withdraw_offer(offer_id)), 200
     else:
         return jsonify(Error="Offer not found."), 404
 
 
-@app.route('/api/delete-loan-offers', methods=['DELETE'])
-def delete_all_loans_offers():
-    loan_id = request.args.get('loan_id')
+@app.route('/api/delete-loan-offers', methods=['PUT'])
+def withdraw_all_loan_offers():
+    data = request.json
+    loan_id = data['loan_id']
     if loan_id:
-        return OffersHandler.delete_all_loans_offers(loan_id)
+        return OffersHandler.withdraw_all_loan_offers(loan_id)
     else:
         return jsonify(Error="Offer not found."), 404
 
@@ -608,7 +605,7 @@ def eth_create_loan(lender, amount, interest, months, platform):
     
     contractReceipt = w3.eth.waitForTransactionReceipt(tx_hash)
 
-    print(contractReceipt)
+    # print(contractReceipt)
 
     return contractReceipt['logs'][0]['address']
 

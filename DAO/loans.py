@@ -14,7 +14,7 @@ class LoansDAO:
     # GET
     def get_all_loans(self):
         cursor = self.conn.cursor()
-        query = f'select * from loans where accepted = false;'
+        query = f'select * from loans where accepted = false and withdrawn = false;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -23,7 +23,7 @@ class LoansDAO:
 
     def get_all_user_loans(self, uid):
         cursor = self.conn.cursor()
-        query = f'select * from loans where lender = {uid} or borrower = {uid} order by created_on DESC;'
+        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -32,7 +32,7 @@ class LoansDAO:
 
     def get_all_unaccepted_user_loans(self, uid):
         cursor = self.conn.cursor()
-        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and accepted = false order by created_on DESC;'
+        query = f'select * from loans where (lender = {uid} or borrower = {uid}) and accepted = false and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -41,7 +41,7 @@ class LoansDAO:
 
     def get_single_user_loan(self, loan_id):
         cursor = self.conn.cursor()
-        query = f'select * from loans where loan_id = {loan_id};'
+        query = f'select * from loans where loan_id = {loan_id} and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
@@ -51,7 +51,7 @@ class LoansDAO:
 
     def get_loan_lender_id(self, loan_id):
         cursor = self.conn.cursor()
-        query = f'select lender from loans where loan_id = {loan_id};'
+        query = f'select lender from loans where loan_id = {loan_id} and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
@@ -103,6 +103,12 @@ class LoansDAO:
         self.conn.commit()
         return loan_id
 
+    def withdraw_loan(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f"update loans set withdrawn = true where loan_id = {loan_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return loan_id
 
     # POST 
     def insert_loan(self, ETH_ADDRESS, LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, PLATFORM):
@@ -111,13 +117,5 @@ class LoansDAO:
             values (%s, %s, %s, %s, %s, %s, %s, now()) returning loan_id;"
         cursor.execute(query, (LENDER, BORROWER, LOAN_AMOUNT, TIME_FRAME, INTEREST, ETH_ADDRESS, PLATFORM))
         loan_id = cursor.fetchone()[0]
-        self.conn.commit()
-        return loan_id
-        
-    # DELETE
-    def delete_loan(self, loan_id):
-        cursor = self.conn.cursor()
-        query = f"DELETE from loans where loan_id = {loan_id};"
-        cursor.execute(query)
         self.conn.commit()
         return loan_id

@@ -21,6 +21,7 @@ class LoansHandler:
         result['platform'] = row[12]
         result['state'] = row[13]
         result['payment_number'] = row[14]
+        result['withdrawn'] = row[15]
         return result
 
     def insert_loan(self, eth_address, loan_amount, lender, borrower, interest, time_frame, platform):
@@ -128,10 +129,10 @@ class LoansHandler:
         else: 
             return None
 
-    # DELETE
-    def delete_loan(self, loan_id):
+
+    def withdraw_loan(self, loan_id):
         dao = LoansDAO()
-        result = dao.delete_loan(loan_id)
+        result = dao.withdraw_loan(loan_id)
         if result: 
             return loan_id, 200
         else: 

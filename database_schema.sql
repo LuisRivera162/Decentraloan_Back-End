@@ -51,6 +51,7 @@ CREATE TABLE LOANS (
 	platform INTEGER default 0,
 	state INTEGER default 0,
 	payment_number INTEGER default 0,
+	withdrawn BOOLEAN default false,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
@@ -80,6 +81,7 @@ CREATE TABLE OFFER (
 	expiration_date DATE,
 	rejected BOOLEAN default false,
 	platform INTEGER default 0,
+	withdrawn BOOLEAN default false,
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)

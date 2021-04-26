@@ -23,7 +23,7 @@ class OffersDAO:
 
     def get_all_loan_offers(self, loan_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where loan_id = {loan_id} and rejected = false;'
+        query = f'select * from offer where loan_id = {loan_id} and rejected = false and withdrawn = false;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -32,7 +32,8 @@ class OffersDAO:
 
     def get_all_user_pending_offers(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = false and accepted = false order by created_on DESC;'
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = false and accepted = false \
+             and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -41,7 +42,7 @@ class OffersDAO:
 
     def get_all_user_rejected_offers(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = true order by created_on DESC;'
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = true and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -50,7 +51,7 @@ class OffersDAO:
 
     def get_offer_count(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select count (*) from offer where borrower_id = {user_id} or lender_id = {user_id};'
+        query = f'select count (*) from offer where borrower_id = {user_id} or lender_id = {user_id} and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
@@ -60,7 +61,7 @@ class OffersDAO:
 
     def get_offer(self, offer_id):
         cursor = self.conn.cursor()
-        query = f'select * from offer where offer_id = {offer_id};'
+        query = f'select * from offer where offer_id = {offer_id} and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
@@ -70,7 +71,7 @@ class OffersDAO:
         
     def get_borrower_loan_offer(self, user_id, loan_id):
         cursor = self.conn.cursor()
-        query = f'select offer_id from offer where loan_id = {loan_id} and borrower_id = {user_id};'
+        query = f'select offer_id from offer where loan_id = {loan_id} and borrower_id = {user_id} and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result: 
@@ -94,7 +95,8 @@ class OffersDAO:
     # expiration date not used, not sure how to use. 
     def edit_offer(self, offer_id, amount, months, interest, expiration_date, platform):
         cursor = self.conn.cursor()
-        query = f"update offer set amount = {amount}, interest = {interest}, months = {months}, rejected = false, platform = {platform} where offer_id = {offer_id};"
+        query = f"update offer set amount = {amount}, interest = {interest}, months = {months}, rejected = false, withdrawn = false, platform = {platform} \
+            where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id
@@ -120,17 +122,16 @@ class OffersDAO:
         self.conn.commit()
         return offer_id
 
-    # DELETE
     def withdraw_offer(self, offer_id):
         cursor = self.conn.cursor()
-        query = f"DELETE from offer where offer_id = {offer_id};"
+        query = f"update offer set withdrawn = true where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id
 
-    def delete_all_loans_offers(self, loan_id):
+    def withdraw_all_loan_offers(self, loan_id):
         cursor = self.conn.cursor()
-        query = f"DELETE from offer where loan_id = {loan_id};"
+        query = f"update offer set withdrawn = true where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
         return loan_id
