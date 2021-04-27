@@ -124,14 +124,14 @@ class OffersDAO:
 
     def withdraw_offer(self, offer_id):
         cursor = self.conn.cursor()
-        query = f"update offer set withdrawn = true where offer_id = {offer_id};"
+        query = f"update offer set withdrawn = true, withdraw_date = now() where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id
 
     def withdraw_all_loan_offers(self, loan_id):
         cursor = self.conn.cursor()
-        query = f"update offer set withdrawn = true where loan_id = {loan_id};"
+        query = f"update offer set withdrawn = true, withdraw_date = now() where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
         return loan_id

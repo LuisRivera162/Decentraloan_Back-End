@@ -105,7 +105,7 @@ class LoansDAO:
 
     def withdraw_loan(self, loan_id):
         cursor = self.conn.cursor()
-        query = f"update loans set withdrawn = true where loan_id = {loan_id};"
+        query = f"update loans set withdrawn = true, withdraw_date = now() where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
         return loan_id
