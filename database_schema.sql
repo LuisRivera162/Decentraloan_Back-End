@@ -52,6 +52,7 @@ CREATE TABLE LOANS (
 	state INTEGER default 0,
 	payment_number INTEGER default 0,
 	withdrawn BOOLEAN default false,
+	withdraw_date TIMESTAMP,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
@@ -68,6 +69,7 @@ CREATE TABLE CHATS (
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
 );
 
+
 CREATE TABLE OFFER (
 	offer_id serial PRIMARY KEY,
 	loan_id INTEGER,
@@ -82,6 +84,7 @@ CREATE TABLE OFFER (
 	rejected BOOLEAN default false,
 	platform INTEGER default 0,
 	withdrawn BOOLEAN default false,
+	withdraw_date TIMESTAMP,
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
