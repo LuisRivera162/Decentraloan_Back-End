@@ -300,6 +300,8 @@ contract DecentraLoan {
         uint256 weis    
     );
     
+    event Delinquent();
+    
     event Terminated ();
 
     // Receive any ethereum randomly sent to the contract from outside
@@ -321,6 +323,11 @@ contract DecentraLoan {
         require(msg.sender == _owner);
         
         State = StateType.Delinquent;
+        
+        // payout insurance to lender
+        payable(Lender).transfer(address(this).balance);
+        
+        emit Delinquent();
     }
 
     // get tupple with information about current contract
