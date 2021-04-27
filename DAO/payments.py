@@ -23,24 +23,37 @@ class PaymentsDAO:
 
     def get_all_user_payments(self, user_id):
         cursor = self.conn.cursor()
-        query = f"select                                                                                                        \
-                    receiver_id, sender_id, null as lender,                                                                     \
-                    null as borrower, amount, payment_date,                                                                     \
-                    cast(null as integer) as offer_id, cast(null as integer) as loan_id,                                        \
-                    payment_id, validated, validation_hash                                                                      \
-                    from payments                                                                                               \
-                    where payments.sender_id = {user_id} or payments.receiver_id = {user_id}                                    \
-                    union select null, null, lender as lender, borrower as borrower, amount, created_on, cast(null as integer), \
-                    loan_id, cast(null as integer), null, null                                                                  \
-                    from loans                                                                                                  \
-                    where loans.lender = {user_id}                                                                              \
-                    union                                                                                                       \
-                    select null, null, lender_id as lender,                                                                     \
-                    borrower_id as borrower, amount, created_on, offer_id, cast(null as integer), cast(null as integer),        \
-                    null, null                                                                                                  \
-                    from offer                                                                                                  \
-                    where offer.borrower_id = {user_id}                                                                         \
-                    order by payment_date DESC;"
+        query = f"select                                                                                                    \
+                receiver_id, sender_id, null as lender,                                                                     \
+                null as borrower, amount, payment_date,                                                                     \
+                cast(null as integer) as offer_id, cast(null as integer) as loan_id,                                        \
+                payment_id, validated, validation_hash, null as withdrawn, null as withdraw_date                            \
+                from payments                                                                                               \
+                where payments.sender_id = {user_id} or payments.receiver_id = {user_id}                                    \
+                union                                                                                                       \
+                select null, null, lender as lender, borrower as borrower, amount, created_on, cast(null as integer),       \
+                loan_id, cast(null as integer), null, null, false, withdraw_date                                        \
+                from loans                                                                                                  \
+                where loans.lender = {user_id}                                                                              \
+                union                                                                                                       \
+                select null, null, lender as lender, borrower as borrower, amount, withdraw_date, cast(null as integer),    \
+                loan_id, cast(null as integer), null, null, withdrawn, withdraw_date                                        \
+                from loans                                                                                                  \
+                where loans.lender = {user_id} and loans.withdrawn = true                                                   \
+                union                                                                                                       \
+                select null, null, lender_id as lender,                                                                     \
+                borrower_id as borrower, amount, created_on, offer_id, cast(null as integer), cast(null as integer),        \
+                null, null, false, withdraw_date                                                                        \
+                from offer                                                                                                  \
+                where offer.borrower_id = {user_id}                                                                         \
+                union                                                                                                       \
+                select null, null, lender_id as lender,                                                                     \
+                borrower_id as borrower, amount, withdraw_date, offer_id, cast(null as integer), cast(null as integer),     \
+                null, null, withdrawn, withdraw_date                                                                        \
+                from offer                                                                                                  \
+                where offer.borrower_id = {user_id} and withdrawn = true                                                    \
+                order by payment_date DESC;"
+
         cursor.execute(query)
         result = []
         for row in cursor:

@@ -30,6 +30,8 @@ class PaymentsHandler:
         result['payment_id'] = row[8]
         result['validated'] = row[9]
         result['validation_hash'] = row[10]
+        result['withdrawn'] = row[11]
+        result['withdrawn_date'] = row[12]
         return result
 
     def get_all_payments(self):

@@ -22,6 +22,7 @@ class LoansHandler:
         result['state'] = row[13]
         result['payment_number'] = row[14]
         result['withdrawn'] = row[15]
+        result['withdraw_date'] = row[16]
         return result
 
     def insert_loan(self, eth_address, loan_amount, lender, borrower, interest, time_frame, platform):

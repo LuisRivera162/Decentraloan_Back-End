@@ -19,6 +19,7 @@ class OffersHandler:
         result['rejected'] = row[10]
         result['platform'] = row[11]
         result['withdrawn'] = row[12]
+        result['withdraw_date'] = row[13]
         return result
 
     # POST

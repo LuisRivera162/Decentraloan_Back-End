@@ -438,7 +438,7 @@ def send_payment():
     payment_id = PaymentsHandler.insert_payment(
         paymentNumber, sender_id, receiver_id, loan_id, rcvd_interest, amount, False, evidenceHash)
 
-    return jsonify(payment_id=payment_id)
+    return jsonify(payment_id=payment_id), 200
 
 
 @app.route('/api/validate-payment', methods=['POST'])
