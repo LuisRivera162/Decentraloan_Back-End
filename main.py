@@ -427,15 +427,15 @@ def send_payment():
     sender_eth = UsersHandler.get_user(sender_id)['wallet']
     loan = LoansHandler.get_loan(loan_id)
 
-    rcvd_interest = (((loan['interest']) / 12) * loan['balance'])*0.30
+    rcvd_interest = (((loan['interest']) / 12) * loan['balance'])
 
     if paymentNumber == 0: 
         rcvd_interest = 0
 
-    eth_send_payment(sender_eth, loan['eth_address'], int(amount*100), paymentNumber, int(rcvd_interest*100), evidenceHash)
+    eth_send_payment(sender_eth, loan['eth_address'], int(amount*100), paymentNumber, int(rcvd_interest*0.30*100), evidenceHash)
 
     payment_id = PaymentsHandler.insert_payment(
-        paymentNumber, sender_id, receiver_id, loan_id, rcvd_interest, amount, False, evidenceHash)
+        paymentNumber, sender_id, receiver_id, loan_id, rcvd_interest*0.7, amount, False, evidenceHash)
 
     return jsonify(payment_id=payment_id), 200
 
