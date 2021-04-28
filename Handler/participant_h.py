@@ -36,3 +36,12 @@ class ParticipantHandler:
             return jsonify("Error processing, query."), 400
 
         return 'success', 200
+
+    # DELETE
+    def remove_participants_from_loan(self, loan_id):
+        dao = ParticipantDAO()
+        try:
+            dao.remove_participants_from_loan(loan_id)
+        except:
+            return jsonify("Error processing, query."), 400
+        return jsonify(Status='Success'), 200

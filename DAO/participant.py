@@ -39,3 +39,11 @@ class ParticipantDAO:
         cursor.execute(query, (lender_id, borrower_id, loan_id))
         self.conn.commit()
         return 'success'
+
+    # DELETE
+    def remove_participants_from_loan(self, loan_id):
+        cursor = self.conn.cursor()
+        query = f'delete from PARTICIPANT where loan_id = {loan_id}'
+        cursor.execute(query)
+        self.conn.commit()
+        return loan_id
