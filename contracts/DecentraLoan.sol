@@ -184,7 +184,12 @@ contract DecentraLoan {
         if (PaymentNumber == 0) {
             // Lender sent core loan amount, this is considered as payment 0.
             Balance = amount;
-        } else {
+        } 
+        else if (PaymentNumber == RepaymentPeriod) {
+            Balance = 0;
+            PayInvestors(rcvd_interest/(InvestorIndex+1)); // pay interest to investors
+        }
+        else {
             // subtract paid amount to the balance
             Balance = Balance - amount;
             PayInvestors(rcvd_interest/(InvestorIndex+1)); // pay interest to investors
