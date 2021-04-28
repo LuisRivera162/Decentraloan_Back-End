@@ -417,7 +417,6 @@ def get_offer_count():
 @app.route('/api/send-payment', methods=['POST'])
 def send_payment():
     data = request.json
-
     sender_id = data['sender_id']
     receiver_id = data['receiver_id']
     loan_id = data['loan_id']
@@ -452,7 +451,8 @@ def validate_payment():
     sender_eth = UsersHandler.get_user(sender_id)['wallet']
     
     loan_id = PaymentsHandler.get_payment(payment_id)['loan_id']
-    loan_eth = LoansHandler.get_loan(loan_id)['eth_address']
+    loan = LoansHandler.get_loan(loan_id)
+    loan_eth = loan['eth_address']
     
     eth_validate_payment(sender_eth, loan_eth)
 
@@ -460,9 +460,14 @@ def validate_payment():
         payment_id, sender_id, evidenceHash)
 
     if isValid > 0:
-        return jsonify(isvalid=True)
+        if loan['payment_number'] == loan['months']:
+            ParticipantHandler.remove_participants_from_loan(loan_id)
+            LoansHandler.edit_loan_state(loan_id, 5)
+            return jsonify(isvalid=2), 200
 
-    return jsonify(isvalid=False)
+        return jsonify(isvalid=1), 200
+
+    return jsonify(isvalid=3), 200
 
 
 @app.route('/api/user-payments', methods=['GET'])
