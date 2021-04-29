@@ -94,6 +94,11 @@ def profile():
 # return _backend_account address
 @app.route('/checkonline')
 def check_online():
+    """ Verifies if the application is connected to Infura network. 
+
+    Returns:
+        json: A json object containing: backend_eth_account, backend_eth_balance, and web3_online. 
+    """
     return jsonify(
         web3_online=w3.isConnected(),
         backend_eth_account=_backend_eth_account.address,
@@ -104,6 +109,11 @@ def check_online():
 
 @app.route('/api/getfactory')
 def get_factory():
+    """ Returns the connection to the DecentraLoan factory. 
+
+    Returns:
+        json: A json object containing: abi, factory address, and the bytecode representing the factory. 
+    """
     return jsonify(
         abi=platform_contract_abi,
         bytecode=platform_contract_bytecode,
@@ -119,20 +129,41 @@ def get_loan():
 
 @app.route('/users', methods=['GET'])
 def get_all_users():
+    """ Retrieves all users in the platform from the database. 
+
+    Returns:
+        json_object: A json object containing all of the users in the platform. 
+    """
     return UsersHandler.get_all_users()
 
 
 @app.route('/api/user', methods=['GET'])
 def get_user():
+    """ Retrieves a user with the user_id given
+    in the platform from the database. 
+
+    Returns:
+        User: The user who's user_id matches, error if the id does 
+        not exist within the database. 
+    """
     user_id = request.args.get('user_id')
     if user_id:
-        return UsersHandler.get_user(user_id)
+        return UsersHandler.get_user(user_id), 200
     else:
-        return jsonify(Error="User not found.")
+        return jsonify(Error="User not found."), 404
 
 
 @app.route('/api/notifications', methods=['GET', 'POST'])
 def alert_user_notifications():
+    """Depending on the request method, it either retrieves all notifications
+    belonging to the user_id passed or posts a new notification to the user 
+    with the user_id passed. 
+
+    Returns: 
+        JSON: A object containing all the notifications a user has,
+        the notification ID of the newly created notification in the case of a 
+        'POST' request, an error if the user is not found or the query fails.
+    """
     if request.method == 'GET':
         user_id = request.args.get('user_id')
         if user_id:
@@ -155,19 +186,26 @@ def alert_user_notifications():
 
 @app.route('/api/check-emails-user', methods=['GET'])
 def check_emailsUsersname():
+    """Verifies the legitimacy of a input email and username. 
+
+    Returns:
+        Boolean Array: Returns an array of booleans denoting 
+        if the email and username are valid when true.
+    """
     email = request.args.get('email')
     username = request.args.get('username')
     return UsersHandler.check_emailsUsersname(email, username)
 
 
-# -----------------------
-#  Log | Register Routes
-# -----------------------
-
-
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
 def register():
+    """Upon success inserts a new user into the database. 
+
+    Returns:
+        JSON: returns a JSON object denoting the new user information upon success, 
+        upon failure, returns an error denoting whether the query was successful. 
+    """
     if request.method == 'POST':
         data = request.json
         username = data['username']
@@ -195,6 +233,13 @@ def register():
 
 @app.route('/api/login', methods=['POST'])
 def login():
+    """Verifies user credentials passed in order to determine if a login
+    is valid. 
+
+    Returns:
+        JSON: Returns a successful json object with user information, upon
+        failure it will return an error. 
+    """
     if request.method == 'POST':
         data = request.json
         email = data['email']
@@ -218,6 +263,14 @@ def login():
 
 @app.route('/api/edituser', methods=['PUT'])
 def edit_user():
+    """Verifies user credentials passed in order to determine if an edit
+    is valid, if so it will use the rest of the parameters and update the user
+    whos user_id matches with the passed parameters. 
+
+    Returns:
+        JSON: Returns a successful json object with user information, upon
+        failure it will return an error. 
+    """
     data = request.json
     uid = data['user_id']
     username = data['username']
@@ -235,6 +288,13 @@ def edit_user():
 
 @app.route('/api/editpass', methods=['PUT'])
 def edit_user_pass():
+    """Verifies passed user credentials, if valid, procedes to 
+    update the user's password. 
+
+    Returns:
+        JSON: Returns a json object with a status denoting if it 
+        was successful or not. 
+    """
     data = request.json
     uid = data['user_id']
     email = data['email']
@@ -248,15 +308,16 @@ def edit_user_pass():
         return jsonify(email=email, localId=uid, status='fail')
 
 
-@app.route('/api/logout')
-def logout():
-    if request.method == 'POST':
-        return jsonify({'status': 'success'})
-
-
 # Loan Routes
 @app.route('/api/create-loan', methods=['POST'])
 def create_loan():
+    """Retrieves passed request information and procedes to 
+    create a loan on the Decentraloan factory and the database. 
+
+    Returns:
+        JSON: Returns the loan_id of the newly created loan upon success and 
+        an error message upon failure of the query.
+    """
     if request.method == 'POST':
         data = request.json
         loan_amount = data['loan_amount']
@@ -358,6 +419,7 @@ def edit_loan_state():
         return jsonify(Error="User not found."), 404
 
 
+# Offer routes
 @app.route('/api/create-offer', methods=['POST', 'PUT'])
 def create_offer():
     if request.method == 'POST':
@@ -414,6 +476,7 @@ def get_offer_count():
         return jsonify(Error="User not found."), 404
 
 
+# Payment routes
 @app.route('/api/send-payment', methods=['POST'])
 def send_payment():
     data = request.json
