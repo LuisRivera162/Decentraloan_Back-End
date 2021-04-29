@@ -85,7 +85,7 @@ class LoansHandler:
         user_dao = UsersDAO()
         row = dao.get_single_user_loan(loan_id)
         if not row:
-            return jsonify(Error="Loan Not Found"), 404
+            return None
         else:
             result = self.build_loan_dict(row)
             lender_username = result['lender']

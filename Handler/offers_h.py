@@ -139,7 +139,7 @@ class OffersHandler:
         if offer_id: 
             return jsonify(offer_id=offer_id), 200
         else: 
-            return None
+            return jsonify(Error="Offer not found."), 404
 
     def reject_all_loan_offers(self, offer_id, loan_id):
         dao = OffersDAO()
@@ -167,8 +167,8 @@ class OffersHandler:
 
     def withdraw_all_loan_offers(self, loan_id):
         dao = OffersDAO()
-        dao.withdraw_all_loan_offers(loan_id)
+        loan_id = dao.withdraw_all_loan_offers(loan_id)
         if loan_id: 
             return loan_id, 200
         else: 
-            return None
+            return jsonify(Error="Offer not found."), 404
