@@ -705,6 +705,16 @@ def reject_offer():
 
 @app.route('/api/accept-offer', methods=['PUT'])
 def accept_offer():
+    """Accepts incomming offer that matches with the 
+    'offer_id' received and procedes to reject all other offers
+    the loan to whom the offer was made, set the loan as accepted 
+    in the block chain, and insert to the participant table both, 
+    lender and borrower. 
+
+    Returns:
+        JSON: Returns a json object containing the initial given 'offer_id' 
+        upon success. Will return an error if the offer was not found. 
+    """
     data = request.json
     offer_id = data['offer_id']
     _offer = OffersHandler.get_offer(offer_id=offer_id)
@@ -718,8 +728,6 @@ def accept_offer():
         borrower_eth = UsersHandler.get_user(_offer['borrower_id'])['wallet']
         loan_eth = LoansHandler.get_loan(_offer['loan_id'])['eth_address']
 
-        # print(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*100), _offer['months'], _offer['platform'])
-
         eth_reach_deal(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*10000), _offer['months'], _offer['platform'])
         
         return OffersHandler.accept_offer(offer_id)
@@ -729,6 +737,13 @@ def accept_offer():
 
 @app.route('/api/get-participant', methods=['GET'])
 def get_participant():
+    """Checks whether the user received is a loan participant
+    or not. 
+
+    Returns:
+        JSON: Returns a json object with the 'participant_id' upon success.
+        Will return an error if no participant found. 
+    """
     user_id = request.args.get('user_id')
     if user_id:
         return ParticipantHandler.get_participant(user_id), 200
@@ -738,6 +753,13 @@ def get_participant():
 
 @app.route('/api/rejected-offers', methods=['GET'])
 def get_rejected_offers():
+    """Retrieves from the database all offers that are rejected. 
+
+    Returns:
+        JSON: Returns a json object containing all rejected
+        offers upon success. Will return an error if the 'user_id' 
+        is not found. 
+    """
     user_id = request.args.get('user_id')
     if user_id:
         return OffersHandler.get_all_user_rejected_offers(user_id), 200
@@ -747,6 +769,12 @@ def get_rejected_offers():
 
 @app.route('/payments', methods=['GET'])
 def get_all_payments():
+    """Retrieves from the database all payments. 
+
+    Returns:
+        JSON: Returns a json object containing all payments
+        upon success. 
+    """
     return PaymentsHandler.get_all_payments()
 
 # Blockchain Operations
