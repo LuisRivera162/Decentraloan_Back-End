@@ -97,7 +97,7 @@ def check_online():
     """ Verifies if the application is connected to Infura network. 
 
     Returns:
-        json: A json object containing: backend_eth_account, backend_eth_balance, and web3_online. 
+        JSON: A json object containing: backend_eth_account, backend_eth_balance, and web3_online. 
     """
     return jsonify(
         web3_online=w3.isConnected(),
@@ -112,7 +112,7 @@ def get_factory():
     """ Returns the connection to the DecentraLoan factory. 
 
     Returns:
-        json: A json object containing: abi, factory address, and the bytecode representing the factory. 
+        JSON: A json object containing: abi, factory address, and the bytecode representing the factory. 
     """
     return jsonify(
         abi=platform_contract_abi,
@@ -132,7 +132,7 @@ def get_all_users():
     """ Retrieves all users in the platform from the database. 
 
     Returns:
-        json_object: A json object containing all of the users in the platform. 
+        JSON: A json object containing all of the users in the platform. 
     """
     return UsersHandler.get_all_users()
 
@@ -143,7 +143,7 @@ def get_user():
     in the platform from the database. 
 
     Returns:
-        User: The user who's user_id matches, error if the id does 
+        JSON: The user who's user_id matches, error if the id does 
         not exist within the database. 
     """
     user_id = request.args.get('user_id')
@@ -151,37 +151,6 @@ def get_user():
         return UsersHandler.get_user(user_id), 200
     else:
         return jsonify(Error="User not found."), 404
-
-
-@app.route('/api/notifications', methods=['GET', 'POST'])
-def alert_user_notifications():
-    """Depending on the request method, it either retrieves all notifications
-    belonging to the user_id passed or posts a new notification to the user 
-    with the user_id passed. 
-
-    Returns: 
-        JSON: A object containing all the notifications a user has,
-        the notification ID of the newly created notification in the case of a 
-        'POST' request, an error if the user is not found or the query fails.
-    """
-    if request.method == 'GET':
-        user_id = request.args.get('user_id')
-        if user_id:
-            result = NotificationsHandler.get_all_user_notifications(user_id)
-            return result
-        else:
-            return jsonify(Error="User not found.")
-    elif request.method == 'POST':
-        data = request.json
-        user_id = data['user_id']
-        message = data['message']
-        notification_type = data['notification_type']
-        if user_id:
-            return NotificationsHandler.create_notification(user_id, message, notification_type)
-        else:
-            return jsonify(Error="User not found."), 404
-    else:
-        return jsonify(Error="Method not allowed."), 405
 
 
 @app.route('/api/check-emails-user', methods=['GET'])
@@ -448,6 +417,34 @@ def edit_loan_state():
         return jsonify(Error="Loan not found."), 404
 
 
+@app.route('/api/withdraw-loan', methods=['POST'])
+def withdraw_loan():
+    """Withdraws the loan with the 'loan_id' received. 
+
+    Returns:
+        JSON: Returns a status message upon success. It will return
+        an error if the received 'loan_id' does not exist. 
+    """
+    data = request.json
+
+    loan_id = data['loan_id']
+
+    loan_eth_address = LoansHandler.get_loan(loan_id)
+
+    if not loan_eth_address: 
+        return jsonify(Error='Loan not found.'), 404
+
+    loan_eth_address = loan_eth_address['eth_address']
+
+    # 0. mark as withdrawn in Blockchain
+    eth_withdraw_loan(loan_eth_address)
+    # 1. rescind all offers related to loan in DB
+    OffersHandler.withdraw_all_loan_offers(loan_id)
+    # 2. remove loan from DB
+    LoansHandler.withdraw_loan(loan_id)
+    return jsonify(status='Success')
+
+
 # Offer routes
 @app.route('/api/create-offer', methods=['POST', 'PUT'])
 def create_offer():
@@ -525,6 +522,98 @@ def get_offer_count():
         return OffersHandler.get_offer_count(user_id), 200
     else:
         return jsonify(Error="User not found."), 404
+
+
+@app.route('/api/withdraw-offer', methods=['PUT'])
+def withdraw_offer():
+    """Withdraws the Offer with the 'offer_id' received. 
+
+    Returns:
+        JSON: Returns a offer_id of the withdrawn offer upon success. 
+        It will return an error if the received 'offer_id' does not exist. 
+    """
+    data = request.json
+    offer_id = data['offer_id']
+    if offer_id:
+        return jsonify(offer_id=OffersHandler.withdraw_offer(offer_id)), 200
+    else:
+        return jsonify(Error="Offer not found."), 404
+
+
+@app.route('/api/withdraw-loan-offers', methods=['PUT'])
+def withdraw_all_loan_offers():
+    """Withdraws all offers that were made to a specific loan. 
+
+    Returns:
+        JSON: Returns the 'loan_id' of the loan who's offers were 
+        withdrawn on success. It will return an error if the loan 
+        is not found. 
+    """
+    data = request.json
+    loan_id = data['loan_id']
+    if loan_id:
+        return OffersHandler.withdraw_all_loan_offers(loan_id)
+
+
+@app.route('/api/reject-offer', methods=['PUT'])
+def reject_offer():
+    """Rejects an offer with the 'offer_id' received. 
+
+    Returns:
+        JSON: Returns the 'offer_id' of the rejected offer. 
+        It will return an error if the 'offer_id' is not found. 
+    """
+    data = request.json
+    offer_id = data['offer_id']
+    return OffersHandler.reject_offer(offer_id)
+
+
+@app.route('/api/accept-offer', methods=['PUT'])
+def accept_offer():
+    """Accepts incomming offer that matches with the 
+    'offer_id' received and procedes to reject all other offers
+    the loan to whom the offer was made, set the loan as accepted 
+    in the block chain, and insert to the participant table both, 
+    lender and borrower. 
+
+    Returns:
+        JSON: Returns a json object containing the initial given 'offer_id' 
+        upon success. Will return an error if the offer was not found. 
+    """
+    data = request.json
+    offer_id = data['offer_id']
+    _offer = OffersHandler.get_offer(offer_id=offer_id)
+    if _offer:
+        ParticipantHandler.insert_participant(
+            lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
+        LoansHandler.accept_loan_offer(_offer['loan_id'], _offer['borrower_id'],
+                                       _offer['amount'], _offer['months'], _offer['interest'], _offer['platform'])
+        OffersHandler.reject_all_loan_offers(offer_id, _offer['loan_id'])
+
+        borrower_eth = UsersHandler.get_user(_offer['borrower_id'])['wallet']
+        loan_eth = LoansHandler.get_loan(_offer['loan_id'])['eth_address']
+
+        eth_reach_deal(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*10000), _offer['months'], _offer['platform'])
+        
+        return OffersHandler.accept_offer(offer_id)
+    else:
+        return jsonify(Error="Offer not found."), 404
+
+
+@app.route('/api/rejected-offers', methods=['GET'])
+def get_rejected_offers():
+    """Retrieves from the database all offers that are rejected. 
+
+    Returns:
+        JSON: Returns a json object containing all rejected
+        offers upon success. Will return an error if the 'user_id' 
+        is not found. 
+    """
+    user_id = request.args.get('user_id')
+    if user_id:
+        return OffersHandler.get_all_user_rejected_offers(user_id), 200
+    else:
+        return jsonify(Error="Offers not found."), 404
 
 
 # Payment routes
@@ -631,110 +720,17 @@ def get_all_loan_payments():
         return jsonify(Error="Loan not found."), 404
 
 
-@app.route('/api/withdraw-loan', methods=['POST'])
-def withdraw_loan():
-    """Withdraws the loan with the 'loan_id' received. 
+@app.route('/payments', methods=['GET'])
+def get_all_payments():
+    """Retrieves from the database all payments. 
 
     Returns:
-        JSON: Returns a status message upon success. It will return
-        an error if the received 'loan_id' does not exist. 
+        JSON: Returns a json object containing all payments
+        upon success. 
     """
-    data = request.json
+    return PaymentsHandler.get_all_payments()
 
-    loan_id = data['loan_id']
-
-    loan_eth_address = LoansHandler.get_loan(loan_id)
-
-    if not loan_eth_address: 
-        return jsonify(Error='Loan not found.'), 404
-
-    loan_eth_address = loan_eth_address['eth_address']
-
-    # 0. mark as withdrawn in Blockchain
-    eth_withdraw_loan(loan_eth_address)
-    # 1. rescind all offers related to loan in DB
-    OffersHandler.withdraw_all_loan_offers(loan_id)
-    # 2. remove loan from DB
-    LoansHandler.withdraw_loan(loan_id)
-    return jsonify(status='Success')
-
-
-@app.route('/api/withdraw-offer', methods=['PUT'])
-def withdraw_offer():
-    """Withdraws the Offer with the 'offer_id' received. 
-
-    Returns:
-        JSON: Returns a offer_id of the withdrawn offer upon success. 
-        It will return an error if the received 'offer_id' does not exist. 
-    """
-    data = request.json
-    offer_id = data['offer_id']
-    if offer_id:
-        return jsonify(offer_id=OffersHandler.withdraw_offer(offer_id)), 200
-    else:
-        return jsonify(Error="Offer not found."), 404
-
-
-@app.route('/api/withdraw-loan-offers', methods=['PUT'])
-def withdraw_all_loan_offers():
-    """Withdraws all offers that were made to a specific loan. 
-
-    Returns:
-        JSON: Returns the 'loan_id' of the loan who's offers were 
-        withdrawn on success. It will return an error if the loan 
-        is not found. 
-    """
-    data = request.json
-    loan_id = data['loan_id']
-    if loan_id:
-        return OffersHandler.withdraw_all_loan_offers(loan_id)
-
-
-@app.route('/api/reject-offer', methods=['PUT'])
-def reject_offer():
-    """Rejects an offer with the 'offer_id' received. 
-
-    Returns:
-        JSON: Returns the 'offer_id' of the rejected offer. 
-        It will return an error if the 'offer_id' is not found. 
-    """
-    data = request.json
-    offer_id = data['offer_id']
-    return OffersHandler.reject_offer(offer_id)
-
-
-@app.route('/api/accept-offer', methods=['PUT'])
-def accept_offer():
-    """Accepts incomming offer that matches with the 
-    'offer_id' received and procedes to reject all other offers
-    the loan to whom the offer was made, set the loan as accepted 
-    in the block chain, and insert to the participant table both, 
-    lender and borrower. 
-
-    Returns:
-        JSON: Returns a json object containing the initial given 'offer_id' 
-        upon success. Will return an error if the offer was not found. 
-    """
-    data = request.json
-    offer_id = data['offer_id']
-    _offer = OffersHandler.get_offer(offer_id=offer_id)
-    if _offer:
-        ParticipantHandler.insert_participant(
-            lender_id=_offer['lender_id'], borrower_id=_offer['borrower_id'], loan_id=_offer['loan_id'])
-        LoansHandler.accept_loan_offer(_offer['loan_id'], _offer['borrower_id'],
-                                       _offer['amount'], _offer['months'], _offer['interest'], _offer['platform'])
-        OffersHandler.reject_all_loan_offers(offer_id, _offer['loan_id'])
-
-        borrower_eth = UsersHandler.get_user(_offer['borrower_id'])['wallet']
-        loan_eth = LoansHandler.get_loan(_offer['loan_id'])['eth_address']
-
-        eth_reach_deal(borrower_eth, loan_eth, int(_offer['amount']), int(_offer['interest']*10000), _offer['months'], _offer['platform'])
-        
-        return OffersHandler.accept_offer(offer_id)
-    else:
-        return jsonify(Error="Offer not found."), 404
-
-
+# Participant routes
 @app.route('/api/get-participant', methods=['GET'])
 def get_participant():
     """Checks whether the user received is a loan participant
@@ -751,31 +747,37 @@ def get_participant():
         return jsonify(Error="User not found."), 404
 
 
-@app.route('/api/rejected-offers', methods=['GET'])
-def get_rejected_offers():
-    """Retrieves from the database all offers that are rejected. 
+# Notification Routes
+@app.route('/api/notifications', methods=['GET', 'POST'])
+def alert_user_notifications():
+    """Depending on the request method, it either retrieves all notifications
+    belonging to the user_id passed or posts a new notification to the user 
+    with the user_id passed. 
 
-    Returns:
-        JSON: Returns a json object containing all rejected
-        offers upon success. Will return an error if the 'user_id' 
-        is not found. 
+    Returns: 
+        JSON: A object containing all the notifications a user has,
+        the notification ID of the newly created notification in the case of a 
+        'POST' request, an error if the user is not found or the query fails.
     """
-    user_id = request.args.get('user_id')
-    if user_id:
-        return OffersHandler.get_all_user_rejected_offers(user_id), 200
+    if request.method == 'GET':
+        user_id = request.args.get('user_id')
+        if user_id:
+            result = NotificationsHandler.get_all_user_notifications(user_id)
+            return result
+        else:
+            return jsonify(Error="User not found.")
+    elif request.method == 'POST':
+        data = request.json
+        user_id = data['user_id']
+        message = data['message']
+        notification_type = data['notification_type']
+        if user_id:
+            return NotificationsHandler.create_notification(user_id, message, notification_type)
+        else:
+            return jsonify(Error="User not found."), 404
     else:
-        return jsonify(Error="Offers not found."), 404
+        return jsonify(Error="Method not allowed."), 405
 
-
-@app.route('/payments', methods=['GET'])
-def get_all_payments():
-    """Retrieves from the database all payments. 
-
-    Returns:
-        JSON: Returns a json object containing all payments
-        upon success. 
-    """
-    return PaymentsHandler.get_all_payments()
 
 # Blockchain Operations
 
