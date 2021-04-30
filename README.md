@@ -147,7 +147,9 @@ def login():
 
 ## Routes API
 
-```{style="max-height: 10px;"}
+<routes>
+    
+```
 @app.route('/checkonline')
 def check_online():
 """ Verifies if the application is connected to Infura network. 
@@ -484,6 +486,7 @@ Returns:
 """
 
 ```
+</routes>
 
 
 ## Credits
