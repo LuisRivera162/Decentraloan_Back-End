@@ -13,6 +13,12 @@ class OffersDAO:
 
     # GET
     def get_all_offers(self): 
+        """Retrieves all offers from the database. 
+
+        Returns:
+            Tuple[]: Returns a tuple array filled with all offers' 
+            attributes found.
+        """
         cursor = self.conn.cursor()
         query = 'select * from offer;'
         cursor.execute(query)
@@ -22,6 +28,15 @@ class OffersDAO:
         return result
 
     def get_all_loan_offers(self, loan_id):
+        """Retrieves all offers that have been made onto a 
+        particular loan whom are not rejected or withdrawn.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            Tuple[]: Returns all offers that have been made onto a loan.
+        """
         cursor = self.conn.cursor()
         query = f'select * from offer where loan_id = {loan_id} and rejected = false and withdrawn = false;'
         cursor.execute(query)
@@ -31,8 +46,21 @@ class OffersDAO:
         return result
 
     def get_all_user_pending_offers(self, user_id):
+        """Retrieves all offers that are currently pending which
+        are not rejected nor accepted and whos 'borrower_id' or 
+        'lender_id' attribute matches with the one passed.  
+
+        Args:
+            user_id (integer): The ID of the user.  
+
+        Returns:
+            Tuple[]: Returns a tuple array representing offers and their
+            attribute values, ordered in a descending manner, ordered by 
+            the date they were created on. 
+        """
         cursor = self.conn.cursor()
-        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = false and accepted = false \
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) \
+            and rejected = false and accepted = false \
              and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
@@ -41,8 +69,10 @@ class OffersDAO:
         return result
 
     def get_all_user_rejected_offers(self, user_id):
+
         cursor = self.conn.cursor()
-        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = true and withdrawn = false order by created_on DESC;'
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) \
+            and rejected = true and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -51,7 +81,8 @@ class OffersDAO:
 
     def get_offer_count(self, user_id):
         cursor = self.conn.cursor()
-        query = f'select count (*) from offer where borrower_id = {user_id} or lender_id = {user_id} and withdrawn = false;'
+        query = f'select count (*) from offer where borrower_id = {user_id} or lender_id = {user_id} \
+            and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
@@ -71,7 +102,8 @@ class OffersDAO:
         
     def get_borrower_loan_offer(self, user_id, loan_id):
         cursor = self.conn.cursor()
-        query = f'select offer_id from offer where loan_id = {loan_id} and borrower_id = {user_id} and withdrawn = false;'
+        query = f'select offer_id from offer where loan_id = {loan_id} and borrower_id = {user_id} \
+            and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result: 
@@ -80,7 +112,6 @@ class OffersDAO:
             return None
 
     # POST
-    # expiration date not used, not sure how to use. 
     def create_offer(self, loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, expiration_date, platform):
         cursor = self.conn.cursor()
         query = "insert into OFFER(LOAN_ID, BORROWER_ID, LENDER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE, PLATFORM) \
@@ -92,10 +123,10 @@ class OffersDAO:
 
     
     # PUT
-    # expiration date not used, not sure how to use. 
     def edit_offer(self, offer_id, amount, months, interest, expiration_date, platform):
         cursor = self.conn.cursor()
-        query = f"update offer set amount = {amount}, interest = {interest}, months = {months}, rejected = false, withdrawn = false, platform = {platform} \
+        query = f"update offer set amount = {amount}, interest = {interest}, months = {months}, \
+            rejected = false, withdrawn = false, platform = {platform} \
             where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
