@@ -13,6 +13,11 @@ class PaymentsDAO:
 
     # GET
     def get_all_payments(self): 
+        """Retrieves all payments.
+
+        Returns:
+            Tuple[]: Returns all payment tuble object arrays. 
+        """
         cursor = self.conn.cursor()
         query = 'select * from payments;'
         cursor.execute(query)
@@ -22,6 +27,14 @@ class PaymentsDAO:
         return result
 
     def get_all_user_payments(self, user_id):
+        """Retrieves all the creation and withdrawal dates of user payments, offers, and loans. 
+
+        Args:
+            user_id (integer): The ID of the user.
+
+        Returns:
+            Tuple[]: Returns all the creation and withdrawal dates of user payments, offers, and loans. 
+        """
         cursor = self.conn.cursor()
         query = f"select                                                                                                    \
                 receiver_id, sender_id, null as lender,                                                                     \
@@ -61,6 +74,16 @@ class PaymentsDAO:
         return result
 
     def get_loan_payments(self, loan_id):
+        """Retrieves all payments that were done to a loan ordered by date
+        in a ascending manner.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            Tuple[]: Returns all payments that were done to a loan ordered by date
+            in a ascending manner. 
+        """
         cursor = self.conn.cursor()
         query = f'select * from payments where loan_id = {loan_id} order by payment_date ASC;'
         cursor.execute(query)
@@ -70,6 +93,15 @@ class PaymentsDAO:
         return result
 
     def get_payment(self, payment_id):
+        """Retrieves a payments that matches with passed 'payment_id'.
+
+        Args:
+            payment_id (integer): The ID of the payment.
+
+        Returns:
+            Tuple[]: Returns a payment tuple object where all values 
+            represent the payments' attributes.
+        """
         cursor = self.conn.cursor()
         query = f'select * from payments where payment_id = {payment_id};'
         cursor.execute(query)
@@ -79,6 +111,22 @@ class PaymentsDAO:
         return result
 
     def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
+        """Creates a new payment with the values passed as parameters. And updates the loan's balance and 
+        received interest.
+
+        Args:
+            paymentNumber (integer): The number of payments done on the loan.
+            sender (integer): The ID of the sender.
+            receiver (integer): The ID of the receiver.
+            loan_id (integer): The ID of the loan.
+            rcvd_interest (double): The total received interest.
+            amount (double): The amount paid.
+            validated (boolean): Validation boolean.
+            validation_hash (string): Validation hash code.
+
+        Returns:
+            integer: Returns the payment ID of the newly created payment.
+        """
         cursor = self.conn.cursor()
         query = "insert into PAYMENTS(loan_id, sender_id, receiver_id, amount, validated, validation_hash, payment_date) values (%s, %s, %s, %s, %s, %s, now()) returning payment_id;"
         cursor.execute(query, (loan_id, sender, receiver, amount, validated, validation_hash))
@@ -96,17 +144,22 @@ class PaymentsDAO:
         return payment_id
 
     def validate_payment(self, payment_id):
+        """Validates a payment. And sums the number of payments done 
+        to the payment.
+
+        Args:
+            payment_id (integer): The ID of the payment.
+
+        Returns:
+            integer: Returns the 'payment_id' of the updated payment.
+        """
         cursor = self.conn.cursor()
         query = f'update PAYMENTS set validated=true where payment_id = {payment_id} returning payment_id, loan_id'
         cursor.execute(query)
-
         cursor_res = cursor.fetchone()
         payment_id = cursor_res[0]
         loan_id = cursor_res[1]
-
         query = 'update LOANS set state = %s, payment_number = payment_number + 1 where loan_id = %s'
         cursor.execute(query,(2, loan_id))
-
         self.conn.commit()
-
         return payment_id
