@@ -3,6 +3,7 @@ from DAO.users import UsersDAO
 from flask import jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 class PaymentsHandler:
 
     def build_payment_dict(self, row):

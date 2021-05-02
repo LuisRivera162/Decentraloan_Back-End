@@ -30,9 +30,9 @@ CREATE TABLE LOANERS (
 
 CREATE TABLE ACTIVITY (
 	activity_id serial PRIMARY KEY,
-	"user" INTEGER,
+	user_id INTEGER,
 	activity_type INTEGER,
-	FOREIGN KEY ("user") REFERENCES USERS(user_id)
+	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
 CREATE TABLE LOANS (

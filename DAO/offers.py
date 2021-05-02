@@ -118,6 +118,7 @@ class OffersDAO:
 
         Returns:
             Tuple: Returns a tuple with the values of the offer attributes if found.
+
         """
         cursor = self.conn.cursor()
         query = f'select * from offer where offer_id = {offer_id} and withdrawn = false;'
@@ -174,7 +175,6 @@ class OffersDAO:
         self.conn.commit()
         return offer_id
 
-    
     # PUT
     def edit_offer(self, offer_id, amount, months, interest, expiration_date, platform):
         """Updates the value of an offer that matches with a passed 'offer_id' parameter.
