@@ -1,5 +1,4 @@
 from eth_account import Account
-import web3 as w3
 from config.dbconfig import pg_config
 import psycopg2
 
@@ -13,7 +12,7 @@ class UsersDAO:
                                                                     pg_config['port'])
         self.conn = psycopg2._connect(connection_url)
 
-    # GET 
+    # GET     # gets all users
     def get_all_users(self):
         """Retrieves all users from the database.
 
@@ -29,6 +28,7 @@ class UsersDAO:
             result.append(row)
         return result
 
+    # gets the user from the id
     def get_user(self, uid):
         """Retrieves a user whos 'user_id' matches with the passed argument. 
 
@@ -47,6 +47,7 @@ class UsersDAO:
         else:
             return -1
 
+    # gets the username from the id
     def get_username(self, uid):
         """Retrieves the username from a user that matches with the 'user_id'
         parameter passed.
@@ -66,6 +67,7 @@ class UsersDAO:
         else:
             return -1
 
+    # gets the users wallet
     def get_user_wallet_address(self, uid):
         """Retrieves the wallet address from a user that matches 
         with the 'user_id' parameter passed.
@@ -85,6 +87,7 @@ class UsersDAO:
         else:
             return -1
 
+    # gets the user by username or email
     def get_user_by_email_or_username(self, email):
         """Retrieves a user whos 'email' matches with the passed argument. 
 
@@ -103,6 +106,7 @@ class UsersDAO:
         else:
             return -1
 
+    # gets the user by username
     def get_user_by_username(self, username):
         """Retrieves a user whos 'username' matches with the passed argument. 
 
@@ -121,7 +125,7 @@ class UsersDAO:
         else:
             return -1
 
-    # INSERT 
+    # INSERT     # creates a user entry on table
     def insert_user(self, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PASSKEY, AGE, PHONE, LENDER):
         """Creates a new user with the values passed as parameters. 
 
@@ -149,7 +153,7 @@ class UsersDAO:
         self.conn.commit()
         return uid
 
-    # PUT
+    # PUT    # edits a users data
     def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
         """Updates a new user with the values passed as parameters. 
 
@@ -172,6 +176,7 @@ class UsersDAO:
         self.conn.commit()
         return query
 
+    # edits a users password
     def edit_user_pass(self, uid, n_password):
         """Updates the user password.
 
@@ -191,7 +196,7 @@ class UsersDAO:
     # ----------------------
     #   Login Validations
     # ----------------------
-
+    # gets the password the password hash for a user
     def get_user_password_hash(self, email):
         """Retrieves the hashed password from a user that matches with the
         provided email.

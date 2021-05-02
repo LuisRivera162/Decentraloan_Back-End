@@ -179,6 +179,7 @@ class LoansDAO:
 
         Returns:
             integer: The ID of the loan that got updated. 
+
         """
         cursor = self.conn.cursor()
         query = f"update loans set state = {state} where loan_id = {loan_id};"

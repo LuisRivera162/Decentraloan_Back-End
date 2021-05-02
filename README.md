@@ -145,7 +145,6 @@ def login():
 
 ![DATABASE ERD](images/DATABASE_ERD.PNG)
 
-
 <details><summary><h2>Routes API</h2></summary>
 <p>
     
@@ -491,9 +490,7 @@ Returns:
 </p>
 </details>
 
-
 ## Credits
 
 ### Luis G. Rivera Gonzalez (luis.rivera162@upr.edu) 
 ### Hector A. Rodriguez  (hector.rodriguez49@upr.edu) 
-

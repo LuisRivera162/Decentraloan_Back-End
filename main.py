@@ -3,6 +3,7 @@
 # project WILL NOT be able to connect the the blockchain if not set!
 # run env.bat to populate this data
 from web3 import contract, eth
+
 from Handler.users_h import UsersHandler
 from Handler.loans_h import LoansHandler
 from Handler.offers_h import OffersHandler
@@ -10,11 +11,8 @@ from Handler.payments_h import PaymentsHandler
 from Handler.notifications_h import NotificationsHandler
 from Handler.participant_h import ParticipantHandler
 
-
-# from wtforms import Form, BooleanField, TextField, PasswordField, validators
-
 from flask_cors import CORS, cross_origin
-from flask import (Flask, g, jsonify, session, url_for, request)
+from flask import (Flask, g, jsonify, session, request)
 
 from eth_account import Account
 from web3.auto.infura.kovan import w3
@@ -85,6 +83,7 @@ def before_request():
         g.user = user
 
 
+# default route for backend
 @app.route('/')
 def profile():
     return 'go to /users'
@@ -125,7 +124,6 @@ def get_loan():
     return jsonify(
         abi=decentraloan_contract_abi,
         bytecode=decentraloan_contract_bytecode)
-
 
 @app.route('/users', methods=['GET'])
 def get_all_users():
@@ -523,7 +521,6 @@ def get_offer_count():
     else:
         return jsonify(Error="User not found."), 404
 
-
 @app.route('/api/withdraw-offer', methods=['PUT'])
 def withdraw_offer():
     """Withdraws the Offer with the 'offer_id' received. 
@@ -627,6 +624,7 @@ def send_payment():
         It will return an error if the user with a 'user_id' or a loan with the 'loan_id' 
         is not found. 
     """
+
     data = request.json
     sender_id = data['sender_id']
     receiver_id = data['receiver_id']
@@ -857,6 +855,7 @@ def eth_withdraw_loan(loan_id):
     loan_contract = w3.eth.contract(address=loan_id, abi=decentraloan_contract_abi)
 
     unsigned_tx = loan_contract.functions.Withdraw().buildTransaction({
+
         'gas': 4000000,
         'gasPrice': w3.eth.gas_price,
         'nonce': w3.eth.getTransactionCount(_backend_eth_account.address)
