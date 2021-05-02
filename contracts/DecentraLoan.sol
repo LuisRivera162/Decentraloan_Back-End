@@ -25,24 +25,28 @@ contract DecentraLoan {
     }
 
     // contract owner (who pays for the gas fees..)
-    address public _owner;
+    address private _owner;
+    
+    address payable[10] private _investors;
+    uint256 private InvestorIndex;
 
     // lender specific variables
-    address public Lender;
-    address public Borrower;
-    uint256 public LoanAmount;
-    uint256 public InterestRate;
-    uint256 public RepaymentPeriod;
-    uint256 public Platform;
+    address private Lender;
+    address private Borrower;
+    uint256 private LoanAmount;
+    uint256 private InterestRate;
+    uint256 private RepaymentPeriod;
+    uint256 private Platform;
 
     // loan contract specific variables
-    StateType public State;
-    Evidence[] public Evidences;
-    uint256 public Balance;
-    uint256 public PaymentNumber;
+    StateType private State;
+    Evidence[] private Evidences;
+    uint256 private Balance;
+    uint256 private PaymentNumber;
 
     // contract constructor
     constructor(
+        address owner,
         address lender,
         uint256 amount,
         uint256 interest,
@@ -55,13 +59,52 @@ contract DecentraLoan {
         RepaymentPeriod = repaymentPeriod;
         Platform = platform;
 
-        _owner = msg.sender; // set owner to custom address
+        _owner = owner;
 
         State = StateType.Available;
 
         PaymentNumber = 0;
 
         emit Created(lender, amount, interest, repaymentPeriod);
+    }
+    
+    function GetLoanAmount() public view returns (uint256) {
+        return LoanAmount;
+    }
+    
+    function Invest() public payable {
+        require(State != StateType.Withdrawn || State != StateType.Delinquent);
+        require(InvestorIndex < 10);
+        require(msg.value == ((LoanAmount/10)*(5e14)));
+        
+        _investors[InvestorIndex] = payable(msg.sender);
+        InvestorIndex++;
+        
+        emit Invested(msg.sender, (LoanAmount/10)*(5e14));
+    }
+    
+    function GetInvestors() public view returns (address payable[10] memory) {
+        return _investors;
+    }
+    
+    function ReturnInvestments() public payable {
+        require(msg.sender == _owner);
+        
+        for (uint256 i = 0; i < InvestorIndex; i++) {
+            _investors[i].transfer((LoanAmount/10)*(5e14));
+            
+            emit ReturnedInvestment(_investors[i], (LoanAmount)*(5e14));
+        }
+    }
+    
+    function PayInvestors(uint256 usd_amount) public payable {
+        require(msg.sender == _owner);
+        
+        for (uint256 i = 0; i < InvestorIndex; i++) {
+            _investors[i].transfer((usd_amount/100)*(5e14));
+            
+            emit PaidInvestor(_investors[i], (usd_amount/100)*(5e14));
+        }
     }
 
     // modify available (non-active) contract [lender]
@@ -130,6 +173,7 @@ contract DecentraLoan {
         address sender,
         uint256 paymentNumber,
         uint256 amount,
+        uint256 rcvd_interest,
         string memory evidence
     ) public payable {
         require(msg.sender == _owner);
@@ -140,9 +184,15 @@ contract DecentraLoan {
         if (PaymentNumber == 0) {
             // Lender sent core loan amount, this is considered as payment 0.
             Balance = amount;
-        } else {
+        } 
+        else if (PaymentNumber == RepaymentPeriod) {
+            Balance = 0;
+            PayInvestors(rcvd_interest/(InvestorIndex+1)); // pay interest to investors
+        }
+        else {
             // subtract paid amount to the balance
             Balance = Balance - amount;
+            PayInvestors(rcvd_interest/(InvestorIndex+1)); // pay interest to investors
         }
 
         // send evidence for counterparty validation, initialy unverified
@@ -239,10 +289,50 @@ contract DecentraLoan {
         uint256 paymentNumber,
         string evidence
     );
+    
+    event PaidInvestor(
+        address investor,
+        uint256 usd  
+    );
+    
+    event Invested(
+        address investor, 
+        uint256 blockvalue
+    );
+    
+    event ReturnedInvestment(
+        address investor,
+        uint256 weis    
+    );
+    
+    event Delinquent();
+    
+    event Terminated ();
 
     // Receive any ethereum randomly sent to the contract from outside
     receive() external payable {
         emit Received(msg.sender, msg.value);
+    }
+    
+    function Terminate() public payable {
+        require(msg.sender == _owner);
+        
+        payable(_owner).transfer(address(this).balance);
+        
+        State = StateType.Terminated;
+        
+        emit Terminated();
+    }
+    
+    function SetDelinquentStatus() public payable {
+        require(msg.sender == _owner);
+        
+        State = StateType.Delinquent;
+        
+        // payout insurance to lender
+        payable(Lender).transfer(address(this).balance);
+        
+        emit Delinquent();
     }
 
     // get tupple with information about current contract

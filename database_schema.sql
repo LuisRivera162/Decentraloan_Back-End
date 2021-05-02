@@ -46,11 +46,17 @@ CREATE TABLE LOANS (
 	accepted BOOLEAN default false,
 	eth_address VARCHAR,
 	monthly_repayment FLOAT,
-	balance FLOAT,
-	est_total_interest FLOAT,
+	balance FLOAT default 0,
+	rcvd_interest FLOAT default 0,
+	platform INTEGER default 0,
+	state INTEGER default 0,
+	payment_number INTEGER default 0,
+	withdrawn BOOLEAN default false,
+	withdraw_date TIMESTAMP,
 	FOREIGN KEY (lender) REFERENCES USERS(user_id),
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
+
 
 CREATE TABLE CHATS (
 	chat_id serial PRIMARY KEY,
@@ -62,6 +68,7 @@ CREATE TABLE CHATS (
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
 );
+
 
 CREATE TABLE OFFER (
 	offer_id serial PRIMARY KEY,
@@ -75,6 +82,9 @@ CREATE TABLE OFFER (
 	accepted BOOLEAN default false,
 	expiration_date DATE,
 	rejected BOOLEAN default false,
+	platform INTEGER default 0,
+	withdrawn BOOLEAN default false,
+	withdraw_date TIMESTAMP,
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
@@ -94,7 +104,7 @@ CREATE TABLE MESSAGE (
 
 CREATE TABLE PAYMENTS (
 	payment_id serial PRIMARY KEY,
-	loan_eth_address VARCHAR,
+	loan_id INTEGER,
 	receiver_id INTEGER,
 	sender_id INTEGER,
 	amount INTEGER,
@@ -102,7 +112,8 @@ CREATE TABLE PAYMENTS (
 	validated BOOLEAN default false, 
 	validation_hash VARCHAR (300),
 	FOREIGN KEY (receiver_id) REFERENCES USERS(user_id),
-	FOREIGN KEY (sender_id) REFERENCES USERS(user_id)
+	FOREIGN KEY (sender_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
 );
 
 CREATE TABLE NOTIFICATIONS (
@@ -115,3 +126,11 @@ CREATE TABLE NOTIFICATIONS (
 	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
 );
 
+CREATE TABLE PARTICIPANT (
+	lender_id INTEGER,
+	borrower_id INTEGER,
+	loan_id INTEGER,
+	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
+	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
+);

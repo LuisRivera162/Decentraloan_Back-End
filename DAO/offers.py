@@ -12,10 +12,12 @@ class OffersDAO:
         self.conn = psycopg2._connect(connection_url)
 
     # GET
-    def get_all_offers(self):
-        """
-        gets all offers
-        :return: list of offers
+    def get_all_offers(self): 
+        """Retrieves all offers from the database. 
+
+        Returns:
+            Tuple[]: Returns a tuple array filled with all offers' 
+            attributes found.
         """
         cursor = self.conn.cursor()
         query = 'select * from offer;'
@@ -26,13 +28,17 @@ class OffersDAO:
         return result
 
     def get_all_loan_offers(self, loan_id):
-        """
-        get all offers on a loan
-        :param loan_id: loan in question
-        :return: list of offers on the loan
+        """Retrieves all offers that have been made onto a 
+        particular loan whom are not rejected or withdrawn.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            Tuple[]: Returns all offers that have been made onto a loan.
         """
         cursor = self.conn.cursor()
-        query = f'select * from offer where loan_id = {loan_id} and rejected = false;'
+        query = f'select * from offer where loan_id = {loan_id} and rejected = false and withdrawn = false;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -40,13 +46,22 @@ class OffersDAO:
         return result
 
     def get_all_user_pending_offers(self, user_id):
-        """
-        gets all pending offers for a user
-        :param user_id: user id of lender or borrower
-        :return: list of offers
+        """Retrieves all offers that are currently pending which
+        are not rejected nor accepted and whos 'borrower_id' or 
+        'lender_id' attribute matches with the one passed.  
+
+        Args:
+            user_id (integer): The ID of the user.  
+
+        Returns:
+            Tuple[]: Returns a tuple array representing offers and their
+            attribute values, ordered in a descending manner, ordered by 
+            the date they were created on. 
         """
         cursor = self.conn.cursor()
-        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = false order by created_on DESC;'
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) \
+            and rejected = false and accepted = false \
+             and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -54,13 +69,20 @@ class OffersDAO:
         return result
 
     def get_all_user_rejected_offers(self, user_id):
-        """
-        gets all the rejected offers of a user
-        :param user_id: user to search
-        :return: list of offers
+        """Retrieves all user rejected offers that have not been withdrawn 
+        in a descending order by the creation date.
+
+        Args:
+            user_id (integer): The ID of the user. 
+
+        Returns:
+            Tuple[]: Returns a tuple array representing offers and their
+            attribute values, ordered in a descending manner, ordered by 
+            the date they were created on. 
         """
         cursor = self.conn.cursor()
-        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) and rejected = true order by created_on DESC;'
+        query = f'select * from offer where (borrower_id = {user_id} or lender_id = {user_id}) \
+            and rejected = true and withdrawn = false order by created_on DESC;'
         cursor.execute(query)
         result = []
         for row in cursor:
@@ -68,13 +90,18 @@ class OffersDAO:
         return result
 
     def get_offer_count(self, user_id):
-        """
-        gets amount of offers on a loan made by a user
-        :param user_id: borrower or lender who is in the loan
-        :return: count of offers
+        """Retrieves the number of offers a user has.
+
+        Args:
+            user_id (integer): The ID of the user.
+
+        Returns:
+            integer: Returns the number of offers that belong to a user
+            which are not withdrawn. 
         """
         cursor = self.conn.cursor()
-        query = f'select count (*) from offer where borrower_id = {user_id} or lender_id = {user_id};'
+        query = f'select count (*) from offer where borrower_id = {user_id} or lender_id = {user_id} \
+            and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
@@ -83,13 +110,18 @@ class OffersDAO:
             return 0
 
     def get_offer(self, offer_id):
-        """
-        get a specific offer
-        :param offer_id: offer entry id
-        :return: offer
+        """Retrieves the info of an offer with an offer_id equal to the one received
+        and which is not false. 
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            Tuple: Returns a tuple with the values of the offer attributes if found.
+
         """
         cursor = self.conn.cursor()
-        query = f'select * from offer where offer_id = {offer_id};'
+        query = f'select * from offer where offer_id = {offer_id} and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result:
@@ -98,14 +130,19 @@ class OffersDAO:
             return -1
         
     def get_borrower_loan_offer(self, user_id, loan_id):
-        """
-        get the offers that the borrower has made on a loan
-        :param user_id: borrower user id
-        :param loan_id: loan id of the offer
-        :return: offer id
+        """Retrieves all the loan offers that belongs to a borrower with
+        matchin 'user_id'. 
+
+        Args:
+            user_id (integer): The ID of the user.
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            Tuple: Returns a tuple with the values of the offer attributes if found.
         """
         cursor = self.conn.cursor()
-        query = f'select offer_id from offer where loan_id = {loan_id} and borrower_id = {user_id};'
+        query = f'select offer_id from offer where loan_id = {loan_id} and borrower_id = {user_id} \
+            and withdrawn = false;'
         cursor.execute(query)
         result = cursor.fetchone()
         if result: 
@@ -114,49 +151,61 @@ class OffersDAO:
             return None
 
     # POST
-    # expiration date not used, not sure how to use. 
-    def create_offer(self, loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, expiration_date):
-        """
-        creates an offer
-        :param loan_id: loan id this offer belongs to
-        :param borrower_id: user id of borrower
-        :param lender_id: user id of lender
-        :param loan_amount: $$
-        :param time_frame: time in months
-        :param interest: %  in decila
-        :param expiration_date: expiration date
-        :return: ofer id
+    def create_offer(self, loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, expiration_date, platform):
+        """Creates an offer with the parameters listed.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+            borrower_id (integer): The ID of the borrower.
+            lender_id (integer): The ID of the lender.
+            loan_amount (integer): The amount offered.
+            time_frame (Date): The months offered.
+            interest (double): The interest offered.
+            expiration_date (Date): The expiration date.
+            platform (integer): The preffered platform offered.
+
+        Returns:
+            integer: Returns the 'offer_id' of the newly created offer.
         """
         cursor = self.conn.cursor()
-        query = "insert into OFFER(LOAN_ID, BORROWER_ID, LENDER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE) \
-                values (%s, %s, %s, %s, %s, %s, now(), now()) returning offer_id;"
-        cursor.execute(query, (loan_id, borrower_id, lender_id, loan_amount, time_frame, interest))
+        query = "insert into OFFER(LOAN_ID, BORROWER_ID, LENDER_ID, AMOUNT, MONTHS, INTEREST, CREATED_ON, EXPIRATION_DATE, PLATFORM) \
+                values (%s, %s, %s, %s, %s, %s, now(), now(), %s) returning offer_id;"
+        cursor.execute(query, (loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, platform))
         offer_id = cursor.fetchone()[0]
         self.conn.commit()
         return offer_id
 
-    # PUT  # expiration date not used, not sure how to use.
-    def edit_offer(self, offer_id, amount, months, interest, expiration_date):
-        """
-        edits an offer
-        :param offer_id: offer id to be edited
-        :param amount: $$
-        :param months: time frame
-        :param interest: % in decimal
-        :param expiration_date: expiration date of the offer
-        :return:offer id
+    # PUT
+    def edit_offer(self, offer_id, amount, months, interest, expiration_date, platform):
+        """Updates the value of an offer that matches with a passed 'offer_id' parameter.
+
+        Args:
+            offer_id (integer): The ID of the offer. 
+            amount (integer): The amount offered.
+            months (Date): The months offered.
+            interest (double): The interest offered.
+            expiration_date (Date): The expiration date.
+            platform (integer): The preffered platform offered.
+
+        Returns:
+            integer: Returns the offer ID of the modified offer.
         """
         cursor = self.conn.cursor()
-        query = f"update offer set amount = {amount}, interest = {int(interest) / 100}, months = {months} where offer_id = {offer_id};"
+        query = f"update offer set amount = {amount}, interest = {interest}, months = {months}, \
+            rejected = false, withdrawn = false, platform = {platform} \
+            where offer_id = {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id
 
     def accept_offer(self, offer_id):
-        """
-        accept an offer
-        :param offer_id: offer id to be accepted
-        :return: offer id accepted
+        """Accepts an offer that matches with the offer id passed.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
         """
         cursor = self.conn.cursor()
         query = f"update offer set accepted = true where offer_id = {offer_id};"
@@ -165,10 +214,13 @@ class OffersDAO:
         return offer_id
 
     def reject_offer(self, offer_id):
-        """
-        reject an offer
-        :param offer_id: the offer to reject
-        :return: id of rejected offer
+        """Rejects an offer that matches with the offer id passed.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
         """
         cursor = self.conn.cursor()
         query = f"update offer set rejected = true where offer_id = {offer_id};"
@@ -176,27 +228,52 @@ class OffersDAO:
         self.conn.commit()
         return offer_id
 
-    # DELETE
-    def withdraw_offer(self, offer_id):
-        """
-        deletes an offer from a loan
-        :param offer_id: id of selected offer
-        :return: the id of the offer deleted
+    def reject_all_loan_offers(self, offer_id, loan_id):
+        """Rejects all offers that are involved with the loan id passed
+        except the offer that matches with the 'offer_id' passed.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
         """
         cursor = self.conn.cursor()
-        query = f"DELETE from offer where offer_id = {offer_id};"
+        query = f"update offer set rejected = true where loan_id = {loan_id} and offer_id != {offer_id};"
         cursor.execute(query)
         self.conn.commit()
         return offer_id
 
-    def delete_all_loans_offers(self, loan_id):
-        """
-        deletes all offers of a loan
-        :param loan_id: id of selected loan
-        :return: loans id
+    def withdraw_offer(self, offer_id):
+        """Withdraws an offer that matches with the offer id passed and 
+        updated the withdrawn date of the offer.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
         """
         cursor = self.conn.cursor()
-        query = f"DELETE from offer where loan_id = {loan_id};"
+        query = f"update offer set withdrawn = true, withdraw_date = now() where offer_id = {offer_id};"
+        cursor.execute(query)
+        self.conn.commit()
+        return offer_id
+
+    def withdraw_all_loan_offers(self, loan_id):
+        """Withdraws all offers that are involved with the loan id passed
+        and sets their withdrawn date to be the exact same as when the 
+        query is processed.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            integer: Returns the ID of the loan. 
+        """
+        cursor = self.conn.cursor()
+        query = f"update offer set withdrawn = true, withdraw_date = now() where loan_id = {loan_id};"
         cursor.execute(query)
         self.conn.commit()
         return loan_id
