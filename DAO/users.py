@@ -15,6 +15,12 @@ class UsersDAO:
 
     # GET 
     def get_all_users(self):
+        """Retrieves all users from the database.
+
+        Returns:
+            Tuple[]: Returns a tuple array representing user objects from the 
+            database found.
+        """
         cursor = self.conn.cursor()
         query = 'select * from users;'
         cursor.execute(query)
@@ -24,6 +30,14 @@ class UsersDAO:
         return result
 
     def get_user(self, uid):
+        """Retrieves a user whos 'user_id' matches with the passed argument. 
+
+        Args:
+            uid (integer): The ID of the user.
+
+        Returns:
+            Tuple: Returns a tuple representing all attribute values a user has.
+        """
         cursor = self.conn.cursor()
         query = "select * from Users where user_id = %s;"
         cursor.execute(query, (uid,))
@@ -34,6 +48,15 @@ class UsersDAO:
             return -1
 
     def get_username(self, uid):
+        """Retrieves the username from a user that matches with the 'user_id'
+        parameter passed.
+
+        Args:
+            uid (integer): The ID of the user.
+
+        Returns:
+            string: The username of the user if found.
+        """
         cursor = self.conn.cursor()
         query = "select username from Users where user_id = %s;"
         cursor.execute(query, (uid,))
@@ -44,6 +67,15 @@ class UsersDAO:
             return -1
 
     def get_user_wallet_address(self, uid):
+        """Retrieves the wallet address from a user that matches 
+        with the 'user_id' parameter passed.
+
+        Args:
+            uid (integer): The ID of the user.
+
+        Returns:
+            string: The wallet address of the user if found.
+        """
         cursor = self.conn.cursor()
         query = "select wallet from Users where user_id = %s;"
         cursor.execute(query, (uid,))
@@ -54,6 +86,14 @@ class UsersDAO:
             return -1
 
     def get_user_by_email_or_username(self, email):
+        """Retrieves a user whos 'email' matches with the passed argument. 
+
+        Args:
+            email (string): The email of the user.
+
+        Returns:
+            Tuple: Returns a tuple representing all attribute values a user has.
+        """
         cursor = self.conn.cursor()
         query = "select * from Users where email = %s or username = %s;"
         cursor.execute(query, (email, email))
@@ -64,6 +104,14 @@ class UsersDAO:
             return -1
 
     def get_user_by_username(self, username):
+        """Retrieves a user whos 'username' matches with the passed argument. 
+
+        Args:
+            username (string): The username of the user.
+
+        Returns:
+            Tuple: Returns a tuple representing all attribute values a user has.
+        """
         cursor = self.conn.cursor()
         query = "select * from Users where username = %s;"
         cursor.execute(query, (username,))
@@ -75,6 +123,21 @@ class UsersDAO:
 
     # INSERT 
     def insert_user(self, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PASSKEY, AGE, PHONE, LENDER):
+        """Creates a new user with the values passed as parameters. 
+
+        Args:
+            USERNAME (string): The username of the user.
+            FIRSTNAME (string): The firstname of the user.
+            LASTNAME (string): The lastname of the user.
+            EMAIL (string): The email of the user.
+            PASSKEY (string): The password of the user.
+            AGE (integer): The age of the user.
+            PHONE (integer): The phone of the user.
+            LENDER (boolean): Lender flag for the user.
+
+        Returns:
+            integer: Returns the 'user_id' of the newly created user.
+        """
         cursor = self.conn.cursor()
 
         _ETH_ACCOUNT = Account.create()
@@ -88,6 +151,19 @@ class UsersDAO:
 
     # PUT
     def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
+        """Updates a new user with the values passed as parameters. 
+
+        Args:
+            uid (integer): The ID of the user.
+            USERNAME (string): The username of the user.
+            FIRSTNAME (string): The firstname of the user.
+            LASTNAME (string): The lastname of the user.
+            EMAIL (string): The email of the user.
+            PHONE (integer): The phone of the user.
+
+        Returns:
+            integer: Returns the 'user_id' of the updated user.
+        """
         cursor = self.conn.cursor()
 
         query = f"update users set username = '{USERNAME}', firstname = '{FIRSTNAME}', lastname = '{LASTNAME}'" \
@@ -97,6 +173,15 @@ class UsersDAO:
         return query
 
     def edit_user_pass(self, uid, n_password):
+        """Updates the user password.
+
+        Args:
+            uid (integer): The ID of the user.
+            n_password (string): New user password.
+
+        Returns:
+            integer: Returns the 'user_id' of the updated user.
+        """
         cursor = self.conn.cursor()
         query = f"update users set password = '{n_password}' where user_id = {uid};"
         cursor.execute(query)
@@ -108,6 +193,15 @@ class UsersDAO:
     # ----------------------
 
     def get_user_password_hash(self, email):
+        """Retrieves the hashed password from a user that matches with the
+        provided email.
+
+        Args:
+            email (string): The email of the user.
+
+        Returns:
+            string: Returns the hashed password if found.
+        """
         cursor = self.conn.cursor()
         query = f"select password from users where email = '{email}' or username = '{email}';"
         cursor.execute(query)
@@ -116,27 +210,6 @@ class UsersDAO:
         except:
             result = None
         return result
-
-    def validate_login_input(self, email, password):
-        cursor = self.conn.cursor()
-        query = 'select password from users where users.email = %s;'
-        cursor.execute(query, (email))
-        try:
-            result = cursor.fetchone()[0]
-
-        except:
-            result = None
-        return result
-
-    def user_logged_in(self, user_id):
-        cursor = self.conn.cursor()
-        query = "UPDATE USERS SET logged_in = %s WHERE user_id = %s;"
-        cursor.execute(query, ('TRUE', user_id))
-
-    def user_logged_out(self, user_id):
-        cursor = self.conn.cursor()
-        query = "UPDATE USERS SET logged_in = %s WHERE user_id = %s;"
-        cursor.execute(query, ('FALSE', user_id))
         
     def check_emailsUsersname(self, email, username):
         cursor = self.conn.cursor()
@@ -145,14 +218,14 @@ class UsersDAO:
         result = []
         for row in cursor:
             result.append(row)
-        final_resut = []
+        final_result = []
         if len(result) == 0:  # no diuplicate
-            final_resut.append(False)
-            final_resut.append(False)
+            final_result.append(False)
+            final_result.append(False)
         elif len(result) == 1:  # duplicate username or password or both in one user
-            final_resut.append((result[0])[5] == email)  # 5 is the index for the email on the row
-            final_resut.append((result[0])[1] == username)
+            final_result.append((result[0])[5] == email)  # 5 is the index for the email on the row
+            final_result.append((result[0])[1] == username)
         else:  # duplicate user and email on diferent users
-            final_resut.append(True)
-            final_resut.append(True)
-        return final_resut
+            final_result.append(True)
+            final_result.append(True)
+        return final_result
