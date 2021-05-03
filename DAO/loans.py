@@ -179,7 +179,6 @@ class LoansDAO:
 
         Returns:
             integer: The ID of the loan that got updated. 
-
         """
         cursor = self.conn.cursor()
         query = f"update loans set state = {state} where loan_id = {loan_id};"
@@ -195,7 +194,7 @@ class LoansDAO:
         Args:
             loan_id (integer): The ID of the loan.
             borrower_id (integer): The ID of the borrower.
-            mount (double): The amount of the loan.
+            amount (double): The amount of the loan.
             months ([type]): The total months to repay the loan.
             interest (double): The interest of the loan.
             platform (integer): The integer symbolizing preferred payment method.
@@ -241,7 +240,7 @@ class LoansDAO:
             PLATFORM (integer): The integer symbolizing preferred payment method.
 
         Returns:
-            integer: The ID of the loan that got withdrawn. 
+            integer: The ID of the loan that got created. 
         """
         cursor = self.conn.cursor()
         query = "insert into LOANS(LENDER, BORROWER, AMOUNT, MONTHS, INTEREST, ETH_ADDRESS, PLATFORM, created_on) \
