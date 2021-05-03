@@ -71,6 +71,14 @@ class UsersDAO:
 This folder contain source files for smart contracts used in the Ethereum Blockchain. These contracts are written in the Solidity v8.0.0 programming language. Solidity is a simple and powerful language that is exclusively used for the development of Ethereum Smart Contracts. For this project, the main contract is DecentraLoan.sol. This contract has the structure and required methods to track a loan contract.
 
 ``` solidity
+contract DecentraLoanPlatform:
+    Constructor();
+    GetLoans();
+    NewLoan(address lender, uint256 amount, uint256 interest, uint256 months, uint256 platform);
+    Decomise();
+```
+
+``` solidity
 contract DecentraLoan:
     Constructor(address owner, address lender, uint256 amount, uint256 interest, uint256 repaymentPeriod, uint256 platform);
     GetLoanAmount();
