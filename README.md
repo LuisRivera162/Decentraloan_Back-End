@@ -70,6 +70,9 @@ class UsersDAO:
 
 This folder contain source files for smart contracts used in the Ethereum Blockchain. These contracts are written in the Solidity v8.0.0 programming language. Solidity is a simple and powerful language that is exclusively used for the development of Ethereum Smart Contracts. For this project, the main contracts are DecentraLoanPlatform.sol and  DecentraLoan.sol. 
 
+#### DecentraLoanPlatform.sol
+This smart contract has the task of deploying and keeping a record of loan contracts that are created in the system. This contract works as a “factory” of DecentraLoan contracts. Any time a loan is created in the platform, the factory is called to deploy a DecentraLoan contract to the blockchain with the specified parameters. The factory only has the capability to create a contract and store it’s address in memory for easy fetching. The investor portal in the web application fetches its information directly from this factory, without using any kind of database, thus being completely decentralized.
+
 ``` solidity
 contract DecentraLoanPlatform:
     Constructor();
@@ -77,6 +80,9 @@ contract DecentraLoanPlatform:
     NewLoan(address lender, uint256 amount, uint256 interest, uint256 months, uint256 platform);
     Decomise();
 ```
+
+#### DecentraLoan.sol
+This project leverages the capabilities of the Ethereum Blockchain by using smart contracts. The DecentraLoan contract represents a loan agreement from our platform, but in the public blockchain. This smart contract has methods for all management operations: a constructor,  loan agreement, modify parameters, withdrawal, payment sending, payment evidence validation, loan termination by complete payment or delinquent (unpaid) balances. The contract also has investor related functionality where one can invest, receive interest payments, trigger payment distributions and return core investment to investors once the loan is terminated.
 
 ``` solidity
 contract DecentraLoan:
