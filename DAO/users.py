@@ -12,7 +12,7 @@ class UsersDAO:
                                                                     pg_config['port'])
         self.conn = psycopg2._connect(connection_url)
 
-    # GET     # gets all users
+    # GET
     def get_all_users(self):
         """Retrieves all users from the database.
         Returns:
@@ -27,7 +27,6 @@ class UsersDAO:
             result.append(row)
         return result
 
-    # gets the user from the id
     def get_user(self, uid):
         """Retrieves a user whos 'user_id' matches with the passed argument. 
         Args:
@@ -44,7 +43,6 @@ class UsersDAO:
         else:
             return -1
 
-    # gets the username from the id
     def get_username(self, uid):
         """Retrieves the username from a user that matches with the 'user_id'
         parameter passed.
@@ -62,7 +60,6 @@ class UsersDAO:
         else:
             return -1
 
-    # gets the users wallet
     def get_user_wallet_address(self, uid):
         """Retrieves the wallet address from a user that matches 
         with the 'user_id' parameter passed.
@@ -80,7 +77,6 @@ class UsersDAO:
         else:
             return -1
 
-    # gets the user by username or email
     def get_user_by_email_or_username(self, email):
         """Retrieves a user whos 'email' matches with the passed argument. 
         Args:
@@ -97,7 +93,6 @@ class UsersDAO:
         else:
             return None
 
-    # gets the user by username
     def get_user_by_username(self, username):
         """Retrieves a user whos 'username' matches with the passed argument. 
         Args:
@@ -140,7 +135,7 @@ class UsersDAO:
         self.conn.commit()
         return uid
 
-    # PUT    # edits a users data
+    # PUT    
     def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
         """Updates a new user with the values passed as parameters. 
         Args:
@@ -161,7 +156,6 @@ class UsersDAO:
         self.conn.commit()
         return query
 
-    # edits a users password
     def edit_user_pass(self, uid, n_password):
         """Updates the user password.
         Args:
@@ -179,7 +173,7 @@ class UsersDAO:
     # ----------------------
     #   Login Validations
     # ----------------------
-    # gets the password the password hash for a user
+
     def get_user_password_hash(self, email):
         """Retrieves the hashed password from a user that matches with the
         provided email.
@@ -196,22 +190,3 @@ class UsersDAO:
         except:
             result = None
         return result
-        
-    def check_emailsUsersname(self, email, username):
-        cursor = self.conn.cursor()
-        query = f"select * from users where email = '{email}' or username = '{username}';"
-        cursor.execute(query)
-        result = []
-        for row in cursor:
-            result.append(row)
-        final_result = []
-        if len(result) == 0:  # no diuplicate
-            final_result.append(False)
-            final_result.append(False)
-        elif len(result) == 1:  # duplicate username or password or both in one user
-            final_result.append((result[0])[5] == email)  # 5 is the index for the email on the row
-            final_result.append((result[0])[1] == username)
-        else:  # duplicate user and email on diferent users
-            final_result.append(True)
-            final_result.append(True)
-        return final_result

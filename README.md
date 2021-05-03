@@ -188,16 +188,6 @@ Returns:
 """
 
 
-@app.route('/api/check-emails-user', methods=['GET'])
-def check_emailsUsersname():
-"""Verifies the legitimacy of a input email and username. 
-
-Returns:
-    Boolean Array: Returns an array of booleans denoting 
-    if the email and username are valid when true.
-"""
-
-
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
 def register():
