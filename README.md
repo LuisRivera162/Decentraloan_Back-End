@@ -1162,55 +1162,676 @@ Returns:
 <details><summary><h2>DAO API</h2></summary>
 <p>
     
-<details><summary><h2>User DAO API</h2></summary>
+<details><summary><h3>User DAO API</h3></summary>
 <p>
  
- 
+ ```
+     def build_user_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        user attributes using values passed.
+
+        Args:
+            row (Tuple): Tuple containing all of the user attibutes.
+
+        Returns:
+            dict: Returns a dictionary with the user attributes.
+        """
+
+    def get_user(self, uid):
+        """Retrieves a user whos 'user_id' matches with the passed argument. 
+        Args:
+            uid (integer): The ID of the user.
+        Returns:
+            Tuple: Returns a tuple representing all attribute values a user has.
+        """
+
+    def get_user_by_username(self, username):
+        """Retrieves a user whos 'username' matches with the passed argument. 
+        Args:
+            username (string): The username of the user.
+        Returns:
+            Tuple: Returns a tuple representing all attribute values a user has.
+        """
+
+    def get_user_by_email(self, email):
+        """Retrieves a user whos 'email' matches with the passed argument. 
+        Args:
+            email (string): The email of the user.
+        Returns:
+            Tuple: Returns a tuple representing all attribute values a user has.
+        """
+
+    def get_all_users(self):
+        """Retrieves all users from the database.
+        Returns:
+            Tuple[]: Returns a tuple array representing user objects from the 
+            database found.
+        """
+
+    def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone, lender):
+        """Creates a new user with the values passed as parameters. 
+
+        Args:
+            username (string): The username of the user.
+            first_name (string): The firstname of the user.
+            last_name (string): The lastname of the user.
+            email (string): The email of the user.
+            password (string): The password of the user.
+            confirm_password (string): The confirmed password of the user.
+            age (integer): The age of the user.
+            phone (integer): The phone of the user.
+            lender (boolean): Lender flag for the user.
+
+        Returns:
+            integer: Returns the 'user_id' of the newly created user.
+        """
+
+    def edit_user_pass(self, uid, password):
+        """Updates the user password.
+        Args:
+            uid (integer): The ID of the user.
+            password (string): New user password.
+        Returns:
+            integer: Returns the 'user_id' of the updated user.
+        """
+
+    def edit_user(self, uid, USERNAME, FIRSTNAME, LASTNAME, EMAIL, PHONE):
+        """Updates a new user with the values passed as parameters. 
+        Args:
+            uid (integer): The ID of the user.
+            USERNAME (string): The username of the user.
+            FIRSTNAME (string): The firstname of the user.
+            LASTNAME (string): The lastname of the user.
+            EMAIL (string): The email of the user.
+            PHONE (integer): The phone of the user.
+        Returns:
+            integer: Returns the 'user_id' of the updated user.
+        """
+
+    def get_potential(self, potential):
+        """Retrieves a user whos 'email' matches with the passed argument. 
+        Args:
+            email (string): The email of the user.
+        Returns:
+            Tuple: Returns a tuple representing all attribute values a user has.
+        """
+
+    def validate_user_login(self, email, password):
+        """Validates user login parameters.
+
+        Args:
+            email (string): The email of the user.
+            password (string): The input password of the user.
+
+        Returns:
+            integer: Returns the ID of the user if found.
+        """
+ ```
 
 </p>
 </details>
     
-<details><summary><h2>Loans DAO API</h2></summary>
+<details><summary><h3>Loans DAO API</h3></summary>
 <p>
     
+```
+    def build_loan_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        loan attributes using values passed.
 
+        Args:
+            row (Tuple): Tuple containing all of the loan attibutes.
+
+        Returns:
+            dict: Returns a dictionary with the loan attributes.
+        """
+
+    def insert_loan(self, eth_address, loan_amount, lender, borrower, interest, time_frame, platform):
+        """Manages inputs and calls the loans data access object in order to create
+        a loan in the database.
+        
+        Args:
+            eth_address (string): The ethereum address of the loan.
+            lender (integer): The 'user_id' of the lender.
+            borrower (integer): The 'user_id' of the borrower.
+            loan_amount (double): The amount of the loan.
+            time_frame (integer): The total number of months the loan will last.
+            interest (double): The interest rate of the loan.
+            platform (integer): The integer symbolizing preferred payment method.
+
+        Returns:
+            integer: The ID of the loan that got created. 
+        """
+        
+    def get_all_loans(self):
+        """Retrieves all loans which are not accepted and not withdrawn 
+        from the database, creates a dictionary out of the values and returns
+        the result. 
+
+        Returns:
+            Tuple[]: Returns an array of tuples which contain all the column 
+            values found and the username of the lender. 
+        """
+
+    def get_all_unaccepted_user_loans(self, user_id):
+        """Retrieves all loans which are not accepted and not withdrawn 
+        from the database which 'user_id' matches with a borrower or lender,
+        adding the results to an array to be filles with a dictionary containing
+        all values found. 
+
+        Args:
+            uid (integer): The 'user_id' of the user's loans to find. 
+
+        Returns:
+            Tuple[]: Returns an array of tuples which contain all the column 
+            values found, ordered by date in a descending manner. 
+        """
+
+    def get_all_user_loans(self, uid):
+        """Retrieves all loans which are not withdrawn from the database 
+        which 'user_id' matches with a borrower or lender, adding the results 
+        to an array to be filles with a dictionary containing all values found
+        and the username of the lender and borrower of each. 
+
+        Args:
+            uid (integer): The 'user_id' of the user's loans to find. 
+
+        Returns:
+            Tuple[]: Returns an array of tuples which contain all the column 
+            values found, ordered by date in a descending manner. 
+        """
+
+    def get_all_user_loan_count(self, uid):
+        """Retrieves the number of loans a user has.
+
+        Args:
+            uid (integer): The ID of the user.
+
+        Returns:
+            integer: The number of loans a user has.
+        """
+
+    def get_loan(self, loan_id):
+        """Retrieves a loan from the database that matches
+        with the loan ID passed.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            dict: Returns a dictionary with all the values found
+            and the username of the lender and borrower of the loan.
+        """
+
+    def get_loan_by_address(self, eth_address):
+        """Retrieves the ID of a loan that matches with the ethereum address
+        passed as argument. 
+
+        Args:
+            eth_address (string): The ethereum address of the loan. 
+
+        Returns:
+            loan_id (integer): Returns the ID number of the loan.
+        """
+        
+    def edit_loan(self, loan_id, amount, interest, months, platform):
+        """Updates the values of a loan who's 'loan_id' parameter 
+        matches with the one passed as a parameter. 
+
+        Args:
+            loan_id (integer): The ID of the loan.
+            amount (double): The amount of the loan.
+            interest (double): The interest of the loan.
+            months ([type]): The total months to repay the loan.
+            platform (integer): The integer symbolizing preferred payment method.
+
+        Returns:
+            integer: Returns the ID of the updated loan.
+        """
+    
+    def edit_loan_state(self, loan_id, state):
+        """Updates the state of a loan. 
+
+        Args:
+            loan_id (integer): The ID of the loan.
+            state (integer): The state to be updated. 
+
+        Returns:
+            integer: The ID of the loan that got updated. 
+        """
+    
+    def accept_loan_offer(self, loan_id, borrower_id, amount, months, interest, platform):
+        """Accepts a loan offer by updating the values of the loan to be the
+        same as the offer parameters and setting its 'accepted' value to be 
+        true, 
+
+        Args:
+            loan_id (integer): The ID of the loan.
+            borrower_id (integer): The ID of the borrower.
+            amount (double): The amount of the loan.
+            months ([type]): The total months to repay the loan.
+            interest (double): The interest of the loan.
+            platform (integer): The integer symbolizing preferred payment method.
+
+        Returns:
+            integer: The ID of the loan that got accepted. 
+        """
+
+    def withdraw_loan(self, loan_id):
+        """Withdraws a loan by updating its 'withdrawn' value to true and 
+        updating the 'withdrawn_date' column to be the exact time of when 
+        the query is processed.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            integer: The ID of the loan that got withdrawn. 
+        """
+```
 
 
 </p>
 </details>
     
-<details><summary><h2>Offer DAO API</h2></summary>
+<details><summary><h3>Offer DAO API</h3></summary>
 <p>
     
+```
+    def build_offer_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        offer attributes using values passed.
 
+        Args:
+            row (Tuple): Tuple containing all of the offer attibutes.
 
+        Returns:
+            dict: Returns a dictionary with the offer attributes.
+        """
+        
+    def create_offer(self, loan_id, borrower_id, lender_id, amount, months, interest, expiration_date, platform):
+        """Intends to create an offer or modify an existing one.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+            borrower_id (integer): The ID of the borrower.
+            lender_id (integer): The ID of the lender.
+            loan_amount (integer): The amount offered.
+            time_frame (Date): The months offered.
+            interest (double): The interest offered.
+            expiration_date (Date): The expiration date.
+            platform (integer): The preffered platform offered.
+
+        Returns:
+            string: Returns a status code denoting if the offer was created or edited.
+        """
+        
+    def get_all_offers(self):
+        """Retrieves all offers from the database. 
+
+        Returns:
+            dict[]: Returns a tuple array filled with all offers' 
+            attributes found in the forms of a dictionary.
+        """
+
+    def get_all_user_pending_offers(self, user_id):
+        """Retrieves all offers that are currently pending which
+        are not rejected nor accepted and whos 'borrower_id' or 
+        'lender_id' attribute matches with the one passed in addition 
+        it adds to the result the username and eth address
+        of the user.  
+
+        Args:
+            user_id (integer): The ID of the user.  
+
+        Returns:
+            dict[]: Returns a tuple array representing offers and their
+            attribute values in the form of dictionaries, ordered in a 
+            descending manner by the date they were created on. 
+        """
+
+    def get_all_user_rejected_offers(self, user_id):
+        """Retrieves all user rejected offers that have not been withdrawn 
+        in a descending order by the creation date in addition 
+        it adds to the result the username and eth address
+        of the user.  
+
+        Args:
+            user_id (integer): The ID of the user. 
+
+        Returns:
+            dict[]: Returns a tuple array representing offers and their
+            attribute values in the form of dictionaries, ordered in a 
+            descending manner by the date they were created on. 
+        """
+
+    def get_all_user_rejected_offers(self, user_id):
+        """Retrieves all user rejected offers that have not been withdrawn 
+        in a descending order by the creation date in addition 
+        it adds to the result the username and eth address
+        of the user.  
+
+        Args:
+            user_id (integer): The ID of the user. 
+
+        Returns:
+            dict[]: Returns a tuple array representing offers and their
+            attribute values in the form of dictionaries, ordered in a 
+            descending manner by the date they were created on. 
+        """
+
+    def get_all_loan_offers(self, loan_id):
+        """Retrieves all offers that have been made onto a 
+        particular loan whom are not rejected or withdrawn
+        in the form of dictionaries.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            dict[]: Returns all offers that have been made onto a loan.
+        """
+
+    def get_offer(self, offer_id):
+        """Retrieves the info of an offer with an offer_id equal to the one received
+        and which is not false. 
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            dict: Returns a dict with the values of the offer attributes if found.
+        """
+
+    def exists_offer(self, borrower_id, loan_id):
+        """Retrieves all the loan offers that belongs to a borrower with
+        matchin 'user_id'. 
+
+        Args:
+            user_id (integer): The ID of the user.
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            boolean: Returns a flag denoting if an offer is found.
+        """
+        
+    def edit_offer(self, offer_id, amount, months, interest, expiration_date, platform):
+        """Updates the value of an offer that matches with a passed 'offer_id' parameter.
+
+        Args:
+            offer_id (integer): The ID of the offer. 
+            amount (integer): The amount offered.
+            months (Date): The months offered.
+            interest (double): The interest offered.
+            expiration_date (Date): The expiration date.
+            platform (integer): The preffered platform offered.
+
+        Returns:
+            integer: Returns the offer ID of the modified offer.
+        """
+
+    def reject_offer(self, offer_id):
+        """Rejects an offer that matches with the offer id passed.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
+        """
+
+    def reject_all_loan_offers(self, offer_id, loan_id):
+        """Rejects all offers that are involved with the loan id passed
+        except the offer that matches with the 'offer_id' passed.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
+        """
+
+    def accept_offer(self, offer_id):
+        """Accepts an offer that matches with the offer id passed.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
+        """
+
+    def withdraw_offer(self, offer_id):
+        """Withdraws an offer that matches with the offer id passed and 
+        updated the withdrawn date of the offer.
+
+        Args:
+            offer_id (integer): The ID of the offer.
+
+        Returns:
+            integer: Returns the ID of the offer that was modified. 
+        """
+
+    def withdraw_all_loan_offers(self, loan_id):
+        """Withdraws all offers that are involved with the loan id passed
+        and sets their withdrawn date to be the exact same as when the 
+        query is processed.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            integer: Returns the ID of the loan. 
+        """
+```
 
 </p>
 </details>
     
-<details><summary><h2>Notification DAO API</h2></summary>
+<details><summary><h3>Notification DAO API</h3></summary>
 <p>
     
+```
+    def build_notifications_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        notification attributes using values passed.
 
+        Args:
+            row (Tuple): Tuple containing all of the notification attibutes.
 
+        Returns:
+            dict: Returns a dictionary with the notification attributes.
+        """
+
+    def get_all_user_notifications(self, user_id):
+        """Retrieves all notifications where the 'user_id' matches. 
+
+        Args:
+            user_id (integer): The ID of a user.
+
+        Returns:
+            Tuple[]: Returns a tuple array with all the notification 
+            table attributes that matches with the 'user_id' in the form 
+            of dictionaries ordered in a date descending manner. 
+        """
+        
+    def create_notification(self, user_id, message, notification_type):
+        """Creates a new notification with the parameter values.
+
+        Args:
+            user_id (integer): The ID of the user.
+            message (string): The message the notification will store.
+            notification_type (integer): The type of notification it will be. 
+
+        Returns:
+            integer: Returns the 'notification_id' of the newly created notification.
+        """
+```
 
 </p>
 </details>
     
-<details><summary><h2>Payments DAO API</h2></summary>
+<details><summary><h3>Payments DAO API</h3></summary>
 <p>
     
+```
+    def build_payment_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        payment attributes using values passed.
 
+        Args:
+            row (Tuple): Tuple containing all of the payment attibutes.
 
+        Returns:
+            dict: Returns a dictionary with the payment attributes.
+        """
+
+    def build_unified_payment_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        activity attributes using values passed.
+
+        Args:
+            row (Tuple): Tuple containing all of the activity attibutes.
+
+        Returns:
+            dict: Returns a dictionary with the activity attributes.
+        """
+
+    def get_all_payments(self):
+        """Retrieves all payments.
+
+        Returns:
+            Tuple[]: Returns all payment tuble object arrays in
+            the form of dictionaries. 
+        """
+
+    def get_payment(self, payment_id):
+        """Retrieves a payment that matches with passed 'payment_id'.
+
+        Args:
+            payment_id (integer): The ID of the payment.
+
+        Returns:
+            dict: Returns a payment dictionary object where all values 
+            represent the payments' attributes.
+        """
+
+    def get_loan_payments(self, loan_id):
+        """Retrieves all payments that were done to a loan ordered by date
+        in a ascending manner.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            Tuple[]: Returns all payments that were done to a loan in the form
+            of dictionaries ordered by date in a ascending manner. 
+        """
+
+    def get_all_user_payments(self, borrower_id):
+        """Retrieves all the creation and withdrawal dates of user payments, offers, and loans
+        with an addition of receiver and sender usernames. 
+
+        Args:
+            user_id (integer): The ID of the user.
+
+        Returns:
+            Tuple[]: Returns all the creation and withdrawal dates of user payments, offers, and loans
+            in the form of dictionaries. 
+        """
+
+    def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
+        """Creates a new payment with the values passed as parameters. 
+        And updates the loan's balance and received interest.
+
+        Args:
+            paymentNumber (integer): The number of payments done on the loan.
+            sender (integer): The ID of the sender.
+            receiver (integer): The ID of the receiver.
+            loan_id (integer): The ID of the loan.
+            rcvd_interest (double): The total received interest.
+            amount (double): The amount paid.
+            validated (boolean): Validation boolean.
+            validation_hash (string): Validation hash code.
+
+        Returns:
+            integer: Returns the payment ID of the newly created payment.
+        """
+
+    def validate_payment(self, payment_id, sender, validation_hash):
+        """Validates a payment. And sums the number of payments done 
+        to the payment.
+
+        Args:
+            payment_id (integer): The ID of the payment.
+
+        Returns:
+            integer: Returns a value indicating if there was a validation_hash
+            mismatch (-3), sender not part of the transaction error (-2), or
+            no payment found (-1).
+        """
+```
 
 </p>
 </details>
     
-<details><summary><h2>Participant DAO API</h2></summary>
+<details><summary><h3>Participant DAO API</h3></summary>
 <p>
     
+```
+    def build_participant_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        participant attributes using values passed.
 
+        Args:
+            row (Tuple): Tuple containing all of the participant attibutes.
 
+        Returns:
+            dict: Returns a dictionary with the participant attributes.
+        """
+        
+    def get_all_participants(self):
+        """Retrieves all participants.
+
+        Returns:
+            Tuple[]: Returns an array of tuple objects that contain all the attribute
+            values of the participant table.
+        """
+
+    def get_participant(self, user_id):
+        """Retrieves a participant that matches with the 'user_id' passed.
+
+        Args:
+            user_id (integer): The ID of a user.
+
+        Returns:
+            Tuple: Returns a participant that matches with the 'user_id' passed.
+        """
+        
+    def insert_participant(self, lender_id, borrower_id, loan_id):
+        """Creates a new participant with the values passed as parameters.
+
+        Args:
+            lender_id (integer): The ID of the lender.
+            borrower_id (integer): The ID of the borrower.
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            string: Returns a success message upon creation.
+        """
+        
+    def remove_participants_from_loan(self, loan_id):
+        """Removes a participant from the table where the loan ID 
+        matches.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            string: Returns a success message.
+        """
+```
 
 </p>
 </details>
