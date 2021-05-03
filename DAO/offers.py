@@ -118,7 +118,6 @@ class OffersDAO:
 
         Returns:
             Tuple: Returns a tuple with the values of the offer attributes if found.
-
         """
         cursor = self.conn.cursor()
         query = f'select * from offer where offer_id = {offer_id} and withdrawn = false;'
