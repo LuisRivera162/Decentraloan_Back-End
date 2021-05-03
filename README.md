@@ -70,15 +70,36 @@ class UsersDAO:
 
 This folder contain source files for smart contracts used in the Ethereum Blockchain. These contracts are written in the Solidity v8.0.0 programming language. Solidity is a simple and powerful language that is exclusively used for the development of Ethereum Smart Contracts. For this project, the main contract is DecentraLoan.sol. This contract has the structure and required methods to track a loan contract.
 
-```
+``` solidity
 contract DecentraLoan:
-    Constructor(address lender, uint amount, uint interest, uint repaymentPeriod)
-    Modify(uint amount, uint interest, uint repaymentPeriod)
-    Deal(address borrower, uint amount, uint interest, uint repaymentPeriod)
-    Withdraw(address lender, string reason)
-    SendPayment(address sender, uint paymentNumber, uint amount, string evidence)
-    GetEvidence(uint paymentNumber)
-    ValidateEvidence(address user, uint paymentNumber)
+    Constructor(address owner, address lender, uint256 amount, uint256 interest, uint256 repaymentPeriod, uint256 platform);
+    GetLoanAmount();
+    Invest();
+    GetInvestors();
+    ReturnInvestments();
+    PayInvestors(uint256 usd_amount);
+    Modify(uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    Deal(address _borrower, uint256 _amount, uint256 _interest, uint256 _repaymentPeriod);
+    Withdraw();
+    SendPayment(address sender, uint256 paymentNumber, uint256 amount, string memory evidence);
+    GetEvidence(uint256 paymentNumber);
+    ValidateEvidence(address user);
+    Terminate();
+    SetDelinquentStatus();
+    Info()
+    
+    event Received(address sender, uint256 amount);
+    event Created(address lender, uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    event Modified(address lender, uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    event Withdrawn(address lender);
+    event DealReached(address lender, address borrower, uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    event PaymentSent(address sender, uint256 amount, uint256 paymentNumber, string evidence);
+    event PaymentValidated(address sender, uint256 paymentNumber, string evidence);
+    event PaidInvestor(address investor, uint256 usd);
+    event Invested(address investor, uint256 blockvalue);
+    event ReturnedInvestment(address investor, uint256 weis);
+    event Delinquent();
+    event Terminated ();
 ```
 
 ### Handler folder: 
