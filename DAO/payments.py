@@ -45,7 +45,7 @@ class PaymentsDAO:
                 where payments.sender_id = {user_id} or payments.receiver_id = {user_id}                                    \
                 union                                                                                                       \
                 select null, null, lender as lender, borrower as borrower, amount, created_on, cast(null as integer),       \
-                loan_id, cast(null as integer), null, null, false, withdraw_date                                        \
+                loan_id, cast(null as integer), null, null, false, withdraw_date                                            \
                 from loans                                                                                                  \
                 where loans.lender = {user_id}                                                                              \
                 union                                                                                                       \
@@ -56,7 +56,7 @@ class PaymentsDAO:
                 union                                                                                                       \
                 select null, null, lender_id as lender,                                                                     \
                 borrower_id as borrower, amount, created_on, offer_id, cast(null as integer), cast(null as integer),        \
-                null, null, false, withdraw_date                                                                        \
+                null, null, false, withdraw_date                                                                            \
                 from offer                                                                                                  \
                 where offer.borrower_id = {user_id}                                                                         \
                 union                                                                                                       \

@@ -7,6 +7,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class PaymentsHandler:
 
     def build_payment_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        payment attributes using values passed.
+
+        Args:
+            row (Tuple): Tuple containing all of the payment attibutes.
+
+        Returns:
+            dict: Returns a dictionary with the payment attributes.
+        """
         result = {}
         result['payment_id'] = row[0]
         result['loan_id'] = row[1]
@@ -19,6 +28,15 @@ class PaymentsHandler:
         return result
 
     def build_unified_payment_dict(self, row):
+        """Builds a dictionary to be used as a json object with the 
+        activity attributes using values passed.
+
+        Args:
+            row (Tuple): Tuple containing all of the activity attibutes.
+
+        Returns:
+            dict: Returns a dictionary with the activity attributes.
+        """
         result = {}
         result['receiver_id'] = row[0]
         result['sender_id'] = row[1]
@@ -36,6 +54,12 @@ class PaymentsHandler:
         return result
 
     def get_all_payments(self):
+        """Retrieves all payments.
+
+        Returns:
+            Tuple[]: Returns all payment tuble object arrays in
+            the form of dictionaries. 
+        """
         dao = PaymentsDAO()
         offers = dao.get_all_payments()
         result_list = []
@@ -45,12 +69,31 @@ class PaymentsHandler:
         return jsonify(Payments=result_list)
 
     def get_payment(self, payment_id):
+        """Retrieves a payment that matches with passed 'payment_id'.
+
+        Args:
+            payment_id (integer): The ID of the payment.
+
+        Returns:
+            dict: Returns a payment dictionary object where all values 
+            represent the payments' attributes.
+        """
         dao = PaymentsDAO()
         payment = dao.get_payment(payment_id)
 
         return self.build_payment_dict(payment)
 
     def get_loan_payments(self, loan_id):
+        """Retrieves all payments that were done to a loan ordered by date
+        in a ascending manner.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            Tuple[]: Returns all payments that were done to a loan in the form
+            of dictionaries ordered by date in a ascending manner. 
+        """
         dao = PaymentsDAO()
         offers = dao.get_loan_payments(loan_id)
         result_list = []
@@ -60,6 +103,16 @@ class PaymentsHandler:
         return jsonify(Payments=result_list)
 
     def get_all_user_payments(self, borrower_id):
+        """Retrieves all the creation and withdrawal dates of user payments, offers, and loans
+        with an addition of receiver and sender usernames. 
+
+        Args:
+            user_id (integer): The ID of the user.
+
+        Returns:
+            Tuple[]: Returns all the creation and withdrawal dates of user payments, offers, and loans
+            in the form of dictionaries. 
+        """
         dao = PaymentsDAO()
         users_dao = UsersDAO()
         payments = dao.get_all_user_payments(borrower_id)
@@ -73,6 +126,22 @@ class PaymentsHandler:
         return jsonify(Payments=result_list)
 
     def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
+        """Creates a new payment with the values passed as parameters. 
+        And updates the loan's balance and received interest.
+
+        Args:
+            paymentNumber (integer): The number of payments done on the loan.
+            sender (integer): The ID of the sender.
+            receiver (integer): The ID of the receiver.
+            loan_id (integer): The ID of the loan.
+            rcvd_interest (double): The total received interest.
+            amount (double): The amount paid.
+            validated (boolean): Validation boolean.
+            validation_hash (string): Validation hash code.
+
+        Returns:
+            integer: Returns the payment ID of the newly created payment.
+        """
         dao = PaymentsDAO()
         validation_hash = generate_password_hash(validation_hash)
         payment_id = dao.insert_payment(paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash)
@@ -80,6 +149,17 @@ class PaymentsHandler:
         return payment_id
 
     def validate_payment(self, payment_id, sender, validation_hash):
+        """Validates a payment. And sums the number of payments done 
+        to the payment.
+
+        Args:
+            payment_id (integer): The ID of the payment.
+
+        Returns:
+            integer: Returns a value indicating if there was a validation_hash
+            mismatch (-3), sender not part of the transaction error (-2), or
+            no payment found (-1).
+        """
         dao = PaymentsDAO()
 
         result = dao.get_payment(payment_id)
