@@ -2,7 +2,7 @@
 
 ## Description
 
-This repository will focus on the back-end, blockchain and server side implementation of our project. 
+This repository will focus on the back-end and blockchain implementations of the project. 
 
 ## Usage
 
@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 ### Before Running main.py
 
-It is important to define WEB3 INFURA constant variables in order to communicate with the block chain. Do this by running the ```env.bat``` file. 
+It is important to define infura.io constant variables in order to communicate with the Ethereum Kovan (Testnet) Blockchain. Do this by running the ```env.bat``` file. 
 
 ### Project structure
 
