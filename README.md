@@ -44,7 +44,7 @@ Inside the Data Access Object (DAO) folder, there will exist classes for each en
 
 #### Example: 
 
-```
+``` python
 class UsersDAO:
 
     def __init__(self):
@@ -122,7 +122,7 @@ Inside this folder there will exist classes that correspond to all entities used
 
 #### Example: 
 
-```
+``` python
 class UsersHandler:
 
     def build_user_dict(self, row):
@@ -153,7 +153,7 @@ Inside main.py is where the server routes are created and manage HTTP requests t
 
 #### Example: 
 
-```
+``` python
 @app.route('/api/login', methods=['POST'])
 def login():
     if request.method == 'POST':
@@ -184,7 +184,7 @@ def login():
 <p>
     
     
-```
+``` python
 @app.route('/checkonline')
 def check_online():
 """ Verifies if the application is connected to Infura network. 
@@ -521,7 +521,7 @@ Returns:
 <details><summary><h3>User Handler API</h3></summary>
 <p>
  
- ```
+ ``` python
     def build_user_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         user attributes using values passed.
@@ -630,7 +630,7 @@ Returns:
 <details><summary><h3>Loans Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_loan_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         loan attributes using values passed.
@@ -796,7 +796,7 @@ Returns:
 <p>
     
     
-```
+``` python
     def build_offer_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         offer attributes using values passed.
@@ -987,7 +987,7 @@ Returns:
 <details><summary><h3>Notification Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_notifications_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         notification attributes using values passed.
@@ -1030,7 +1030,7 @@ Returns:
 <details><summary><h3>Payments Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_payment_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         payment attributes using values passed.
@@ -1134,7 +1134,7 @@ Returns:
 <details><summary><h3>Participant Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_participant_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         participant attributes using values passed.
@@ -1200,7 +1200,7 @@ Returns:
 <details><summary><h3>User DAO API</h3></summary>
 <p>
  
- ```
+ ``` python
      def build_user_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         user attributes using values passed.
@@ -1309,7 +1309,7 @@ Returns:
 <details><summary><h3>Loans DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_loan_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         loan attributes using values passed.
@@ -1472,7 +1472,7 @@ Returns:
 <details><summary><h3>Offer DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_offer_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         offer attributes using values passed.
@@ -1667,7 +1667,7 @@ Returns:
 <details><summary><h3>Notification DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_notifications_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         notification attributes using values passed.
@@ -1710,7 +1710,7 @@ Returns:
 <details><summary><h3>Payments DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_payment_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         payment attributes using values passed.
@@ -1814,7 +1814,7 @@ Returns:
 <details><summary><h3>Participant DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_participant_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         participant attributes using values passed.
