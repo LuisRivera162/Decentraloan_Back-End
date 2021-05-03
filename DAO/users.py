@@ -95,7 +95,7 @@ class UsersDAO:
         if result:
             return result[0]
         else:
-            return -1
+            return None
 
     # gets the user by username
     def get_user_by_username(self, username):

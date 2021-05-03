@@ -62,7 +62,6 @@ class UsersHandler:
 
     def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone, lender):
         dao = UsersDAO()
-
         if password == confirm_password:
             password = generate_password_hash(password)
             try:
@@ -70,7 +69,7 @@ class UsersHandler:
             except:
                 return jsonify("Email or Username already exists.")
         else:
-            return jsonify("Passwords do not match."), 405
+            return -1
         return uid
 
     def edit_user_pass(self, uid, password):

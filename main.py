@@ -151,19 +151,6 @@ def get_user():
         return jsonify(Error="User not found."), 404
 
 
-@app.route('/api/check-emails-user', methods=['GET'])
-def check_emailsUsersname():
-    """Verifies the legitimacy of a input email and username. 
-
-    Returns:
-        Boolean Array: Returns an array of booleans denoting 
-        if the email and username are valid when true.
-    """
-    email = request.args.get('email')
-    username = request.args.get('username')
-    return UsersHandler.check_emailsUsersname(email, username)
-
-
 @app.route('/api/register', methods=['POST'])
 @cross_origin()
 def register():
@@ -184,15 +171,21 @@ def register():
         age = data['age']
         phone = data['phone']
         lender = data['lender']
+        
+        if password != conf_password:
+            return jsonify(Error="Passwords do not match.")
 
-        try:
-            uid = UsersHandler.insert_user(
+        existing_user = UsersHandler.get_potential(email)
+        if (existing_user):
+            return jsonify(Error="Email is already in use.")
+        existing_user = UsersHandler.get_potential(username)
+        if (existing_user):
+            return jsonify(Error="Username is already in use.")
+
+        uid = UsersHandler.insert_user(
                 username, first_name, last_name, email, password, conf_password, age, phone, lender)
 
-            return jsonify({"email": email, "localId": uid, "status": 'success', 'lender': lender}), 200
-
-        except:
-            return jsonify({'email': 'null', 'localId': 'null', 'status': 'failure', 'lender': 'null'})
+        return jsonify({"email": email, "localId": uid, "status": 'success', 'lender': lender}), 200
 
     else:
         return jsonify(Error="Method not allowed."), 405
