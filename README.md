@@ -483,7 +483,7 @@ Returns:
 <details><summary><h2>Handler API</h2></summary>
 <p>
     
-<details><summary><h2>User Handler API</h2></summary>
+<details><summary><h3>User Handler API</h3></summary>
 <p>
  
  ```
@@ -592,7 +592,7 @@ Returns:
 </p>
 </details>
     
-<details><summary><h2>Loans Handler API</h2></summary>
+<details><summary><h3>Loans Handler API</h3></summary>
 <p>
     
 ```
@@ -757,7 +757,7 @@ Returns:
 </p>
 </details>
     
-<details><summary><h2>Offer Handler API</h2></summary>
+<details><summary><h3>Offer Handler API</h3></summary>
 <p>
     
     
@@ -949,7 +949,7 @@ Returns:
 </p>
 </details>
     
-<details><summary><h2>Notification Handler API</h2></summary>
+<details><summary><h3>Notification Handler API</h3></summary>
 <p>
     
 ```
@@ -992,7 +992,7 @@ Returns:
 </p>
 </details>
     
-<details><summary><h2>Payments Handler API</h2></summary>
+<details><summary><h3>Payments Handler API</h3></summary>
 <p>
     
 ```
@@ -1096,7 +1096,7 @@ Returns:
 </p>
 </details>
     
-<details><summary><h2>Participant Handler API</h2></summary>
+<details><summary><h3>Participant Handler API</h3></summary>
 <p>
     
 ```
