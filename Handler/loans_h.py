@@ -217,7 +217,6 @@ class LoansHandler:
 
         Returns:
             integer: The ID of the loan that got updated. 
-
         """
         dao = LoansDAO()
         loan_id = dao.edit_loan_state(loan_id, state)
@@ -226,7 +225,7 @@ class LoansHandler:
         else: 
             return None
     
-
+    
     def accept_loan_offer(self, loan_id, borrower_id, amount, months, interest, platform):
         """Accepts a loan offer by updating the values of the loan to be the
         same as the offer parameters and setting its 'accepted' value to be 
