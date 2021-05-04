@@ -105,11 +105,27 @@ class PaymentsDAO:
         cursor = self.conn.cursor()
         query = f'select * from payments where payment_id = {payment_id};'
         cursor.execute(query)
-
         result = cursor.fetchone()
-        
         return result
 
+    def check_for_invalid_payments(self, loan_id):
+        """Checks to see if there are any invalidated payments in a loan
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            Tuple: Returns a tuble object containing all attribute values 
+            a found payment has, if any are found. 
+        """
+        cursor = self.conn.cursor()
+        query = f'select * from payments where loan_id = {loan_id} and validated = false;'
+        cursor.execute(query)
+        result = cursor.fetchone()
+        return result
+
+
+    # POST
     def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
         """Creates a new payment with the values passed as parameters. And updates the loan's balance and 
         received interest.
@@ -138,11 +154,10 @@ class PaymentsDAO:
             query = 'UPDATE LOANS SET balance = %s, rcvd_interest = rcvd_interest + %s where loan_id = %s'
 
         cursor.execute(query,(amount, rcvd_interest, loan_id))
-
         self.conn.commit()
-
         return payment_id
 
+    # PUT
     def validate_payment(self, payment_id):
         """Validates a payment. And sums the number of payments done 
         to the payment.

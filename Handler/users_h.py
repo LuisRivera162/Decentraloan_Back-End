@@ -26,6 +26,7 @@ class UsersHandler:
         result['lender'] = row[12]
         return result
 
+    # GET
     def get_user(self, uid):
         """Retrieves a user whos 'user_id' matches with the passed argument. 
         Args:
@@ -84,6 +85,7 @@ class UsersHandler:
             result_list.append(result)
         return jsonify(Users=result_list)
 
+    # POST
     def insert_user(self, username, first_name, last_name, email, password, confirm_password, age, phone, lender):
         """Creates a new user with the values passed as parameters. 
 
@@ -112,6 +114,7 @@ class UsersHandler:
             return -1
         return uid
 
+    # PUT
     def edit_user_pass(self, uid, password):
         """Updates the user password.
         Args:
