@@ -48,7 +48,10 @@ class ParticipantHandler:
         """
         dao = ParticipantDAO()
         result = dao.get_participant(user_id)
-        return jsonify(Participant=result)
+        if result:
+            return True
+        else: 
+            return False
 
     # POST
     def insert_participant(self, lender_id, borrower_id, loan_id):

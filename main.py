@@ -733,9 +733,13 @@ def get_participant():
     """
     user_id = request.args.get('user_id')
     if user_id:
-        return ParticipantHandler.get_participant(user_id), 200
+        if ParticipantHandler.get_participant(user_id):
+            return jsonify(Participant=True), 200
+        else: 
+            return jsonify(Error="Participant not found."), 200
+
     else:
-        return jsonify(Error="User not found."), 404
+        return jsonify(Error="Participant not found."), 404
 
 
 # Notification Routes
