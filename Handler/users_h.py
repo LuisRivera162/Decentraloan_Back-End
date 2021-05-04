@@ -156,7 +156,7 @@ class UsersHandler:
         uidE = dao.get_user_by_email_or_username(potential)
 
         if not uidE:
-            return jsonify(Error="User not found"), 404
+            return None
         else:
             return self.get_user(uidE)
 
