@@ -31,7 +31,7 @@ def testLoanCreation():
         if tx.json()['loan_id'][0]:
             print('Lender: %s | loan with id: %s created after %sns!'%(
                 lender_id, 
-                tx.json()['loan_id'],
+                tx.json()['loan_id'][0],
                 tx_end - tx_start
                 )
             )
