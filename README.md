@@ -2,7 +2,7 @@
 
 ## Description
 
-This repository will focus on the back-end, blockchain and server side implementation of our project. 
+This repository will focus on the back-end and blockchain implementations of the project. 
 
 ## Usage
 
@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 ### Before Running main.py
 
-It is important to define WEB3 INFURA constant variables in order to communicate with the block chain. Do this by running the ```env.bat``` file. 
+It is important to define infura.io constant variables in order to communicate with the Ethereum Kovan (Testnet) Blockchain. Do this by running the ```env.bat``` file. 
 
 ### Project structure
 
@@ -44,7 +44,7 @@ Inside the Data Access Object (DAO) folder, there will exist classes for each en
 
 #### Example: 
 
-```
+``` python
 class UsersDAO:
 
     def __init__(self):
@@ -68,17 +68,52 @@ class UsersDAO:
 
 ### Contracts folder
 
-This folder contain source files for smart contracts used in the Ethereum Blockchain. These contracts are written in the Solidity v8.0.0 programming language. Solidity is a simple and powerful language that is exclusively used for the development of Ethereum Smart Contracts. For this project, the main contract is DecentraLoan.sol. This contract has the structure and required methods to track a loan contract.
+This folder contain source files for smart contracts used in the Ethereum Blockchain. These contracts are written in the Solidity v8.0.0 programming language. Solidity is a simple and powerful language that is exclusively used for the development of Ethereum Smart Contracts. For this project, the main contracts are DecentraLoanPlatform.sol and  DecentraLoan.sol. 
 
+#### DecentraLoanPlatform.sol
+This smart contract has the task of deploying and keeping a record of loan contracts that are created in the system. This contract works as a “factory” of DecentraLoan contracts. Any time a loan is created in the platform, the factory is called to deploy a DecentraLoan contract to the blockchain with the specified parameters. The factory only has the capability to create a contract and store it’s address in memory for easy fetching. The investor portal in the web application fetches its information directly from this factory, without using any kind of database, thus being completely decentralized.
+
+``` solidity
+contract DecentraLoanPlatform:
+    Constructor();
+    GetLoans();
+    NewLoan(address lender, uint256 amount, uint256 interest, uint256 months, uint256 platform);
+    Decomise();
 ```
+
+#### DecentraLoan.sol
+This project leverages the capabilities of the Ethereum Blockchain by using smart contracts. The DecentraLoan contract represents a loan agreement from our platform, but in the public blockchain. This smart contract has methods for all management operations: a constructor,  loan agreement, modify parameters, withdrawal, payment sending, payment evidence validation, loan termination by complete payment or delinquent (unpaid) balances. The contract also has investor related functionality where one can invest, receive interest payments, trigger payment distributions and return core investment to investors once the loan is terminated.
+
+``` solidity
 contract DecentraLoan:
-    Constructor(address lender, uint amount, uint interest, uint repaymentPeriod)
-    Modify(uint amount, uint interest, uint repaymentPeriod)
-    Deal(address borrower, uint amount, uint interest, uint repaymentPeriod)
-    Withdraw(address lender, string reason)
-    SendPayment(address sender, uint paymentNumber, uint amount, string evidence)
-    GetEvidence(uint paymentNumber)
-    ValidateEvidence(address user, uint paymentNumber)
+    Constructor(address owner, address lender, uint256 amount, uint256 interest, uint256 repaymentPeriod, uint256 platform);
+    GetLoanAmount();
+    Invest();
+    GetInvestors();
+    ReturnInvestments();
+    PayInvestors(uint256 usd_amount);
+    Modify(uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    Deal(address _borrower, uint256 _amount, uint256 _interest, uint256 _repaymentPeriod);
+    Withdraw();
+    SendPayment(address sender, uint256 paymentNumber, uint256 amount, string memory evidence);
+    GetEvidence(uint256 paymentNumber);
+    ValidateEvidence(address user);
+    Terminate();
+    SetDelinquentStatus();
+    Info()
+    
+    event Received(address sender, uint256 amount);
+    event Created(address lender, uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    event Modified(address lender, uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    event Withdrawn(address lender);
+    event DealReached(address lender, address borrower, uint256 amount, uint256 interest, uint256 repaymentPeriod);
+    event PaymentSent(address sender, uint256 amount, uint256 paymentNumber, string evidence);
+    event PaymentValidated(address sender, uint256 paymentNumber, string evidence);
+    event PaidInvestor(address investor, uint256 usd);
+    event Invested(address investor, uint256 blockvalue);
+    event ReturnedInvestment(address investor, uint256 weis);
+    event Delinquent();
+    event Terminated ();
 ```
 
 ### Handler folder: 
@@ -87,7 +122,7 @@ Inside this folder there will exist classes that correspond to all entities used
 
 #### Example: 
 
-```
+``` python
 class UsersHandler:
 
     def build_user_dict(self, row):
@@ -118,7 +153,7 @@ Inside main.py is where the server routes are created and manage HTTP requests t
 
 #### Example: 
 
-```
+``` python
 @app.route('/api/login', methods=['POST'])
 def login():
     if request.method == 'POST':
@@ -149,7 +184,7 @@ def login():
 <p>
     
     
-```
+``` python
 @app.route('/checkonline')
 def check_online():
 """ Verifies if the application is connected to Infura network. 
@@ -486,7 +521,7 @@ Returns:
 <details><summary><h3>User Handler API</h3></summary>
 <p>
  
- ```
+ ``` python
     def build_user_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         user attributes using values passed.
@@ -595,7 +630,7 @@ Returns:
 <details><summary><h3>Loans Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_loan_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         loan attributes using values passed.
@@ -761,7 +796,7 @@ Returns:
 <p>
     
     
-```
+``` python
     def build_offer_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         offer attributes using values passed.
@@ -952,7 +987,7 @@ Returns:
 <details><summary><h3>Notification Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_notifications_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         notification attributes using values passed.
@@ -995,7 +1030,7 @@ Returns:
 <details><summary><h3>Payments Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_payment_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         payment attributes using values passed.
@@ -1099,7 +1134,7 @@ Returns:
 <details><summary><h3>Participant Handler API</h3></summary>
 <p>
     
-```
+``` python
     def build_participant_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         participant attributes using values passed.
@@ -1165,7 +1200,7 @@ Returns:
 <details><summary><h3>User DAO API</h3></summary>
 <p>
  
- ```
+ ``` python
      def build_user_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         user attributes using values passed.
@@ -1274,7 +1309,7 @@ Returns:
 <details><summary><h3>Loans DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_loan_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         loan attributes using values passed.
@@ -1437,7 +1472,7 @@ Returns:
 <details><summary><h3>Offer DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_offer_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         offer attributes using values passed.
@@ -1632,7 +1667,7 @@ Returns:
 <details><summary><h3>Notification DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_notifications_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         notification attributes using values passed.
@@ -1675,7 +1710,7 @@ Returns:
 <details><summary><h3>Payments DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_payment_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         payment attributes using values passed.
@@ -1779,7 +1814,7 @@ Returns:
 <details><summary><h3>Participant DAO API</h3></summary>
 <p>
     
-```
+``` python
     def build_participant_dict(self, row):
         """Builds a dictionary to be used as a json object with the 
         participant attributes using values passed.
