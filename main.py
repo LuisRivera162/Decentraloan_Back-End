@@ -456,11 +456,13 @@ def create_offer():
         data = request.json
         loan_id = data['loan_id']
         borrower_id = data['borrower_id']
-        lender_id = data['lender_id']
+        # lender_id = data['lender_id']
         loan_amount = data['loan_amount']
         interest = data['interest']
         time_frame = data['time_frame']
         platform = data['platform']
+
+        lender_id = LoansHandler.get_loan(loan_id)['lender']
 
         return OffersHandler.create_offer(
             loan_id, borrower_id, lender_id, loan_amount, time_frame, interest, None, platform)
