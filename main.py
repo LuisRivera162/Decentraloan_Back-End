@@ -630,6 +630,10 @@ def send_payment():
 
     sender_eth = UsersHandler.get_user(sender_id)['wallet']
     loan = LoansHandler.get_loan(loan_id)
+    isLender = UsersHandler.get_user(sender_id)['lender']
+    
+    if isLender == False and PaymentsHandler.check_for_invalid_payments(loan['loan_id']):
+        return jsonify(Error="Make sure all payments are validated before making a payment.")
 
     rcvd_interest = (((loan['interest']) / 12) * loan['balance'])
 

@@ -125,6 +125,26 @@ class PaymentsHandler:
             result_list.append(result)
         return jsonify(Payments=result_list)
 
+    def check_for_invalid_payments(self, loan_id):
+        """Verifies if there is a payment to be validated in a loan ID. 
+        If the sender is the lender then it is possible to make a payment,
+        otherwise borrowers can only make a payment once all payments
+        are validated.
+
+        Args:
+            loan_id (integer): The ID of the loan.
+
+        Returns:
+            bool: Returns False if there are no invalidated payments, 
+            True otherwise.
+        """
+        dao = PaymentsDAO()
+        if dao.check_for_invalid_payments(loan_id):
+            return True
+        else: 
+            return False
+        
+
     def insert_payment(self, paymentNumber, sender, receiver, loan_id, rcvd_interest, amount, validated, validation_hash):
         """Creates a new payment with the values passed as parameters. 
         And updates the loan's balance and received interest.
