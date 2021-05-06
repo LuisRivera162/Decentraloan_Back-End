@@ -77,16 +77,16 @@ class UsersDAO:
         else:
             return -1
 
-    def get_user_by_email_or_username(self, email):
-        """Retrieves a user whos 'email' matches with the passed argument. 
+    def get_user_by_email_or_username(self, potential):
+        """Retrieves a user whos email or username matches with the passed argument. 
         Args:
-            email (string): The email of the user.
+            potential (string): The email or username of the user.
         Returns:
             Tuple: Returns a tuple representing all attribute values a user has.
         """
         cursor = self.conn.cursor()
         query = "select * from Users where email = %s or username = %s;"
-        cursor.execute(query, (email, email))
+        cursor.execute(query, (potential, potential))
         result = cursor.fetchone()
         if result:
             return result[0]
