@@ -14,27 +14,6 @@ CREATE TABLE USERS (
     lender BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE BORROWERS (
-	borrower_id serial PRIMARY KEY,
-	user_id INTEGER,
-	created_on TIMESTAMP NOT null,
-	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
-);
-
-CREATE TABLE LOANERS (
-	loaner_id serial PRIMARY KEY,
-	user_id INTEGER,
-	created_on TIMESTAMP NOT null,
-	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
-);
-
-CREATE TABLE ACTIVITY (
-	activity_id serial PRIMARY KEY,
-	user_id INTEGER,
-	activity_type INTEGER,
-	FOREIGN KEY (user_id) REFERENCES USERS(user_id)
-);
-
 CREATE TABLE LOANS (
 	loan_id serial PRIMARY KEY,
 	lender INTEGER,
@@ -57,19 +36,6 @@ CREATE TABLE LOANS (
 	FOREIGN KEY (borrower) REFERENCES USERS(user_id)
 );
 
-
-CREATE TABLE CHATS (
-	chat_id serial PRIMARY KEY,
-	loan_id INTEGER,
-	loaner_id INTEGER,
-	borrower_id INTEGER,
-	created_on TIMESTAMP NOT null,
-	FOREIGN KEY (loaner_id) REFERENCES USERS(user_id),
-	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
-	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
-);
-
-
 CREATE TABLE OFFER (
 	offer_id serial PRIMARY KEY,
 	loan_id INTEGER,
@@ -88,18 +54,6 @@ CREATE TABLE OFFER (
 	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (lender_id) REFERENCES USERS(user_id),
 	FOREIGN KEY (loan_id) REFERENCES LOANS(loan_id)
-);
-
-CREATE TABLE MESSAGE (
-	message_id serial PRIMARY KEY,
-	chat_id INTEGER,
-	loaner_id INTEGER,
-	borrower_id INTEGER,
-	created_on TIMESTAMP NOT null,
-	message VARCHAR (300),
-	FOREIGN KEY (loaner_id) REFERENCES USERS(user_id),
-	FOREIGN KEY (borrower_id) REFERENCES USERS(user_id),
-	FOREIGN KEY (chat_id) REFERENCES CHATS(chat_id)
 );
 
 CREATE TABLE PAYMENTS (
