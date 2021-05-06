@@ -24,10 +24,7 @@ DEV_KETH_PRIVATE_KEY = os.getenv('DEV_KETH_PRIVATE_KEY')
 
 # Smart Contract Paths and Addresses in Infura
 platform_compiled_path = 'build/contracts/DecentraLoanPlatform.json'
-platform_deployed_address = '0xD68fad5Afec8786E0E3e7a845Ef6Db772A5ff776'
-
-decentraloantoken_compiled_path = 'build/contracts/DecentraLoanToken.json'
-decentraloantoken_deployed_address = '0x940C6a951922C30e711F5c122fa1B9c2B762f0D6'
+platform_deployed_address = '0xD862FB04D0abFd5b6a25f32558BAE83cA527C7c0'
 
 decentraloan_compiled_path = 'build/contracts/DecentraLoan.json'
 decentraloan_contract_abi = ''
@@ -50,10 +47,6 @@ with open(platform_compiled_path) as file:
     platform_contract_abi = platform_contract_json['abi']
 
     platform_contract_bytecode = platform_contract_json['bytecode']
-
-# # Fetch deployed contract reference
-# decentraloantoken_contract = w3.eth.contract(
-#     address=decentraloantoken_deployed_address, abi=contract_abi)
 
 # Initialize Flask App
 app = Flask(__name__)
