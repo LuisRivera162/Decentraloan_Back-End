@@ -231,6 +231,15 @@ def edit_user():
     last_name = data['last_name']
     email = data['email']
     phone = data['phone']
+
+    potential = UsersHandler.get_potential(username)
+    if potential and potential['user_id'] != uid:
+        return jsonify(Error="Username is already in use."), 200
+        
+    potential = UsersHandler.get_potential(email)
+    if potential and potential['user_id'] != uid:
+        return jsonify(Error="Email is already in use."), 200
+
     try:
         uid = UsersHandler.edit_user(
             uid, username, first_name, last_name, email, phone)

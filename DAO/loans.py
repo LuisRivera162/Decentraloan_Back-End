@@ -28,7 +28,6 @@ class LoansDAO:
             result.append(row)
         return result
 
-    
     def get_all_user_loans(self, uid):
         """Retrieves all loans which are not withdrawn from the database 
         which 'user_id' matches with a borrower or lender. 
